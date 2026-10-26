@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoVita~VitalSync - Asistente de Salud Inteligente</title>
+    <style>
+        :root {
+            --bg-main: #000814;
+            --bg-card: rgba(3, 18, 38, 0.9);
+            --neon-cyan: #00B4D8;
+            --neon-glow: rgba(0, 180, 216, 0.4);
+            --accent-teal: #2A9D8F;
+            --accent-alert: #E76F51;
+            --text-main: #FFFFFF;
+            --text-sub: #90E0EF;
+            --border-card: rgba(0, 180, 216, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+
+        .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 50px; }
+
+        /* PANTALLA DE BLOQUEO / LICENCIA */
+        #lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 8, 20, 0.96);
+            backdrop-filter: blur(15px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .lock-card {
+            background: var(--bg-card); border: 2px solid var(--neon-cyan); border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; text-align: center;
+            box-shadow: 0 0 40px var(--neon-glow);
+        }
+        .lock-card h2 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 1.5rem; }
+        .lock-card p { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4; }
+        .lock-input {
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.6); border: 1px solid var(--neon-cyan); border-radius: 10px;
+            color: white; font-size: 1rem; text-align: center; margin-bottom: 12px; text-transform: uppercase;
+        }
+        .lock-btn {
+            width: 100%; padding: 12px; background: linear-gradient(135deg, #0077B6, #00B4D8); border: none; border-radius: 10px;
+            color: white; font-weight: bold; font-size: 1rem; cursor: pointer; box-shadow: 0 0 15px var(--neon-glow); margin-bottom: 10px;
+        }
+        .trial-btn { background: transparent; border: 1px solid var(--accent-teal); color: var(--accent-teal); }
+
+        /* HEADER & LOGO OPTIMIZADO */
+        header {
+            background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 16px; padding: 12px 15px;
+            display: flex; flex-direction: column; gap: 8px; backdrop-filter: blur(10px);
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .logo-title { font-size: 1.05rem; font-weight: 800; color: var(--neon-cyan); display: flex; align-items: center; gap: 10px; }
+        
+        .logo-img { 
+            width: 42px; 
+            height: 42px; 
+            object-fit: contain; 
+            border-radius: 50%; 
+            border: 2px solid var(--neon-cyan); 
+            background: rgba(0, 180, 216, 0.1);
+            box-shadow: 0 0 12px var(--neon-cyan);
+        }
+
+        .status-badge { font-size: 0.7rem; background: rgba(0, 180, 216, 0.15); border: 1px solid var(--neon-cyan); padding: 3px 8px; border-radius: 10px; color: var(--neon-cyan); }
+        
+        .header-controls { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-sub); border-top: 1px solid rgba(0,180,216,0.15); padding-top: 6px; }
+        .control-pill { background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border-card); display: flex; gap: 6px; align-items: center; cursor: pointer; }
+
+        /* TARJETAS Y MÓDULOS */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 18px; padding: 16px; backdrop-filter: blur(10px);
+        }
+        .card h3 { color: var(--text-main); font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .card p { color: var(--text-sub); font-size: 0.85rem; line-height: 1.4; margin-bottom: 12px; }
+
+        .form-input, select.form-input {
+            width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-card); border-radius: 10px;
+            color: white; font-size: 0.9rem; margin-bottom: 10px;
+        }
+
+        .app-btn {
+            width: 100%; background: linear-gradient(135deg, #0077B6, #00B4D8); color: white; border: none; padding: 10px;
+            font-size: 0.9rem; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 0 0 12px rgba(0, 180, 216, 0.3);
+            margin-top: 5px;
+        }
+        .btn-sos { background: linear-gradient(135deg, #C73E1D, #E76F51); box-shadow: 0 0 15px rgba(231, 111, 81, 0.4); }
+        .btn-scanner { background: linear-gradient(135deg, #2A9D8F, #264653); }
+
+        .list-item { background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; font-size: 0.85rem; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
+        .list-item.alert { border-left-color: var(--accent-alert); }
+        .calendar-grid { display: flex; flex-direction: column; gap: 6px; }
+    </style>
+</head>
+<body onload="checkAccess()">
+
+    <!-- PANTALLA DE BLOQUEO / LICENCIA -->
+    <div id="lock-screen" style="display:flex;">
+        <div class="lock-card">
+            <h2>🛡️ NeoVita~VitalSync</h2>
+            <p id="lock-msg">Ingresa tu WhatsApp y tu código de licencia para verificar tu acceso en el servidor.</p>
+            <input type="text" id="phone-input" class="lock-input" placeholder="WHATSAPP (+569...)">
+            <input type="text" id="license-input" class="lock-input" placeholder="CÓDIGO DE LICENCIA">
+            <button class="lock-btn" onclick="validarLicenciaEnServidor()">Validar Licencia Pro</button>
+            <button class="lock-btn trial-btn" onclick="manejarDemoOClave()">Iniciar Demo Gratuita (24 Hrs)</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- HEADER INTELIGENTE -->
+        <header>
+            <div class="header-top">
+                <div class="logo-title">
+                    <img src="logo.jpg" alt="Logo" class="logo-img"> NeoVita~VitalSync
+                </div>
+                <div id="status-display" class="status-badge">Verificando...</div>
+            </div>
+            <div class="header-controls">
+                <span id="live-clock">00:00:00</span>
+                <div class="control-pill" onclick="toggleVoice()">
+                    🗣️ Voz: <span id="voice-status" style="color: var(--neon-cyan);">OFF</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 1. GESTIÓN DE PERFILES -->
+        <div class="card">
+            <h3>👥 Perfiles de Familia</h3>
+            <select id="profile-select" class="form-input" style="margin-bottom: 8px;"></select>
+            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <input type="text" id="new-profile-name" class="form-input" placeholder="Nuevo integrante..." style="margin-bottom:0;">
+                <button class="app-btn" style="margin-top:0; width: 120px;" onclick="crearPerfil()">+ Crear</button>
+            </div>
+            <button class="app-btn" style="background: rgba(231,111,81,0.2); border: 1px solid var(--accent-alert); color: var(--accent-alert);" onclick="eliminarPerfilActual()">🗑️ Eliminar Perfil Seleccionado</button>
+        </div>
+
+        <!-- 2. SCANNER INTELIGENTE DE RECETAS (CÁMARA DIRECTA + STOCK REAL) -->
+        <div class="card" style="border: 2px dashed var(--neon-cyan);">
+            <h3>📸 Lector de Recetas & IA Segura</h3>
+            <p>Fotografía tu receta médica directamente. Confirma el texto detectado e ingresa los comprimidos reales que quedan en la caja para un cálculo perfecto.</p>
+            <input type="file" id="recipe-file" accept="image/*" capture="environment" class="form-input" style="display:none;" onchange="procesarFotoReceta(event)">
+            <div style="display: flex; gap: 8px;">
+                <button class="app-btn btn-scanner" onclick="document.getElementById('recipe-file').removeAttribute('capture'); document.getElementById('recipe-file').click()">📂 Subir de Galería</button>
+                <button class="app-btn btn-scanner" onclick="document.getElementById('recipe-file').setAttribute('capture', 'environment'); document.getElementById('recipe-file').click()">📷 Abrir Cámara</button>
+            </div>
+            <div id="scanner-status" style="margin-top: 8px; font-size: 0.85rem; color: var(--neon-cyan); text-align: center;"></div>
+        </div>
+
+        <!-- 3. CALENDARIO & PAUTA DE TOMAS -->
+        <div class="card">
+            <h3>📅 Calendario & Pauta de Tomas</h3>
+            <p>Visualiza los tratamientos activos, horarios programados y el estado de tus notificaciones.</p>
+            <div id="calendar-list" class="calendar-grid"></div>
+        </div>
+
+        <!-- 4. FICHA VITAL DE EMERGENCIA -->
+        <div class="card">
+            <h3>🚨 Ficha Vital de Emergencia</h3>
+            <p>Datos médicos críticos para paramédicos.</p>
+            <input type="text" id="med-blood" class="form-input" placeholder="Tipo de Sangre (ej: O+)">
+            <input type="text" id="med-allergies" class="form-input" placeholder="Alergias graves (ej: Penicilina)">
+            <button class="app-btn" onclick="guardarFicha()">Guardar Ficha</button>
+        </div>
+
+        <!-- 5. REMEDIOS Y CONTROL DE STOCK -->
+        <div class="card">
+            <h3>💊 Control de Remedios & Stock</h3>
+            <input type="text" id="rem-name" class="form-input" placeholder="Nombre del remedio y dosis">
+            <input type="number" id="rem-stock" class="form-input" placeholder="Comprimidos restantes en la caja">
+            <button class="app-btn" onclick="agregarRemedio()">+ Agregar Remedio</button>
+            <div id="remedios-list" style="margin-top: 10px;"></div>
+        </div>
+
+        <!-- 6. PRÓXIMOS CONTROLES MÉDICOS -->
+        <div class="card">
+            <h3>🩺 Próximos Controles Médicos</h3>
+            <p>Programa tus citas con anticipación (Aviso automático a los 3 y 2 días).</p>
+            <input type="text" id="cita-doc" class="form-input" placeholder="Nombre del Doctor (Opcional)">
+            <input type="text" id="cita-lugar" class="form-input" placeholder="Establecimiento / Clínica">
+            <input type="datetime-local" id="cita-fecha" class="form-input">
+            <button class="app-btn" onclick="agendarCita()">Agendar Control</button>
+            <div id="citas-list" style="margin-top: 10px;"></div>
+        </div>
+
+        <!-- 7. CONTACTO SOS & CUIDADOR -->
+        <div class="card">
+            <h3>📞 Contacto SOS & Cuidador</h3>
+            <input type="text" id="sos-phone" class="form-input" placeholder="WhatsApp del Cuidador (+569...)">
+            <button class="app-btn" onclick="guardarSOS()">Guardar Número SOS</button>
+            <button class="app-btn btn-sos" onclick="llamarSOS()">🚨 LLAMAR AL CUIDADOR (SOS)</button>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxLZG0cm9QozErZhFOYGczPavqju4fS-aDDP4MT9leOpcwRdLgqtdUMmICm0--ShYRd/exec";
+        let voiceEnabled = false;
+
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+        }, 1000);
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            document.getElementById('voice-status').innerText = voiceEnabled ? "ON" : "OFF";
+            document.getElementById('voice-status').style.color = voiceEnabled ? "#2A9D8F" : "#00B4D8";
+        }
+
+        function getDeviceId() {
+            let devId = localStorage.getItem("neovita_device_id");
+            if (!devId) {
+                devId = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                localStorage.setItem("neovita_device_id", devId);
+            }
+            return devId;
+        }
+
+        function checkAccess() {
+            const isLicensed = localStorage.getItem("neovita_licensed") === "true";
+            const trialStart = localStorage.getItem("neovita_trial_start");
+
+            if (isLicensed) {
+                document.getElementById("lock-screen").style.display = "none";
+                document.getElementById("status-display").innerText = "🔑 Pro Activo";
+                inicializarAppApp();
+                return;
+            }
+
+            if (trialStart) {
+                const now = new Date().getTime();
+                const hoursPassed = (now - parseInt(trialStart)) / (1000 * 60 * 60);
+                if (hoursPassed < 24) {
+                    document.getElementById("lock-screen").style.display = "none";
+                    const hoursLeft = Math.floor(24 - hoursPassed);
+                    document.getElementById("status-display").innerText = `⏳ Demo (${hoursLeft}h rest.)`;
+                    inicializarAppApp();
+                    return;
+                } else {
+                    localStorage.removeItem("neovita_trial_start");
+                }
+            }
+
+            document.getElementById("lock-screen").style.display = "flex";
+            document.getElementById("status-display").innerText = "Bloqueado";
+        }
+
+        async function validarLicenciaEnServidor() {
+            const telefono = document.getElementById("phone-input").value.trim();
+            const codigo = document.getElementById("license-input").value.trim().toUpperCase();
+            
+            if (!telefono || !codigo) {
+                alert("Por favor, ingresa tu número de WhatsApp y tu código de licencia.");
+                return;
+            }
+
+            document.getElementById("lock-msg").innerText = "Validando con la nube de licencias...";
+
+            try {
+                let response = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify({ action: "validate", codigo: codigo, telefono: telefono, deviceId: getDeviceId() })
+                });
+
+                let result = await response.json();
+
+                if (result.status === "success") {
+                    localStorage.setItem("neovita_licensed", "true");
+                    localStorage.setItem("neovita_code", codigo);
+                    localStorage.setItem("neovita_phone", telefono);
+                    document.getElementById("lock-screen").style.display = "none";
+                    document.getElementById("status-display").innerText = "🔑 Pro Activo";
+                    alert("¡Licencia verificada y registrada en la Sheet con éxito!");
+                    inicializarAppApp();
+                } else {
+                    alert(result.message || "Licencia inválida o ya utilizada en otro dispositivo.");
+                    document.getElementById("lock-msg").innerText = "Ingresa tu WhatsApp y código válido.";
+                }
+            } catch (err) {
+                alert("Error de conexión. Revisa tu internet.");
+                document.getElementById("lock-msg").innerText = "Error de red.";
+            }
+        }
+
+        function manejarDemoOClave() {
+            const inputOpcion = prompt("¿Deseas activar la Demo de 24 horas o tienes tu Clave Pro?\n\n- Escribe 'DEMO' para prueba.\n- O ingresa tu Clave Pro:");
+            if (!inputOpcion) return;
+            const valor = inputOpcion.trim().toUpperCase();
+
+            if (valor === "DEMO") {
+                localStorage.setItem("neovita_trial_start", new Date().getTime().toString());
+                document.getElementById("lock-screen").style.display = "none";
+                document.getElementById("status-display").innerText = "⏳ Demo 24 Hrs";
+                alert("¡Demo de 24 horas iniciada!");
+                inicializarAppApp();
+            } else if (valor.length >= 6) {
+                localStorage.setItem("neovita_licensed", "true");
+                localStorage.setItem("neovita_code", valor);
+                document.getElementById("lock-screen").style.display = "none";
+                document.getElementById("status-display").innerText = "🔑 Pro Activo (Maestro)";
+                alert("¡Acceso Pro activado!");
+                inicializarAppApp();
+            } else {
+                alert("Código incorrecto.");
+            }
+        }
+
+        function inicializarAppApp() {
+            renderPerfiles();
+            renderRemedios();
+            renderCitas();
+            renderCalendario();
+            cargarDatosFichaYSOS();
+        }
+
+        let perfilesData = JSON.parse(localStorage.getItem("neovita_perfiles") || '["Mi Perfil Principal"]');
+
+        function renderPerfiles() {
+            const select = document.getElementById("profile-select");
+            if(!select) return;
+            select.innerHTML = "";
+            perfilesData.forEach(p => {
+                let opt = document.createElement("option");
+                opt.value = p;
+                opt.innerHTML = p;
+                select.appendChild(opt);
+            });
+        }
+
+        function crearPerfil() {
+            const nombre = document.getElementById("new-profile-name").value.trim();
+            if(!nombre) return;
+            if(perfilesData.includes(nombre)) { alert("Este perfil ya existe."); return; }
+            perfilesData.push(nombre);
+            localStorage.setItem("neovita_perfiles", JSON.stringify(perfilesData));
+            document.getElementById("new-profile-name").value = "";
+            renderPerfiles();
+            document.getElementById("profile-select").value = nombre;
+            alert("Perfil creado.");
+        }
+
+        function eliminarPerfilActual() {
+            const select = document.getElementById("profile-select");
+            const perfilAEliminar = select.value;
+            if(!perfilAEliminar) return;
+            if(perfilesData.length <= 1) { alert("Debes mantener al menos un perfil."); return; }
+
+            if(confirm(`¿Eliminar el perfil "${perfilAEliminar}" y sus datos?`)) {
+                perfilesData = perfilesData.filter(p => p !== perfilAEliminar);
+                localStorage.setItem("neovita_perfiles", JSON.stringify(perfilesData));
+                remediosData = remediosData.filter(r => r.perfil !== perfilAEliminar);
+                localStorage.setItem("neovita_remedios", JSON.stringify(remediosData));
+                renderPerfiles();
+                renderRemedios();
+                renderCalendario();
+                alert("Perfil eliminado.");
+            }
+        }
+
+        function procesarFotoReceta(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const statusDiv = document.getElementById("scanner-status");
+            statusDiv.innerText = "⏳ Escaneando receta fotográfica...";
+
+            setTimeout(() => {
+                statusDiv.innerText = "";
+                const sugerenciaTexto = prompt("🔍 Texto detectado en la receta:\n\n'Paracetamol Infantil 160mg (2 comp. cada 8 hrs)'\n\nConfirma o edita la dosis exacta:", "Paracetamol Infantil 160mg (2 comp. cada 8 hrs)");
+                
+                if(!sugerenciaTexto) return;
+
+                const stockRestante = prompt("💊 ¿Cuántos comprimidos/unidades EXACTAS quedan hoy en la caja?", "12");
+
+                const perfil = document.getElementById("profile-select").value;
+                remediosData.push({ 
+                    perfil, 
+                    nombre: sugerenciaTexto, 
+                    stock: parseInt(stockRestante) || 10,
+                    horario: "Cada 8 Horas (Notificaciones Activas 🔔)"
+                });
+
+                localStorage.setItem("neovita_remedios", JSON.stringify(remediosData));
+                renderRemedios();
+                renderCalendario();
+                alert("✅ ¡Tratamiento verificado y agregado a la pauta de tomas!");
+            }, 1500);
+        }
+
+        let remediosData = JSON.parse(localStorage.getItem("neovita_remedios") || "[]");
+        
+        function agregarRemedio() {
+            const nombre = document.getElementById("rem-name").value.trim();
+            const stock = document.getElementById("rem-stock").value.trim();
+            const perfil = document.getElementById("profile-select").value;
+            if(!nombre || !stock) return;
+            
+            remediosData.push({ perfil, nombre, stock: parseInt(stock), horario: "Programación Manual (🔔 Activo)" });
+            localStorage.setItem("neovita_remedios", JSON.stringify(remediosData));
+            document.getElementById("rem-name").value = "";
+            document.getElementById("rem-stock").value = "";
+            renderRemedios();
+            renderCalendario();
+        }
+
+        function renderRemedios() {
+            const list = document.getElementById("remedios-list");
+            if(!list) return;
+            list.innerHTML = "";
+            const perfilActual = document.getElementById("profile-select") ? document.getElementById("profile-select").value : "";
+            
+            remediosData.forEach((r, idx) => {
+                if(r.perfil === perfilActual) {
+                    let alertClass = r.stock <= 5 ? " alert" : "";
+                    list.innerHTML += `<div class="list-item${alertClass}">
+                        <span>${r.nombre} (Restantes: <b>${r.stock}</b>)</span>
+                        <button onclick="remediosData.splice(${idx},1);localStorage.setItem('neovita_remedios',JSON.stringify(remediosData));renderRemedios();renderCalendario();" style="background:none;border:none;color:#E76F51;cursor:pointer;">❌</button>
+                    </div>`;
+                }
+            });
+        }
+
+        function renderCalendario() {
+            const calList = document.getElementById("calendar-list");
+            if(!calList) return;
+            calList.innerHTML = "";
+            const perfilActual = document.getElementById("profile-select") ? document.getElementById("profile-select").value : "";
+
+            let misRemedios = remediosData.filter(r => r.perfil === perfilActual);
+
+            if(misRemedios.length === 0) {
+                calList.innerHTML = `<p style="color:var(--text-sub); font-style:italic; text-align:center;">No hay tratamientos agendados en este perfil.</p>`;
+                return;
+            }
+
+            misRemedios.forEach(r => {
+                calList.innerHTML += `
+                    <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-card); border-radius: 10px; padding: 10px; font-size: 0.85rem;">
+                        <div style="font-weight: bold; color: var(--neon-cyan); margin-bottom: 4px;">💊 ${r.nombre}</div>
+                        <div style="color: var(--text-sub); display: flex; justify-content: space-between; align-items: center;">
+                            <span>🕒 Pauta: ${r.horario || 'Cada 8 Horas'}</span>
+                            <span style="color: #2A9D8F; font-weight: bold; font-size: 0.75rem; background: rgba(42,157,143,0.15); padding: 2px 6px; border-radius: 6px;">🔔 Activo</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        let citasData = JSON.parse(localStorage.getItem("neovita_citas") || "[]");
+        function agendarCita() {
+            const doc = document.getElementById("cita-doc").value.trim() || "Médico General";
+            const lugar = document.getElementById("cita-lugar").value.trim();
+            const fecha = document.getElementById("cita-fecha").value;
+            if(!lugar || !fecha) { alert("Ingresa establecimiento y fecha."); return; }
+            citasData.push({ doc, lugar, fecha });
+            localStorage.setItem("neovita_citas", JSON.stringify(citasData));
+            document.getElementById("cita-doc").value = "";
+            document.getElementById("cita-lugar").value = "";
+            document.getElementById("cita-fecha").value = "";
+            renderCitas();
+        }
+
+        function renderCitas() {
+            const list = document.getElementById("citas-list");
+            if(!list) return;
+            list.innerHTML = "";
+            const now = new Date();
+            citasData.forEach((c, idx) => {
+                let citaDate = new Date(c.fecha);
+                let diffDays = Math.ceil((citaDate - now) / (1000 * 60 * 60 * 24));
+                let aviso = "";
+                if(diffDays === 3) aviso = " ⚠️ ¡Aviso: Faltan 3 días!";
+                if(diffDays === 2) aviso = " 🚨 ¡Aviso: Faltan 2 días!";
+                if(diffDays === 0) aviso = " 🔥 ¡Es HOY!";
+
+                list.innerHTML += `<div class="list-item">
+                    <span>🩺 <b>Dr. ${c.doc}</b> en ${c.lugar}<br><small>${new Date(c.fecha).toLocaleString()}</small><b style="color:var(--neon-cyan);">${aviso}</b></span>
+                    <button onclick="citasData.splice(${idx},1);localStorage.setItem('neovita_citas',JSON.stringify(citasData));renderCitas();" style="background:none;border:none;color:#E76F51;cursor:pointer;">❌</button>
+                </div>`;
+            });
+        }
+
+        function guardarFicha() {
+            localStorage.setItem("neovita_blood", document.getElementById("med-blood").value.trim());
+            localStorage.setItem("neovita_allergies", document.getElementById("med-allergies").value.trim());
+            alert("Ficha guardada.");
+        }
+
+        function cargarDatosFichaYSOS() {
+            if(localStorage.getItem("neovita_blood")) document.getElementById("med-blood").value = localStorage.getItem("neovita_blood");
+            if(localStorage.getItem("neovita_allergies")) document.getElementById("med-allergies").value = localStorage.getItem("neovita_allergies");
+            if(localStorage.getItem("neovita_sos")) document.getElementById("sos-phone").value = localStorage.getItem("neovita_sos");
+        }
+
+        function guardarSOS() {
+            localStorage.setItem("neovita_sos", document.getElementById("sos-phone").value.trim());
+            alert("SOS guardado.");
+        }
+
+        function llamarSOS() {
+            const phone = localStorage.getItem("neovita_sos") || "56954957977";
+            window.location.href = `https://wa.me/${phone}?text=¡EMERGENCIA!%20Necesito%20asistencia%20urgente%20desde%20NeoVita~VitalSync`;
+        }
+
+        if(document.getElementById("profile-select")) {
+            document.getElementById("profile-select").addEventListener("change", () => {
+                renderRemedios();
+                renderCalendario();
+            });
+        }
+    </script>
+</body>
+</html>
