@@ -529,7 +529,7 @@
             alert('¡Número de cuidador guardado!');
         }
 
-        // 🚀 VERIFICACIÓN AUTOMÁTICA DE LICENCIA CONTRA TU GOOGLE SHEET (Sin que el cliente toque nada)
+        // 🚀 VERIFICACIÓN AUTOMÁTICA DE LICENCIA CONTRA TU GOOGLE SHEET (Vía POST para evitar errores de red)
         async function verifyLicense() {
             const licenseKey = document.getElementById('inputLicenseKey').value.trim().toUpperCase();
             const errorMsg = document.getElementById('licenseErrorMsg');
@@ -545,7 +545,15 @@
                 errorMsg.classList.remove('hidden', 'text-rose-500');
                 errorMsg.classList.add('text-sky-600');
 
-                const response = await fetch(`${FIXED_GAS_URL}?action=verify&license=${encodeURIComponent(licenseKey)}`);
+                const response = await fetch(FIXED_GAS_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify({
+                        action: "verify",
+                        license: licenseKey
+                    })
+                });
+
                 const data = await response.json();
 
                 if (data.success || data.valid) {
