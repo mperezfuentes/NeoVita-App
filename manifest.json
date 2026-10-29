@@ -1,0 +1,17 @@
+{
+  "name": "NeoVita VitalSync Clinical PWA",
+  "short_name": "NeoVita",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f9ff",
+  "theme_color": "#0284c7",
+  "description": "Tu asistente médico digital para el control de tratamientos y emergencias.",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
