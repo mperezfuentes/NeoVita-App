@@ -285,7 +285,7 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-xs font-medium text-slate-600 block mb-1">Horario / Bloque</label>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Horario (Compatible 12h/24h)</label>
                         <input type="time" id="newMedTime" value="08:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
                     </div>
                     <div>
@@ -466,7 +466,6 @@
         let isMutedVita = false;
         let selectedPrescriptionFile = null;
 
-        // Funciones de almacenamiento local
         function getProfileData() {
             const stored = localStorage.getItem(`neovita_meds_${currentProfile}`);
             return stored ? JSON.parse(stored) : [];
@@ -553,7 +552,54 @@
             renderVitals();
             renderAppointments();
             renderPrescriptions();
+
+            // VERIFICADOR AUTOMÁTICO DE HORA CADA 30 SEGUNDOS
+            setInterval(checkAlarmTimes, 30000);
         });
+
+        // CONVERSOR UNIVERSAL 12h/24h PARA COMPARAR ALARMAS PERFECTAS
+        function normalizeTimeTo24h(timeStr) {
+            if (!timeStr) return "";
+            let clean = timeStr.trim().toUpperCase();
+            let isPM = clean.includes('P');
+            let isAM = clean.includes('A');
+            
+            // Remover letras AM/PM si las trae
+            clean = clean.replace(/[^0-9:]/g, '');
+            let parts = clean.split(':');
+            if (parts.length < 2) return timeStr; // Retorna original si formato no coincide
+
+            let hours = parseInt(parts[0], 10);
+            let mins = parts[1].padStart(2, '0');
+
+            if (isPM && hours < 12) hours += 12;
+            if (isAM && hours === 12) hours = 0;
+
+            return `${String(hours).padStart(2, '0')}:${mins}`;
+        }
+
+        // VERIFICA SI HAY UN MEDICAMENTO PENDIENTE A LA HORA EXACTA (SOPORTA 12H Y 24H)
+        function checkAlarmTimes() {
+            const meds = getProfileData();
+            const todayStr = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const currentHourStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            meds.forEach(med => {
+                const medTimeNormalized = normalizeTimeTo24h(med.time);
+                if (med.date === todayStr && medTimeNormalized === currentHourStr && med.status === 'pendiente') {
+                    triggerAlarmSoundAndVibration();
+                    speakVita(`¡Atención! Es hora de tomar tu medicamento: ${med.name}`);
+                    
+                    if ("Notification" in window && Notification.permission === "granted") {
+                        new Notification("NeoVita VitalSync 🩺", {
+                            body: `🔔 ¡Hora de tomar ${med.name} (${med.dose || '1 unidad'})!`,
+                            icon: "https://cdn-icons-png.flaticon.com/512/2966/2966327.png"
+                        });
+                    }
+                }
+            });
+        }
 
         function updateNotificationStatusLabel() {
             const label = document.getElementById('lblNotifStatus');
@@ -748,7 +794,7 @@
                     setTimeout(() => {
                         osc.stop();
                         try { ctx.close(); } catch(e){}
-                    }, 1200);
+                    }, 1500);
                 }
             } catch(e) {
                 console.log("Audio Context bloqueado:", e);
@@ -1096,19 +1142,18 @@
 
         function saveNewMedication() {
             const name = document.getElementById('newMedName').value.trim();
-            const time = document.getElementById('newMedTime').value;
+            const time = document.getElementById('newMedTime').value; // Sostiene 12h o 24h según el móvil
             const stock = parseInt(document.getElementById('newMedStock').value) || 30;
             const selectedDate = document.getElementById('calendarDateSelector').value;
 
-            if (!name) { alert('Ingrese el nombre del fármaco.'); return; }
+            if (!name || !time) { alert('Ingrese el nombre y la hora del fármaco.'); return; }
             let meds = getProfileData();
             meds.push({ id: Date.now(), name, time, dose: '1 unidad', stock, status: 'pendiente', date: selectedDate });
             saveProfileData(meds);
             closeAddMedModal();
-            speakVita(`Fármaco ${name} agregado para las ${time} horas.`);
+            speakVita(`Fármaco ${name} agregado para las ${time}.`);
         }
 
-        // SOS DIRECTO SIN NINGÚN FILTRO NI PREGUNTA (MARCA DE INMEDIATO)
         function triggerEmergencySOS(keyword = "") {
             const caregiverPhone = localStorage.getItem('neovita_caregiver_phone') || '+56900000000';
             window.location.href = `tel:${caregiverPhone}`;
