@@ -530,7 +530,7 @@
         }
 
         // 🚀 VERIFICACIÓN DE LICENCIA BLINDADA CONTRA CORS Y REDIRECCIONES
-        async function verifyLicense() {
+async function verifyLicense() {
             const licenseKey = document.getElementById('inputLicenseKey').value.trim().toUpperCase();
             const errorMsg = document.getElementById('licenseErrorMsg');
 
@@ -545,10 +545,9 @@
                 errorMsg.classList.remove('hidden', 'text-rose-500');
                 errorMsg.classList.add('text-sky-600');
 
-                // Usamos POST con cabeceras neutras para evitar el bloqueo de redirección de Google
                 const response = await fetch(FIXED_GAS_URL, {
                     method: "POST",
-                    redirect: "follow", // Sigue la redirección de Google automáticamente
+                    redirect: "follow",
                     headers: {
                         "Content-Type": "text/plain;charset=utf-8",
                     },
@@ -559,11 +558,13 @@
                 });
 
                 const textData = await response.text();
+                console.log("Respuesta cruda del GAS:", textData); // <--- ¡Esto nos dirá la verdad en la F12!
+
                 let data;
                 try {
                     data = JSON.parse(textData);
                 } catch (parseErr) {
-                    // Si Google devolvió HTML por un error de despliegue, lo cachamos aquí
+                    console.error("El servidor no devolvió JSON válido:", textData);
                     throw new Error("Respuesta no válida del servidor");
                 }
 
@@ -576,7 +577,7 @@
                     errorMsg.classList.add('text-rose-500');
                 }
             } catch (e) {
-                console.error("Detalle del error:", e);
+                console.error("Detalle completo del error:", e);
                 errorMsg.textContent = "Error de conexión con el servidor de licencias.";
                 errorMsg.classList.remove('text-sky-600');
                 errorMsg.classList.add('text-rose-500');
