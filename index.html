@@ -434,8 +434,9 @@
             alert('¡Configuración guardada exitosamente!');
         }
 
-        async function verifyLicense() {
-            const licenseKey = document.getElementById('inputLicenseKey').value.trim();
+       async function verifyLicense() {
+            // .trim() borra espacios antes y después, y .toUpperCase() pasa todo a mayúsculas para que de lo mismo cómo lo escriban
+            const licenseKey = document.getElementById('inputLicenseKey').value.trim().toUpperCase();
             const errorMsg = document.getElementById('licenseErrorMsg');
             const gasUrl = localStorage.getItem('neovita_gas_url');
 
@@ -468,6 +469,7 @@
                     errorMsg.classList.add('text-rose-500');
                 }
             } else {
+                // Ahora si pones nv-8890-x1 en minúscula o NV-8890-X1 en mayúscula, igual pasará
                 if (licenseKey === "NV-8890-X1") {
                     document.getElementById('licenseLockScreen').classList.add('hidden');
                     speakVita("Modo demostración activado.");
