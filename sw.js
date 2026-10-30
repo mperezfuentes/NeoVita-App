@@ -1,37 +1,35 @@
-self.addEventListener('install', event => {
-    self.skipWaiting();
-});
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', () => {});   // requerido por Chrome para que la app sea instalable
 
-self.addEventListener('activate', event => {
-    event.waitUntil(self.clients.claim());
-});
-
+// Aviso push enviado desde un servidor (para uso futuro)
 self.addEventListener('push', event => {
     const data = event.data ? event.data.json() : {};
-    const title = data.title || "NeoVita VitalSync 🩺";
-    const options = {
+    event.waitUntil(self.registration.showNotification(data.title || "NeoVita VitalSync 🩺", {
         body: data.body || "🔔 ¡Es hora de tomar tu medicamento!",
-        icon: "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
+        icon: "icon-192.png", badge: "icon-192.png",
         vibrate: [500, 200, 500, 200, 1000],
-        tag: 'neovita-alarm',
-        requireInteraction: true,
-        actions: [
-            { action: 'tomado', title: '✔ Tomar' },
-            { action: 'saltado', title: '❌ Saltar' }
-        ]
-    };
-    event.waitUntil(self.registration.showNotification(title, options));
+        tag: data.tag || 'neovita-alarm', renotify: true, requireInteraction: true,
+        data: data.data || {},
+        actions: [{ action: 'tomado', title: '✔ Tomar' }, { action: 'saltado', title: '❌ Saltar' }]
+    }));
 });
 
+// Toque en la notificación o en sus botones Tomar / Saltar
 self.addEventListener('notificationclick', event => {
     event.notification.close();
+    const action = event.action;
+    const d = event.notification.data || {};
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-            if (clientList.length > 0) {
-                let client = clientList[0];
-                return client.focus();
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+            if (list.length > 0) {
+                const c = list[0];
+                if (action && d.medId != null) c.postMessage({ type: 'NOTIF_ACTION', action, medId: d.medId, profileId: d.profileId });
+                return c.focus();
             }
-            return clients.openWindow('/');
+            const qs = (action && d.medId != null)
+                ? `?accion=${action}&med=${encodeURIComponent(d.medId)}&perfil=${encodeURIComponent(d.profileId || 'principal')}` : '';
+            return self.clients.openWindow('./' + qs);
         })
     );
 });

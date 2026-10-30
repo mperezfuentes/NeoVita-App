@@ -8,6 +8,11 @@
     <!-- PWA Manifest & Theme Color -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0284c7">
+    <link rel="icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="NeoVita">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,13 +64,17 @@
             <div class="space-y-3 text-left">
                 <div>
                     <label class="text-xs font-medium text-slate-600 block mb-1">Código de Licencia</label>
-                    <input type="text" id="inputLicenseKey" placeholder="Ej: NV-XXXX-XX" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-sky-500 uppercase">
+                    <input type="text" id="inputLicenseKey" placeholder="Ej: NV-PRO-XXXX-XXXX" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-sky-500 uppercase">
                 </div>
             </div>
             <button onclick="verifyLicense()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-sky-600/20">
                 Validar Licencia
             </button>
+            <button onclick="startDemo()" class="w-full bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold py-3 rounded-xl border border-sky-200 transition">
+                Probar Demo (24 Hrs)
+            </button>
             <p id="licenseErrorMsg" class="text-xs text-rose-500 hidden font-medium"></p>
+            <a href="https://wa.me/56954957977?text=Hola,%20quiero%20mi%20licencia%20de%20NeoVita~VitalSync" target="_blank" rel="noopener noreferrer" class="block text-xs text-sky-600 underline">¿No tienes código? Escríbenos por WhatsApp</a>
         </div>
     </div>
 
@@ -124,24 +133,6 @@
                     <option value="AB-">AB Negativo (AB-)</option>
                 </select>
             </div>
-        </div>
-
-        <!-- CUADRO DE HUMANIZACIÓN: COMPAÑÍA Y BIENESTAR CON VITA -->
-        <div class="bg-gradient-to-r from-sky-600 to-cyan-600 text-white rounded-2xl p-5 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center space-x-4">
-                <div class="bg-white/20 p-3 rounded-2xl shrink-0 backdrop-blur-sm">
-                    <i data-lucide="heart-handshake" class="w-8 h-8 text-white"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-sm tracking-wide flex items-center gap-2">
-                        Vita ~ Tu Compañía Diaria <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-normal">Siempre contigo</span>
-                    </h3>
-                    <p id="vitaMessageText" class="text-xs text-sky-100 mt-1 italic">"Hola, estoy aquí para acompañarte y cuidarte. Recuerda respirar hondo y sonreír hoy."</p>
-                </div>
-            </div>
-            <button onclick="interactWithVita()" class="bg-white text-sky-700 hover:bg-sky-50 font-semibold text-xs px-4 py-2.5 rounded-xl transition shadow-sm shrink-0 flex items-center gap-1.5">
-                <i data-lucide="sparkles" class="w-4 h-4 text-sky-600"></i> Conversar con Vita
-            </button>
         </div>
 
         <!-- MENU DE BOTONES PRINCIPALES -->
@@ -261,7 +252,7 @@
 
     </main>
 
-    <!-- AUTOMATIC EMERGENCY SOS -->
+    <!-- AUTOMATIC EMERGENCY SOS (DIRECTO SIN FILTROS) -->
     <div class="fixed bottom-6 right-6 z-50">
         <button onclick="triggerEmergencySOS()" class="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-rose-600/40 font-bold transition transform hover:scale-105 active:scale-95 border border-rose-400/30">
             <i data-lucide="phone-call" class="w-6 h-6 animate-bounce"></i>
@@ -269,14 +260,14 @@
         </button>
     </div>
 
-    <!-- MODAL DE ALARMA DE MEDICAMENTO ACTIVO -->
+    <!-- MODAL DE ALARMA DE MEDICAMENTO ACTIVO (POPUP INTERACTIVO A TODA PRUEBA) -->
     <div id="alarmPopupModal" class="fixed inset-0 bg-sky-950/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border-2 border-sky-400 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl text-center animate-pulse">
             <div class="bg-sky-500/10 text-sky-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
                 <i data-lucide="bell-ring" class="w-8 h-8 animate-bounce"></i>
             </div>
             <div>
-                <span id="popupMedTime" class="text-xs bg-sky-100 text-sky-800 font-bold px-3 py-1 rounded-full">🕒 07:00 hrs</span>
+                <span id="popupMedTime" class="text-xs bg-sky-100 text-sky-800 font-bold px-3 py-1 rounded-full">🕒 08:00 hrs</span>
                 <h3 id="popupMedTitle" class="text-xl font-bold text-slate-900 mt-2">Paracetamol 500mg</h3>
                 <p id="popupMedDetails" class="text-xs text-slate-500 mt-1">Dosis: 1 comprimido | Restantes: 29 pastillas</p>
             </div>
@@ -287,27 +278,6 @@
                 <button onclick="popupActionSkipped()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3 rounded-2xl text-xs transition">
                     ❌ Saltar
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL EDITAR HORA DE MEDICAMENTO -->
-    <div id="editMedModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-slate-900">Editar Horario del Fármaco</h3>
-                <button onclick="closeEditMedModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="space-y-3 text-left">
-                <input type="hidden" id="editMedId">
-                <div>
-                    <label class="text-xs font-medium text-slate-600 block mb-1">Nuevo Horario</label>
-                    <input type="time" id="editMedTimeInput" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
-                </div>
-            </div>
-            <div class="flex space-x-3 pt-2">
-                <button onclick="saveEditedMedTime()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar Cambios</button>
-                <button onclick="closeEditMedModal()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
             </div>
         </div>
     </div>
@@ -346,8 +316,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-xs font-medium text-slate-600 block mb-1">Horario (Desde 07:00 AM)</label>
-                        <input type="time" id="newMedTime" value="07:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Horario (Compatible 12h/24h)</label>
+                        <input type="time" id="newMedTime" value="08:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
                     </div>
                     <div>
                         <label class="text-xs font-medium text-slate-600 block mb-1">Stock Inicial</label>
@@ -458,10 +428,10 @@
                     <div>
                         <label class="text-[11px] font-semibold text-slate-600 block mb-1">Frecuencia (Cada cuántas hrs)</label>
                         <select id="confirmMedFrequency" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
-                            <option value="8">Cada 8 horas (Inicia 07:00)</option>
-                            <option value="12">Cada 12 horas (Inicia 07:00)</option>
-                            <option value="24">Cada 24 horas (Inicia 07:00)</option>
-                            <option value="6">Cada 6 horas (Inicia 07:00)</option>
+                            <option value="8">Cada 8 horas (3 veces al día)</option>
+                            <option value="12">Cada 12 horas (2 veces al día)</option>
+                            <option value="24">Cada 24 horas (1 vez al día)</option>
+                            <option value="6">Cada 6 horas</option>
                             <option value="unico">Dosis Única (Una sola toma)</option>
                         </select>
                     </div>
@@ -527,15 +497,87 @@
         let isMutedVita = false;
         let selectedPrescriptionFile = null;
         let currentActiveAlarmMed = null;
+        let currentActiveAlarmProfile = 'principal';
+        const alertedAt = {};
+        let alarmLoopTimer = null, sharedAudioCtx = null, wakeLockSentinel = null;
 
-        // FRASES DE HUMANIZACIÓN DE VITA
-        const vitaPhrases = [
-            "Hola, estoy aquí para acompañarte y cuidarte. Recuerda respirar hondo y sonreír hoy.",
-            "¡Qué gusto saludarte! Que tengas una jornada muy tranquila y llena de energía positiva.",
-            "Recuerda tomar un buen vaso de agua y revisar tus horarios de medicamentos a tiempo.",
-            "Estoy vigilando tus alarmas y tu salud para que tú solo te preocupes por estar bien.",
-            "Un día a la vez. Lo estás haciendo excelente cuidando de tu salud."
-        ];
+        // Fecha LOCAL (YYYY-MM-DD). toISOString() daba la fecha UTC y en Chile, desde ~21:00, ya era "mañana".
+        function localDateStr(d = new Date()) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        // Un único AudioContext reutilizable (se desbloquea con el primer toque del usuario)
+        function getAudioCtx() {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') sharedAudioCtx = new AC();
+            return sharedAudioCtx;
+        }
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator && !wakeLockSentinel) {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
+                }
+            } catch (e) {}
+        }
+        function unlockMedia() {
+            const c = getAudioCtx();
+            if (c && c.state === 'suspended') c.resume().catch(() => {});
+            if ('speechSynthesis' in window) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; window.speechSynthesis.speak(u); } catch (e) {} }
+            try { navigator.vibrate && navigator.vibrate(1); } catch (e) {}
+            requestWakeLock();
+        }
+        ['click', 'touchstart', 'keydown'].forEach(ev => {
+            document.addEventListener(ev, function f() { document.removeEventListener(ev, f, true); unlockMedia(); }, { capture: true });
+        });
+        function startAlarmLoop() {
+            stopAlarmLoop();
+            alarmLoopTimer = setInterval(() => {
+                if (!currentActiveAlarmMed) { stopAlarmLoop(); return; }
+                triggerAlarmBeepBeepBeepLoud();
+            }, 5000);
+        }
+        function stopAlarmLoop() {
+            if (alarmLoopTimer) { clearInterval(alarmLoopTimer); alarmLoopTimer = null; }
+            try { navigator.vibrate && navigator.vibrate(0); } catch (e) {}
+        }
+        function setMedStatusForProfile(profileId, medId, status) {
+            const prev = currentProfile; currentProfile = profileId;
+            try { updateMedStatus(medId, status); } finally { currentProfile = prev; renderMeds(); }
+        }
+        function mostrarNotificacionSistema(med, prof) {
+            if (!('Notification' in window) || Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
+            navigator.serviceWorker.ready.then(reg => reg.showNotification("NeoVita VitalSync 🩺", {
+                body: `🔔 ¡Hora de tomar ${med.name} (${med.dose || '1 unidad'})! · ${prof.name}`,
+                icon: "icon-192.png", badge: "icon-192.png", vibrate: [500, 200, 500, 200, 1000],
+                tag: `neovita-${prof.id}-${med.id}`, renotify: true, requireInteraction: true,
+                data: { medId: med.id, profileId: prof.id },
+                actions: [{ action: 'tomado', title: '✔ Tomar' }, { action: 'saltado', title: '❌ Saltar' }]
+            })).catch(() => {});
+        }
+        // Acción tocada en la notificación (Tomar / Saltar)
+        function aplicarAccionNotificacion(action, medId, profileId) {
+            if (action !== 'tomado' && action !== 'saltado') return;
+            const id = Number(medId); const pid = profileId || 'principal';
+            let meds = []; try { meds = JSON.parse(localStorage.getItem(`neovita_meds_${pid}`) || '[]'); } catch (e) {}
+            const med = meds.find(m => m.id === id);
+            if (!med || med.status !== 'pendiente') return;
+            setMedStatusForProfile(pid, id, action);
+            if (currentActiveAlarmMed && currentActiveAlarmMed.id === id) {
+                stopAlarmLoop();
+                document.getElementById('alarmPopupModal').classList.add('hidden');
+                currentActiveAlarmMed = null;
+            }
+        }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', e => {
+                if (e.data && e.data.type === 'NOTIF_ACTION') aplicarAccionNotificacion(e.data.action, e.data.medId, e.data.profileId);
+            });
+        }
+        window.addEventListener('load', () => {
+            const q = new URLSearchParams(location.search);
+            if (q.get('accion')) { aplicarAccionNotificacion(q.get('accion'), q.get('med'), q.get('perfil')); history.replaceState(null, '', location.pathname); }
+        });
 
         function getProfileData() {
             const stored = localStorage.getItem(`neovita_meds_${currentProfile}`);
@@ -596,10 +638,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const isActivated = localStorage.getItem('neovita_license_activated');
-            if (isActivated === 'true') {
-                document.getElementById('licenseLockScreen').classList.add('hidden');
-            }
+            applyLicenseState();
+            setInterval(applyLicenseState, 60000);
 
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').then(reg => {
@@ -612,7 +652,7 @@
             loadProfilesList();
             updateNotificationStatusLabel();
 
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = localDateStr();
             const dateSelector = document.getElementById('calendarDateSelector');
             const apptDateSelector = document.getElementById('inputApptDate');
             if(dateSelector) dateSelector.value = todayStr;
@@ -624,26 +664,14 @@
             renderAppointments();
             renderPrescriptions();
 
-            // Mensaje aleatorio inicial de Vita
-            setRandomVitaPhrase();
-
-            setInterval(checkAlarmTimes, 30000);
+            // REVISOR AUTOMÁTICO CADA 30 SEGUNDOS
+            setInterval(checkAlarmTimes, 15000);
+            checkAlarmTimes();
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { requestWakeLock(); checkAlarmTimes(); } });
+            window.addEventListener('focus', checkAlarmTimes);
         });
 
-        function setRandomVitaPhrase() {
-            const randomMsg = vitaPhrases[Math.floor(Math.random() * vitaPhrases.length)];
-            const el = document.getElementById('vitaMessageText');
-            if (el) el.textContent = `"${randomMsg}"`;
-        }
-
-        function interactWithVita() {
-            playClickSound();
-            const randomMsg = vitaPhrases[Math.floor(Math.random() * vitaPhrases.length)];
-            const el = document.getElementById('vitaMessageText');
-            if (el) el.textContent = `"${randomMsg}"`;
-            speakVita(randomMsg);
-        }
-
+        // CONVERSOR UNIVERSAL 12h/24h
         function normalizeTimeTo24h(timeStr) {
             if (!timeStr) return "";
             let clean = timeStr.trim().toUpperCase();
@@ -663,49 +691,49 @@
             return `${String(hours).padStart(2, '0')}:${mins}`;
         }
 
+        // VERIFICADOR DE ALARMAS (todos los perfiles; desde la hora exacta hasta 1 hora después)
         function checkAlarmTimes() {
-            const meds = getProfileData();
-            const todayStr = new Date().toISOString().split('T')[0];
-            const now = new Date();
-            const currentHourStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-            meds.forEach(med => {
-                const medTimeNormalized = normalizeTimeTo24h(med.time);
-                if (med.date === todayStr && medTimeNormalized === currentHourStr && med.status === 'pendiente') {
+            if (currentActiveAlarmMed) return;
+            const now = new Date(); const todayStr = localDateStr(now); const nowMs = now.getTime();
+            for (const prof of getProfiles()) {
+                let meds = [];
+                try { meds = JSON.parse(localStorage.getItem(`neovita_meds_${prof.id}`) || '[]'); } catch (e) {}
+                for (const med of meds) {
+                    if (med.date !== todayStr || med.status !== 'pendiente') continue;
+                    const t = normalizeTimeTo24h(med.time).split(':');
+                    const h = parseInt(t[0], 10), m = parseInt(t[1], 10);
+                    if (isNaN(h) || isNaN(m)) continue;
+                    const due = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0).getTime();
+                    const late = nowMs - due;
+                    if (late < 0 || late > 60 * 60 * 1000) continue;
+                    const key = `${prof.id}_${med.id}`;
+                    if (alertedAt[key] && nowMs - alertedAt[key] < 2 * 60 * 1000) continue;
+                    alertedAt[key] = nowMs;
+                    currentActiveAlarmProfile = prof.id;
                     triggerAlarmBeepBeepBeepLoud();
                     showAlarmPopup(med);
-                    
+                    startAlarmLoop();
                     speakVitaQueue(`Atención, es hora de tomar tu medicamento, ${med.name}`);
-                    
-                    if ("Notification" in window && Notification.permission === "granted") {
-                        if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker.ready.then(reg => {
-                                reg.showNotification("NeoVita VitalSync 🩺", {
-                                    body: `🔔 ¡Hora de tomar ${med.name} (${med.dose || '1 unidad'})!`,
-                                    icon: "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
-                                    vibrate: [500, 200, 500, 200, 1000],
-                                    tag: 'neovita-alarm',
-                                    requireInteraction: true
-                                });
-                            });
-                        }
-                    }
+                    mostrarNotificacionSistema(med, prof);
+                    return;
                 }
-            });
+            }
         }
 
         function showAlarmPopup(med) {
             currentActiveAlarmMed = med;
             document.getElementById('popupMedTime').textContent = `🕒 ${med.time} hrs`;
             document.getElementById('popupMedTitle').textContent = med.name;
-            document.getElementById('popupMedDetails').textContent = `Dosis: ${med.dose || '1 unidad'} | Restantes: ${med.stock} pastillas`;
+            const pn = (getProfiles().find(p => p.id === currentActiveAlarmProfile) || {}).name || '';
+            document.getElementById('popupMedDetails').textContent = `Dosis: ${med.dose || '1 unidad'} | Restantes: ${med.stock} pastillas${pn ? ' | Perfil: ' + pn : ''}`;
             document.getElementById('alarmPopupModal').classList.remove('hidden');
         }
 
         function popupActionTaken() {
             playClickSound();
+            stopAlarmLoop();
             if (currentActiveAlarmMed) {
-                updateMedStatus(currentActiveAlarmMed.id, 'tomado');
+                setMedStatusForProfile(currentActiveAlarmProfile, currentActiveAlarmMed.id, 'tomado');
             }
             document.getElementById('alarmPopupModal').classList.add('hidden');
             currentActiveAlarmMed = null;
@@ -713,52 +741,29 @@
 
         function popupActionSkipped() {
             playClickSound();
+            stopAlarmLoop();
             if (currentActiveAlarmMed) {
-                updateMedStatus(currentActiveAlarmMed.id, 'saltado');
+                setMedStatusForProfile(currentActiveAlarmProfile, currentActiveAlarmMed.id, 'saltado');
             }
             document.getElementById('alarmPopupModal').classList.add('hidden');
             currentActiveAlarmMed = null;
         }
 
-        // EDICIÓN DE HORARIO DE MEDICAMENTO
-        function openEditMedModal(id, currentTime) {
-            playClickSound();
-            document.getElementById('editMedId').value = id;
-            document.getElementById('editMedTimeInput').value = currentTime;
-            document.getElementById('editMedModal').classList.remove('hidden');
-        }
-        function closeEditMedModal() {
-            document.getElementById('editMedModal').classList.add('hidden');
-        }
-        function saveEditedMedTime() {
-            playClickSound();
-            const id = parseFloat(document.getElementById('editMedId').value);
-            const newTime = document.getElementById('editMedTimeInput').value;
-            if (!newTime) { alert('Seleccione una hora válida.'); return; }
-
-            let meds = getProfileData();
-            meds = meds.map(m => {
-                if (m.id === id) m.time = newTime;
-                return m;
-            });
-            saveProfileData(meds);
-            closeEditMedModal();
-            speakVita("Horario actualizado con éxito.");
-        }
-
+        // BEEP BEEP BEEP ALTO Y CLARO (VOLUMEN MÁS FUERTE)
         function triggerAlarmBeepBeepBeepLoud() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (AudioContext) {
-                    const ctx = new AudioContext();
+                    const ctx = getAudioCtx();
+                    if (ctx.state === 'suspended') ctx.resume();
                     const now = ctx.currentTime;
 
                     function playLoudBeep(startTime) {
                         const osc = ctx.createOscillator();
                         const gain = ctx.createGain();
                         osc.type = 'sine';
-                        osc.frequency.setValueAtTime(950, startTime);
-                        gain.gain.setValueAtTime(0.8, startTime);
+                        osc.frequency.setValueAtTime(950, startTime); // Tono más agudo y penetrante
+                        gain.gain.setValueAtTime(0.8, startTime); // Ganancia alta (volumen fuerte)
                         gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
                         osc.connect(gain);
                         gain.connect(ctx.destination);
@@ -770,14 +775,17 @@
                     playLoudBeep(now + 0.45);
                     playLoudBeep(now + 0.90);
 
-                    setTimeout(() => { try { ctx.close(); } catch(e){} }, 1800);
+                    
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.log("Audio bloqueado:", e);
+            }
             if (navigator.vibrate) {
                 try { navigator.vibrate([600, 200, 600, 200, 1200]); } catch(e) {}
             }
         }
 
+        // SONIDO DE CLIC TÁCTIL GARANTIZADO
         function playClickSound() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -861,7 +869,7 @@
                     const registration = await navigator.serviceWorker.ready;
                     await registration.showNotification("NeoVita VitalSync 🩺", {
                         body: "🔔 ¡Alarma de medicamento en curso!",
-                        icon: "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
+                        icon: "icon-192.png",
                         vibrate: [500, 200, 500, 200, 1000],
                         tag: 'neovita-alarm',
                         requireInteraction: true
@@ -960,7 +968,7 @@
                 icon.setAttribute('data-lucide', 'volume-2');
                 icon.className = "w-5 h-5 text-sky-600";
                 btn.title = "Asistente de Voz Activo";
-                speakVita("Hola, soy Vita, tu asistente de bienestar.");
+                speakVita("Hola, soy Vita, soy tu asistente de voz.");
             } else {
                 icon.setAttribute('data-lucide', 'volume-x');
                 icon.className = "w-5 h-5 text-rose-500";
@@ -1000,7 +1008,6 @@
                             <p class="text-xs text-slate-500">Dosis: ${med.dose || '1 unidad'} | Stock: ${med.stock} unidades</p>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <button onclick="openEditMedModal(${med.id}, '${med.time}')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-2.5 py-2 rounded-lg font-medium transition" title="Editar Hora">✏️</button>
                             ${med.status === 'pendiente' ? `
                                 <button onclick="updateMedStatus(${med.id}, 'tomado')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium transition shadow-sm">Tomado</button>
                                 <button onclick="updateMedStatus(${med.id}, 'saltado')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 py-2 rounded-lg font-medium transition">Saltar</button>
@@ -1182,11 +1189,12 @@
             let meds = getProfileData();
             
             if (frequencyVal === 'unico') {
-                const dateStr = today.toISOString().split('T')[0];
+                const dateStr = localDateStr(today);
+                const currentHourStr = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
                 meds.push({
                     id: Date.now() + Math.random(),
                     name: fullName,
-                    time: '07:00',
+                    time: currentHourStr,
                     dose: dose,
                     stock: 30,
                     status: 'pendiente',
@@ -1197,14 +1205,13 @@
                 for (let i = 0; i < totalDays; i++) {
                     let targetDate = new Date(today);
                     targetDate.setDate(today.getDate() + i);
-                    let dateStr = targetDate.toISOString().split('T')[0];
+                    let dateStr = localDateStr(targetDate);
 
                     let hoursList = [];
-                    if (frequencyHours === 8) hoursList = ['07:00', '15:00', '23:00'];
-                    else if (frequencyHours === 12) hoursList = ['07:00', '19:00'];
-                    else if (frequencyHours === 24) hoursList = ['07:00'];
-                    else if (frequencyHours === 6) hoursList = ['07:00', '13:00', '19:00', '01:00'];
-                    else hoursList = ['07:00', '15:00', '23:00'];
+                    if (frequencyHours === 8) hoursList = ['08:00', '16:00', '00:00'];
+                    else if (frequencyHours === 12) hoursList = ['09:00', '21:00'];
+                    else if (frequencyHours === 24) hoursList = ['09:00'];
+                    else hoursList = ['08:00', '14:00', '20:00'];
 
                     hoursList.forEach(timeSlot => {
                         meds.push({
@@ -1225,7 +1232,7 @@
             document.getElementById('lblSelectedFileName').textContent = "Ningún archivo seleccionado";
             closePrescriptionConfirmModal();
             triggerAlarmBeepBeepBeepLoud();
-            speakVita(`Receta verificada con éxito. Fármaco ${medName} agendado desde las 07:00 horas.`);
+            speakVita(`Receta verificada con éxito. Fármaco ${medName} agendado.`);
         }
 
         function updateMedStatus(id, status) {
@@ -1356,47 +1363,94 @@
             alert('¡Configuración guardada!');
         }
 
+        // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
+        const LICENSE_VERSION = '2';
+        function getDeviceId() {
+            let d = localStorage.getItem('neovita_device_id');
+            if (!d) { d = 'D' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2)); localStorage.setItem('neovita_device_id', d); }
+            return d;
+        }
+        function showLock(msg) {
+            document.getElementById('licenseLockScreen').classList.remove('hidden');
+            if (msg) {
+                const e = document.getElementById('licenseErrorMsg');
+                e.textContent = msg; e.classList.remove('hidden', 'text-sky-600'); e.classList.add('text-rose-500');
+            }
+        }
+        function hideLock() { document.getElementById('licenseLockScreen').classList.add('hidden'); }
+        function clearLicense() {
+            ['neovita_license_activated', 'neovita_license_key', 'neovita_license_type', 'neovita_license_expires', 'neovita_license_checked', 'neovita_license_v']
+                .forEach(k => localStorage.removeItem(k));
+        }
+        function applyLicenseState() {
+            const now = Date.now();
+            if (localStorage.getItem('neovita_license_activated') === 'true') {
+                if (localStorage.getItem('neovita_license_v') !== LICENSE_VERSION) {      // activaciones antiguas: pedir el código una vez
+                    clearLicense(); showLock('Por seguridad, ingresa nuevamente tu código de licencia.'); return;
+                }
+                const exp = Number(localStorage.getItem('neovita_license_expires') || 0);
+                if (exp && now > exp) { clearLicense(); showLock('Tu plan de 30 días venció. Escríbenos por WhatsApp para renovar.'); return; }
+                hideLock(); revalidateLicense(); return;
+            }
+            const demo = Number(localStorage.getItem('neovita_demo_until') || 0);
+            if (demo && now < demo) { hideLock(); return; }
+            if (demo) showLock('Tu demo de 24 horas terminó. Ingresa un código de licencia para continuar.');
+        }
+        async function revalidateLicense() {
+            const key = localStorage.getItem('neovita_license_key');
+            if (!key || Date.now() - Number(localStorage.getItem('neovita_license_checked') || 0) < 12 * 3600 * 1000) return;
+            try {
+                const r = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(key)}&device=${encodeURIComponent(getDeviceId())}`);
+                const d = await r.json();
+                localStorage.setItem('neovita_license_checked', String(Date.now()));
+                if (d && (d.success || d.valid)) { if (d.expires) localStorage.setItem('neovita_license_expires', String(d.expires)); }
+                else { clearLicense(); showLock(d && d.message ? d.message : 'Licencia no válida.'); }
+            } catch (e) { /* sin internet: se mantiene la licencia hasta poder revalidar */ }
+        }
+        function startDemo() {
+            playClickSound();
+            const errorMsg = document.getElementById('licenseErrorMsg');
+            if (localStorage.getItem('neovita_demo_until')) {
+                errorMsg.textContent = "Este dispositivo ya usó la demo de 24 horas. Ingresa un código de licencia.";
+                errorMsg.classList.remove('hidden', 'text-sky-600'); errorMsg.classList.add('text-rose-500');
+                return;
+            }
+            localStorage.setItem('neovita_demo_until', String(Date.now() + 24 * 3600 * 1000));
+            hideLock();
+            speakVita("Demo de 24 horas activada.");
+        }
+
         async function verifyLicense() {
             playClickSound();
             const licenseKey = document.getElementById('inputLicenseKey').value.trim().toUpperCase();
             const errorMsg = document.getElementById('licenseErrorMsg');
-
-            if (!licenseKey) {
-                errorMsg.textContent = "Por favor ingrese su código de licencia.";
-                errorMsg.classList.remove('hidden');
-                return;
-            }
+            const setMsg = (txt, ok) => {
+                errorMsg.textContent = txt; errorMsg.classList.remove('hidden', 'text-rose-500', 'text-sky-600');
+                errorMsg.classList.add(ok ? 'text-sky-600' : 'text-rose-500');
+            };
+            if (!licenseKey) { setMsg("Por favor ingrese su código de licencia.", false); return; }
 
             try {
-                errorMsg.textContent = "Verificando licencia en la nube...";
-                errorMsg.classList.remove('hidden', 'text-rose-500');
-                errorMsg.classList.add('text-sky-600');
-
-                const response = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(licenseKey)}`, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
+                setMsg("Verificando licencia en la nube...", true);
+                const response = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(licenseKey)}&device=${encodeURIComponent(getDeviceId())}`);
                 const data = await response.json();
 
-                if (data && (data.success || data.valid || data.status === "success")) {
+                if (data && (data.success || data.valid)) {
                     localStorage.setItem('neovita_license_activated', 'true');
-                    document.getElementById('licenseLockScreen').classList.add('hidden');
+                    localStorage.setItem('neovita_license_key', licenseKey);
+                    localStorage.setItem('neovita_license_type', data.type || '');
+                    localStorage.setItem('neovita_license_expires', data.expires ? String(data.expires) : '');
+                    localStorage.setItem('neovita_license_checked', String(Date.now()));
+                    localStorage.setItem('neovita_license_v', LICENSE_VERSION);
+                    localStorage.removeItem('neovita_demo_until');
+                    hideLock();
                     speakVita("Licencia verificada con éxito. Bienvenido a Neo Vita.");
                 } else {
-                    errorMsg.textContent = "Licencia no válida o expirada.";
-                    errorMsg.classList.remove('text-sky-600');
-                    errorMsg.classList.add('text-rose-500');
+                    setMsg((data && data.message) || "Licencia no válida o expirada.", false);
                 }
             } catch (e) {
-                if (licenseKey === "NV-PRO-8854" || licenseKey.startsWith("NV-")) {
-                    localStorage.setItem('neovita_license_activated', 'true');
-                    document.getElementById('licenseLockScreen').classList.add('hidden');
-                    speakVita("Licencia verificada con éxito. Bienvenido a Neo Vita.");
-                } else {
-                    errorMsg.textContent = "Error de conexión con el servidor de licencias.";
-                    errorMsg.classList.remove('text-sky-600');
-                    errorMsg.classList.add('text-rose-500');
-                }
+                // Sin conexión NO se activa nada: la licencia siempre se confirma contra la Sheet.
+                setMsg("No se pudo conectar con el servidor de licencias. Revisa tu internet e intenta de nuevo.", false);
             }
         }
     </script>
