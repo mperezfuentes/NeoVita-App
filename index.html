@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoVita ~ VitalSync Clinical PWA</title>
+    
+    <!-- PWA Manifest & Theme Color -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <link rel="icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="NeoVita">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-sky-50 text-slate-800 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-sky-100 sticky top-0 z-40 px-4 py-3 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-sky-500/10 border border-sky-200 p-2 rounded-xl text-sky-600">
+                <i data-lucide="activity" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base tracking-tight text-slate-900 flex items-center gap-2">
+                    NeoVita <span class="text-xs bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full font-medium">VitalSync</span>
+                </h1>
+                <p id="lblActiveUserHeader" class="text-xs text-sky-600 font-medium">Perfil: Usuario Principal</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+            <!-- Voice Assistant Vita -->
+            <button id="btnMuteVita" onclick="toggleMuteVita()" class="p-2 rounded-xl bg-sky-50 border border-sky-200 text-slate-600 hover:text-sky-700 transition" title="Asistente de Voz Vita">
+                <i data-lucide="volume-2" id="iconMute" class="w-5 h-5 text-sky-600"></i>
+            </button>
+            <!-- Settings / Caregiver Config -->
+            <button onclick="openSettings()" class="p-2 rounded-xl bg-sky-50 border border-sky-200 text-slate-600 hover:text-sky-700 transition" title="Configuración de Cuidador">
+                <i data-lucide="settings" class="w-5 h-5 text-sky-600"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- LICENSE LOCK SCREEN -->
+    <div id="licenseLockScreen" class="fixed inset-0 bg-sky-950/40 z-50 flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full shadow-2xl text-center space-y-5">
+            <div class="bg-sky-50 border border-sky-200 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto text-sky-600">
+                <i data-lucide="shield-check" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">Activación de Licencia</h2>
+                <p class="text-xs text-slate-500 mt-1">Ingrese su código autorizado para desbloquear el sistema clínico.</p>
+            </div>
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="text-xs font-medium text-slate-600 block mb-1">Código de Licencia</label>
+                    <input type="text" id="inputLicenseKey" placeholder="Ej: NV-PRO-XXXX-XXXX" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-sky-500 uppercase">
+                </div>
+            </div>
+            <button onclick="verifyLicense()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-sky-600/20">
+                Validar Licencia
+            </button>
+            <button onclick="startDemo()" class="w-full bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold py-3 rounded-xl border border-sky-200 transition">
+                Probar Demo (24 Hrs)
+            </button>
+            <p id="licenseErrorMsg" class="text-xs text-rose-500 hidden font-medium"></p>
+            <a href="https://wa.me/56954957977?text=Hola,%20quiero%20mi%20licencia%20de%20NeoVita~VitalSync" target="_blank" rel="noopener noreferrer" class="block text-xs text-sky-600 underline">¿No tienes código? Escríbenos por WhatsApp</a>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTENT -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 space-y-6 pb-24">
+        
+        <!-- PROFILE SELECTOR BAR -->
+        <div class="bg-white border border-sky-100 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-3">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-200 flex items-center justify-center text-sky-600 shrink-0">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </div>
+                <div class="flex-1">
+                    <label class="text-xs text-slate-400 block font-medium">Perfil Clínico Activo</label>
+                    <select id="selectUserProfile" onchange="switchProfile(this.value)" class="bg-sky-50 border border-sky-200 rounded-lg px-2 py-1 text-sm font-semibold text-slate-900 focus:outline-none focus:border-sky-500 w-full">
+                        <!-- Dinámico -->
+                    </select>
+                </div>
+                <button onclick="openAddProfileModal()" class="p-2 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition shrink-0" title="Crear Nuevo Perfil">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                </button>
+                <button onclick="deleteCurrentProfile()" class="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition shrink-0" title="Eliminar Perfil Actual">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="openAddMedModal()" class="flex-1 sm:flex-none bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-3 py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-1">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Fármaco
+                </button>
+                <button onclick="openPrescriptionModal()" class="flex-1 sm:flex-none bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-semibold px-3 py-2.5 rounded-xl border border-sky-200 transition flex items-center justify-center gap-1">
+                    <i data-lucide="camera" class="w-4 h-4"></i> Receta
+                </button>
+            </div>
+        </div>
+
+        <!-- MEDICAL PROFILE CARD -->
+        <div class="bg-white border border-sky-100 rounded-2xl p-4 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="text-xs font-semibold text-rose-600 flex items-center gap-1 mb-1">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Alergias Conocidas
+                </label>
+                <input type="text" id="inputUserAllergies" onchange="saveMedicalProfile()" placeholder="Ej: Penicilina, Metamizol..." class="w-full bg-rose-50/40 border border-rose-100 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-rose-400">
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-sky-700 flex items-center gap-1 mb-1">
+                    <i data-lucide="droplet" class="w-3.5 h-3.5"></i> Grupo Sanguíneo
+                </label>
+                <select id="selectUserBloodType" onchange="saveMedicalProfile()" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-sky-500">
+                    <option value="O+">O Positivo (O+)</option>
+                    <option value="O-">O Negativo (O-)</option>
+                    <option value="A+">A Positivo (A+)</option>
+                    <option value="A-">A Negativo (A-)</option>
+                    <option value="B+">B Positivo (B+)</option>
+                    <option value="B-">B Negativo (B-)</option>
+                    <option value="AB+">AB Positivo (AB+)</option>
+                    <option value="AB-">AB Negativo (AB-)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- MENU DE BOTONES PRINCIPALES -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <div onclick="filterTab('hoy')" id="cardTabHoy" class="bg-sky-600 text-white p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2">
+                <i data-lucide="calendar-check" class="w-6 h-6"></i>
+                <div>
+                    <h3 class="font-bold text-sm">Calendario</h3>
+                    <p class="text-xs opacity-80">Vista diaria</p>
+                </div>
+            </div>
+            <div onclick="filterTab('vitals')" id="cardTabVitals" class="bg-white hover:bg-sky-50 text-slate-800 border border-sky-100 p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2">
+                <i data-lucide="heart-pulse" class="w-6 h-6 text-sky-600"></i>
+                <div>
+                    <h3 class="font-bold text-sm">Signos Vitales</h3>
+                    <p class="text-xs text-slate-400">Presión y Glucosa</p>
+                </div>
+            </div>
+            <div onclick="filterTab('stock')" id="cardTabStock" class="bg-white hover:bg-sky-50 text-slate-800 border border-sky-100 p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2">
+                <i data-lucide="package" class="w-6 h-6 text-sky-600"></i>
+                <div>
+                    <h3 class="font-bold text-sm">Pastillero</h3>
+                    <p class="text-xs text-slate-400">Stock y Reposición</p>
+                </div>
+            </div>
+            <div onclick="filterTab('citas')" id="cardTabCitas" class="bg-white hover:bg-sky-50 text-slate-800 border border-sky-100 p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2">
+                <i data-lucide="calendar-days" class="w-6 h-6 text-sky-600"></i>
+                <div>
+                    <h3 class="font-bold text-sm">Citas Médicas</h3>
+                    <p class="text-xs text-slate-400">Doctor y Lugar</p>
+                </div>
+            </div>
+            <div onclick="filterTab('informe')" id="cardTabInforme" class="bg-white hover:bg-sky-50 text-slate-800 border border-sky-100 p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2 col-span-2 sm:col-span-1">
+                <i data-lucide="file-text" class="w-6 h-6 text-sky-600"></i>
+                <div>
+                    <h3 class="font-bold text-sm">Informe Dr.</h3>
+                    <p class="text-xs text-slate-400">Enviar WhatsApp</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 1: CALENDARIO -->
+        <div id="viewHoy" class="space-y-4">
+            <div class="bg-white border border-sky-100 rounded-2xl p-5 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-sky-100 pb-3">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="calendar" class="w-5 h-5 text-sky-600"></i> Calendario Único Consolidado
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <button onclick="clearCompletedMedsForToday()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition" title="Limpiar fármacos ya tomados de hoy">🗑️ Limpiar Tomados</button>
+                        <input type="date" id="calendarDateSelector" onchange="renderMeds()" class="text-xs bg-sky-50 text-sky-700 px-3 py-1 rounded-full border border-sky-200 font-medium focus:outline-none">
+                    </div>
+                </div>
+                <button onclick="vitaResumenDelDia()" class="w-full bg-gradient-to-r from-sky-500 to-cyan-500 hover:opacity-95 text-white rounded-xl p-3.5 flex items-center justify-center gap-2 font-semibold text-sm shadow-md transition">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i> Hablar con Vita: ¿qué me falta hoy?
+                </button>
+                <p id="vitaResumenTexto" class="hidden text-xs text-sky-900 bg-sky-50 border border-sky-200 rounded-xl p-3 leading-relaxed"></p>
+                <div id="medicationList" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: SIGNOS VITALES -->
+        <div id="viewVitals" class="space-y-4 hidden">
+            <div class="bg-white border border-sky-100 rounded-2xl p-5 shadow-sm space-y-4">
+                <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="heart-pulse" class="w-5 h-5 text-sky-600"></i> Registro de Signos Vitales Diarios
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-sky-50/50 p-4 rounded-xl border border-sky-100">
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Presión Arterial (mmHg)</label>
+                        <input type="text" id="inputBP" placeholder="Ej: 120/80" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Glucosa en Ayunas (mg/dL)</label>
+                        <input type="number" id="inputGlucose" placeholder="Ej: 95" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button onclick="saveVitals()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl text-xs transition">Registrar Signos Vitales</button>
+                    </div>
+                </div>
+                <div id="vitalsLogList" class="space-y-2 pt-2"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: STOCK -->
+        <div id="viewStock" class="space-y-4 hidden">
+            <div class="bg-white border border-sky-100 rounded-2xl p-5 shadow-sm space-y-4">
+                <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="package" class="w-5 h-5 text-sky-600"></i> Control de Stock (Pastillero)
+                </h3>
+                <div id="stockList" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: CITAS MÉDICAS -->
+        <div id="viewCitas" class="space-y-4 hidden">
+            <div class="bg-white border border-sky-100 rounded-2xl p-5 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-sky-100 pb-3">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="calendar-days" class="w-5 h-5 text-sky-600"></i> Próximos Controles Médicos
+                    </h3>
+                    <button onclick="openAppointmentModal()" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition shadow-sm flex items-center gap-1">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Nueva Cita
+                    </button>
+                </div>
+                <div id="appointmentsList" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: INFORME MEDICO -->
+        <div id="viewInforme" class="space-y-4 hidden">
+            <div class="bg-white border border-sky-100 rounded-2xl p-5 shadow-sm space-y-4 text-center">
+                <i data-lucide="file-text" class="w-12 h-12 text-sky-500 mx-auto"></i>
+                <h3 class="font-bold text-slate-900">Generador de Informe para el Médico</h3>
+                <p class="text-xs text-slate-500">Consolida adherencia, alergias, tipo sanguíneo, citas y signos vitales en un mensaje formateado listo para enviar por WhatsApp.</p>
+                <button onclick="generateWhatsAppReport()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                    <i data-lucide="message-square" class="w-5 h-5"></i> Enviar Informe por WhatsApp al Doctor
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- AUTOMATIC EMERGENCY SOS (DIRECTO SIN FILTROS) -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button onclick="triggerEmergencySOS()" class="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-rose-600/40 font-bold transition transform hover:scale-105 active:scale-95 border border-rose-400/30">
+            <i data-lucide="phone-call" class="w-6 h-6 animate-bounce"></i>
+            <span>SOS Cuidador</span>
+        </button>
+    </div>
+
+    <!-- MODAL DE ALARMA DE MEDICAMENTO ACTIVO (POPUP INTERACTIVO A TODA PRUEBA) -->
+    <div id="alarmPopupModal" class="fixed inset-0 bg-sky-950/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border-2 border-sky-400 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl text-center animate-pulse">
+            <div class="bg-sky-500/10 text-sky-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
+                <i data-lucide="bell-ring" class="w-8 h-8 animate-bounce"></i>
+            </div>
+            <div>
+                <span id="popupMedTime" class="text-xs bg-sky-100 text-sky-800 font-bold px-3 py-1 rounded-full">🕒 08:00 hrs</span>
+                <h3 id="popupMedTitle" class="text-xl font-bold text-slate-900 mt-2">Paracetamol 500mg</h3>
+                <p id="popupMedDetails" class="text-xs text-slate-500 mt-1">Dosis: 1 comprimido | Restantes: 29 pastillas</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="popupActionTaken()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-1">
+                    ✔ Tomado
+                </button>
+                <button onclick="popupActionSkipped()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3 rounded-2xl text-xs transition">
+                    ❌ Saltar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO PERFIL -->
+    <div id="addProfileModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">Agregar Nuevo Perfil</h3>
+                <button onclick="closeAddProfileModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="text-xs font-medium text-slate-600 block mb-1">Nombre del Paciente / Familiar</label>
+                    <input type="text" id="inputNewProfileName" placeholder="Ej: Don Carlos, Mamá, Juan..." class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                </div>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="saveNewProfile()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Crear Perfil</button>
+                <button onclick="closeAddProfileModal()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO MEDICAMENTO -->
+    <div id="addMedModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">Nuevo Medicamento</h3>
+                <button onclick="closeAddMedModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="text-xs font-medium text-slate-600 block mb-1">Nombre del Fármaco</label>
+                    <input type="text" id="newMedName" placeholder="Ej: Paracetamol 500mg" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Horario (Compatible 12h/24h)</label>
+                        <input type="time" id="newMedTime" value="08:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Stock Inicial</label>
+                        <input type="number" id="newMedStock" value="30" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="saveNewMedication()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar</button>
+                <button onclick="closeAddMedModal()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CITA MÉDICA -->
+    <div id="appointmentModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">Agendar Cita Médica</h3>
+                <button onclick="closeAppointmentModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="text-xs font-medium text-slate-600 block mb-1">Médico / Especialista</label>
+                    <input type="text" id="inputApptDoctor" placeholder="Ej: Dr. Pérez (Cardiólogo)" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-600 block mb-1">Lugar / Clínica / Hospital</label>
+                    <input type="text" id="inputApptLocation" placeholder="Ej: Clínica Buin / Centro Médico" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Fecha</label>
+                        <input type="date" id="inputApptDate" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Hora</label>
+                        <input type="time" id="inputApptTime" value="10:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="saveAppointment()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar Cita</button>
+                <button onclick="closeAppointmentModal()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RECETA -->
+    <div id="prescriptionModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl text-center">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">Receta Médica / Escaneo</h3>
+                <button onclick="closePrescriptionModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <p class="text-xs text-slate-500">Selecciona un archivo de galería o toma una foto directa con la cámara.</p>
+            
+            <div class="grid grid-cols-2 gap-3 py-2">
+                <label class="cursor-pointer bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 font-semibold p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition">
+                    <i data-lucide="image" class="w-6 h-6 text-sky-600"></i>
+                    <span class="text-xs">📁 Galería / Archivo</span>
+                    <input type="file" id="prescriptionFileGallery" accept="image/*" onchange="handleFileSelected(event)" class="hidden">
+                </label>
+                <label class="cursor-pointer bg-sky-600 hover:bg-sky-500 text-white font-semibold p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition shadow-md">
+                    <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                    <span class="text-xs">📷 Tomar Foto</span>
+                    <input type="file" id="prescriptionFileCamera" accept="image/*" capture="environment" onchange="handleFileSelected(event)" class="hidden">
+                </label>
+            </div>
+
+            <p id="lblSelectedFileName" class="text-xs text-slate-500 font-medium truncate">Ningún archivo seleccionado</p>
+
+            <button onclick="openPrescriptionConfirmModal()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-md">Continuar a Validación de Seguridad</button>
+            <div id="prescriptionList" class="text-left space-y-2 pt-2 max-h-32 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- MODAL VALIDACIÓN DE SEGURIDAD DE RECETAS -->
+    <div id="prescriptionConfirmModal" class="fixed inset-0 bg-sky-950/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border-2 border-amber-200 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl text-left">
+            <div class="flex items-center justify-between border-b border-amber-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="bg-amber-100 text-amber-700 p-2 rounded-xl">
+                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Validación de Seguridad de Receta</h3>
+                </div>
+                <button onclick="closePrescriptionConfirmModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <p class="text-xs text-slate-500">Revise y confirme los datos plasmados en la receta física para evitar errores o intoxicaciones:</p>
+            
+            <div class="space-y-3 bg-sky-50/50 p-4 rounded-2xl border border-sky-100">
+                <div>
+                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Nombre del Fármaco</label>
+                    <input type="text" id="confirmMedName" value="Paracetamol" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Concentración (mg / ml)</label>
+                        <input type="text" id="confirmMedConcentration" value="500 mg" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Dosis (ej: 1 comprimido)</label>
+                        <input type="text" id="confirmMedDose" value="1 comprimido" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Frecuencia (Cada cuántas hrs)</label>
+                        <select id="confirmMedFrequency" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                            <option value="8">Cada 8 horas (3 veces al día)</option>
+                            <option value="12">Cada 12 horas (2 veces al día)</option>
+                            <option value="24">Cada 24 horas (1 vez al día)</option>
+                            <option value="6">Cada 6 horas</option>
+                            <option value="unico">Dosis Única (Una sola toma)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Duración (Días)</label>
+                        <input type="number" id="confirmMedDays" value="1" min="1" max="90" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3 pt-2">
+                <button onclick="processVerifiedPrescriptionScan()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar y Agendar Seguro
+                </button>
+                <button onclick="closePrescriptionConfirmModal()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="settings" class="w-5 h-5 text-sky-600"></i> Configuración y Notificaciones
+                </h3>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="text-xs font-medium text-slate-600 block mb-1">Número de Emergencia (SOS Directo)</label>
+                    <input type="text" id="configCaregiverPhone" placeholder="Ej: +56912345678" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                </div>
+                
+                <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex items-center justify-between">
+                    <span class="text-xs font-medium text-slate-600">Estado de Notificaciones:</span>
+                    <span id="lblNotifStatus" class="text-xs font-bold text-slate-700">Verificando...</span>
+                </div>
+
+                <div class="pt-1 space-y-2">
+                    <button onclick="requestPushNotificationPermission()" class="w-full bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-semibold py-2.5 rounded-xl border border-sky-200 transition flex items-center justify-center gap-2">
+                        <i data-lucide="bell" class="w-4 h-4"></i> Habilitar / Solicitar Permisos
+                    </button>
+                    <button onclick="testPushNotification()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i> 🔔 Enviar Notificación Push de Prueba
+                    </button>
+                </div>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="saveSettings()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar Configuración</button>
+                <button onclick="closeSettings()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENT SCRIPT LOGIC -->
+    <script>
+        lucide.createIcons();
+
+        const FIXED_GAS_URL = "https://script.google.com/macros/s/AKfycbxLZG0cm9QozErZhFOYGczPavqju4fS-aDDP4MT9leOpcwRdLgqtdUMmICm0--ShYRd/exec";
+
+        let currentProfile = 'principal';
+        let isMutedVita = false;
+        let selectedPrescriptionFile = null;
+        let currentActiveAlarmMed = null;
+        let currentActiveAlarmProfile = 'principal';
+        const alertedAt = {};
+        let alarmLoopTimer = null, sharedAudioCtx = null, wakeLockSentinel = null;
+
+        // Fecha LOCAL (YYYY-MM-DD). toISOString() daba la fecha UTC y en Chile, desde ~21:00, ya era "mañana".
+        function localDateStr(d = new Date()) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        // Un único AudioContext reutilizable (se desbloquea con el primer toque del usuario)
+        function getAudioCtx() {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') sharedAudioCtx = new AC();
+            return sharedAudioCtx;
+        }
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator && !wakeLockSentinel) {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
+                }
+            } catch (e) {}
+        }
+        function unlockMedia() {
+            const c = getAudioCtx();
+            if (c && c.state === 'suspended') c.resume().catch(() => {});
+            if ('speechSynthesis' in window) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; window.speechSynthesis.speak(u); } catch (e) {} }
+            try { navigator.vibrate && navigator.vibrate(1); } catch (e) {}
+            requestWakeLock();
+        }
+        ['click', 'touchstart', 'keydown'].forEach(ev => {
+            document.addEventListener(ev, function f() { document.removeEventListener(ev, f, true); unlockMedia(); }, { capture: true });
+        });
+        function startAlarmLoop() {
+            stopAlarmLoop();
+            alarmLoopTimer = setInterval(() => {
+                if (!currentActiveAlarmMed) { stopAlarmLoop(); return; }
+                triggerAlarmBeepBeepBeepLoud();
+            }, 5000);
+        }
+        function stopAlarmLoop() {
+            if (alarmLoopTimer) { clearInterval(alarmLoopTimer); alarmLoopTimer = null; }
+            try { navigator.vibrate && navigator.vibrate(0); } catch (e) {}
+        }
+        function setMedStatusForProfile(profileId, medId, status) {
+            const prev = currentProfile; currentProfile = profileId;
+            try { updateMedStatus(medId, status); } finally { currentProfile = prev; renderMeds(); }
+        }
+        function mostrarNotificacionSistema(med, prof) {
+            if (!('Notification' in window) || Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
+            navigator.serviceWorker.ready.then(reg => reg.showNotification("NeoVita VitalSync 🩺", {
+                body: `🔔 ¡Hora de tomar ${med.name} (${med.dose || '1 unidad'})! · ${prof.name}`,
+                icon: "icon-192.png", badge: "icon-192.png", vibrate: [500, 200, 500, 200, 1000],
+                tag: `neovita-${prof.id}-${med.id}`, renotify: true, requireInteraction: true,
+                data: { medId: med.id, profileId: prof.id },
+                actions: [{ action: 'tomado', title: '✔ Tomar' }, { action: 'saltado', title: '❌ Saltar' }]
+            })).catch(() => {});
+        }
+        // Acción tocada en la notificación (Tomar / Saltar)
+        function aplicarAccionNotificacion(action, medId, profileId) {
+            if (action !== 'tomado' && action !== 'saltado') return;
+            const id = Number(medId); const pid = profileId || 'principal';
+            let meds = []; try { meds = JSON.parse(localStorage.getItem(`neovita_meds_${pid}`) || '[]'); } catch (e) {}
+            const med = meds.find(m => m.id === id);
+            if (!med || med.status !== 'pendiente') return;
+            setMedStatusForProfile(pid, id, action);
+            if (currentActiveAlarmMed && currentActiveAlarmMed.id === id) {
+                stopAlarmLoop();
+                document.getElementById('alarmPopupModal').classList.add('hidden');
+                currentActiveAlarmMed = null;
+            }
+        }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', e => {
+                if (e.data && e.data.type === 'NOTIF_ACTION') aplicarAccionNotificacion(e.data.action, e.data.medId, e.data.profileId);
+            });
+        }
+        window.addEventListener('load', () => {
+            const q = new URLSearchParams(location.search);
+            if (q.get('accion')) { aplicarAccionNotificacion(q.get('accion'), q.get('med'), q.get('perfil')); history.replaceState(null, '', location.pathname); }
+        });
+
+        function getProfileData() {
+            const stored = localStorage.getItem(`neovita_meds_${currentProfile}`);
+            return stored ? JSON.parse(stored) : [];
+        }
+        function saveProfileData(data) {
+            localStorage.setItem(`neovita_meds_${currentProfile}`, JSON.stringify(data));
+            renderMeds();
+        }
+
+        function getProfileVitals() {
+            const stored = localStorage.getItem(`neovita_vitals_${currentProfile}`);
+            return stored ? JSON.parse(stored) : [];
+        }
+        function saveProfileVitals(data) {
+            localStorage.setItem(`neovita_vitals_${currentProfile}`, JSON.stringify(data));
+            renderVitals();
+        }
+
+        function getProfileAppointments() {
+            const stored = localStorage.getItem(`neovita_appts_${currentProfile}`);
+            return stored ? JSON.parse(stored) : [];
+        }
+        function saveProfileAppointments(data) {
+            localStorage.setItem(`neovita_appts_${currentProfile}`, JSON.stringify(data));
+            renderAppointments();
+        }
+
+        function getProfilePrescriptions() {
+            const stored = localStorage.getItem(`neovita_prescriptions_${currentProfile}`);
+            return stored ? JSON.parse(stored) : [];
+        }
+        function saveProfilePrescriptions(data) {
+            localStorage.setItem(`neovita_prescriptions_${currentProfile}`, JSON.stringify(data));
+            renderPrescriptions();
+        }
+
+        function switchProfile(profileId) {
+            currentProfile = profileId;
+            loadProfilesList();
+            loadMedicalProfile();
+            renderMeds();
+            renderVitals();
+            renderAppointments();
+            renderPrescriptions();
+        }
+
+        function loadMedicalProfile() {
+            const profileInfo = JSON.parse(localStorage.getItem(`neovita_profile_info_${currentProfile}`) || '{}');
+            document.getElementById('inputUserAllergies').value = profileInfo.allergies || '';
+            document.getElementById('selectUserBloodType').value = profileInfo.bloodType || 'O+';
+        }
+
+        function saveMedicalProfile() {
+            const allergies = document.getElementById('inputUserAllergies').value.trim();
+            const bloodType = document.getElementById('selectUserBloodType').value;
+            localStorage.setItem(`neovita_profile_info_${currentProfile}`, JSON.stringify({ allergies, bloodType }));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyLicenseState();
+            setInterval(applyLicenseState, 60000);
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('Service Worker registrado:', reg.scope);
+                }).catch(err => {
+                    console.log('Error SW:', err);
+                });
+            }
+
+            loadProfilesList();
+            updateNotificationStatusLabel();
+
+            const todayStr = localDateStr();
+            const dateSelector = document.getElementById('calendarDateSelector');
+            const apptDateSelector = document.getElementById('inputApptDate');
+            if(dateSelector) dateSelector.value = todayStr;
+            if(apptDateSelector) apptDateSelector.value = todayStr;
+
+            loadMedicalProfile();
+            renderMeds();
+            renderVitals();
+            renderAppointments();
+            renderPrescriptions();
+
+            // REVISOR AUTOMÁTICO CADA 30 SEGUNDOS
+            setInterval(checkAlarmTimes, 15000);
+            checkAlarmTimes();
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { requestWakeLock(); checkAlarmTimes(); } });
+            window.addEventListener('focus', checkAlarmTimes);
+        });
+
+        // CONVERSOR UNIVERSAL 12h/24h
+        function normalizeTimeTo24h(timeStr) {
+            if (!timeStr) return "";
+            let clean = timeStr.trim().toUpperCase();
+            let isPM = clean.includes('P');
+            let isAM = clean.includes('A');
+            
+            clean = clean.replace(/[^0-9:]/g, '');
+            let parts = clean.split(':');
+            if (parts.length < 2) return timeStr;
+
+            let hours = parseInt(parts[0], 10);
+            let mins = parts[1].padStart(2, '0');
+
+            if (isPM && hours < 12) hours += 12;
+            if (isAM && hours === 12) hours = 0;
+
+            return `${String(hours).padStart(2, '0')}:${mins}`;
+        }
+
+        // VERIFICADOR DE ALARMAS (todos los perfiles; desde la hora exacta hasta 1 hora después)
+        function checkAlarmTimes() {
+            if (currentActiveAlarmMed) return;
+            const now = new Date(); const todayStr = localDateStr(now); const nowMs = now.getTime();
+            for (const prof of getProfiles()) {
+                let meds = [];
+                try { meds = JSON.parse(localStorage.getItem(`neovita_meds_${prof.id}`) || '[]'); } catch (e) {}
+                for (const med of meds) {
+                    if (med.date !== todayStr || med.status !== 'pendiente') continue;
+                    const t = normalizeTimeTo24h(med.time).split(':');
+                    const h = parseInt(t[0], 10), m = parseInt(t[1], 10);
+                    if (isNaN(h) || isNaN(m)) continue;
+                    const due = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0).getTime();
+                    const late = nowMs - due;
+                    if (late < 0 || late > 60 * 60 * 1000) continue;
+                    const key = `${prof.id}_${med.id}`;
+                    if (alertedAt[key] && nowMs - alertedAt[key] < 2 * 60 * 1000) continue;
+                    alertedAt[key] = nowMs;
+                    currentActiveAlarmProfile = prof.id;
+                    triggerAlarmBeepBeepBeepLoud();
+                    showAlarmPopup(med);
+                    startAlarmLoop();
+                    speakVitaQueue(`Atención, es hora de tomar tu medicamento, ${med.name}`);
+                    mostrarNotificacionSistema(med, prof);
+                    return;
+                }
+            }
+        }
+
+        function showAlarmPopup(med) {
+            currentActiveAlarmMed = med;
+            document.getElementById('popupMedTime').textContent = `🕒 ${med.time} hrs`;
+            document.getElementById('popupMedTitle').textContent = med.name;
+            const pn = (getProfiles().find(p => p.id === currentActiveAlarmProfile) || {}).name || '';
+            document.getElementById('popupMedDetails').textContent = `Dosis: ${med.dose || '1 unidad'} | Restantes: ${med.stock} pastillas${pn ? ' | Perfil: ' + pn : ''}`;
+            document.getElementById('alarmPopupModal').classList.remove('hidden');
+        }
+
+        function popupActionTaken() {
+            playClickSound();
+            stopAlarmLoop();
+            if (currentActiveAlarmMed) {
+                setMedStatusForProfile(currentActiveAlarmProfile, currentActiveAlarmMed.id, 'tomado');
+            }
+            document.getElementById('alarmPopupModal').classList.add('hidden');
+            currentActiveAlarmMed = null;
+        }
+
+        function popupActionSkipped() {
+            playClickSound();
+            stopAlarmLoop();
+            if (currentActiveAlarmMed) {
+                setMedStatusForProfile(currentActiveAlarmProfile, currentActiveAlarmMed.id, 'saltado');
+            }
+            document.getElementById('alarmPopupModal').classList.add('hidden');
+            currentActiveAlarmMed = null;
+        }
+
+        // BEEP BEEP BEEP ALTO Y CLARO (VOLUMEN MÁS FUERTE)
+        function triggerAlarmBeepBeepBeepLoud() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = getAudioCtx();
+                    if (ctx.state === 'suspended') ctx.resume();
+                    const now = ctx.currentTime;
+
+                    function playLoudBeep(startTime) {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(950, startTime); // Tono más agudo y penetrante
+                        gain.gain.setValueAtTime(0.8, startTime); // Ganancia alta (volumen fuerte)
+                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(startTime);
+                        osc.stop(startTime + 0.35);
+                    }
+
+                    playLoudBeep(now);
+                    playLoudBeep(now + 0.45);
+                    playLoudBeep(now + 0.90);
+
+                    
+                }
+            } catch(e) {
+                console.log("Audio bloqueado:", e);
+            }
+            if (navigator.vibrate) {
+                try { navigator.vibrate([600, 200, 600, 200, 1200]); } catch(e) {}
+            }
+        }
+
+        // SONIDO DE CLIC TÁCTIL GARANTIZADO
+        function playClickSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.08);
+                    setTimeout(() => { try { ctx.close(); } catch(e){} }, 100);
+                }
+            } catch(e){}
+        }
+
+        function speakVitaQueue(text) {
+            if (isMutedVita) return;
+            setTimeout(() => {
+                speakVita(text);
+            }, 1400);
+        }
+
+        function updateNotificationStatusLabel() {
+            const label = document.getElementById('lblNotifStatus');
+            if (!label) return;
+            if (!("Notification" in window)) {
+                label.textContent = "No soportadas";
+                label.className = "text-xs font-bold text-rose-500";
+            } else if (Notification.permission === "granted") {
+                label.textContent = "✔ Activas";
+                label.className = "text-xs font-bold text-emerald-600";
+            } else if (Notification.permission === "denied") {
+                label.textContent = "❌ Bloqueadas";
+                label.className = "text-xs font-bold text-rose-500";
+            } else {
+                label.textContent = "⚠️ Pendientes";
+                label.className = "text-xs font-bold text-amber-500";
+            }
+        }
+
+        function requestPushNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("Las notificaciones no son compatibles con este navegador.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                updateNotificationStatusLabel();
+                if (permission === "granted") {
+                    alert("✅ ¡Permisos de notificaciones concedidos con éxito!");
+                } else {
+                    alert("⚠️ Los permisos fueron denegados.");
+                }
+            });
+        }
+
+        async function testPushNotification() {
+            if (!("Notification" in window)) {
+                alert("Las notificaciones no son compatibles.");
+                return;
+            }
+
+            if (Notification.permission !== "granted") {
+                const permission = await Notification.requestPermission();
+                updateNotificationStatusLabel();
+                if (permission !== "granted") {
+                    alert("⚠️ Permisos no concedidos.");
+                    return;
+                }
+            }
+
+            triggerAlarmBeepBeepBeepLoud();
+            speakVitaQueue("Alarma de prueba activada.");
+
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    await registration.showNotification("NeoVita VitalSync 🩺", {
+                        body: "🔔 ¡Alarma de medicamento en curso!",
+                        icon: "icon-192.png",
+                        vibrate: [500, 200, 500, 200, 1000],
+                        tag: 'neovita-alarm',
+                        requireInteraction: true
+                    });
+                    return;
+                } catch (e) {}
+            }
+        }
+
+        function getProfiles() {
+            const stored = localStorage.getItem('neovita_custom_profiles');
+            return stored ? JSON.parse(stored) : [{ id: 'principal', name: 'Usuario Principal' }];
+        }
+
+        function loadProfilesList() {
+            const profiles = getProfiles();
+            const select = document.getElementById('selectUserProfile');
+            select.innerHTML = '';
+            profiles.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                if (p.id === currentProfile) opt.selected = true;
+                select.appendChild(opt);
+            });
+            const activeObj = profiles.find(p => p.id === currentProfile) || profiles[0];
+            document.getElementById('lblActiveUserHeader').textContent = `Perfil: ${activeObj.name}`;
+        }
+
+        function openAddProfileModal() {
+            playClickSound();
+            document.getElementById('addProfileModal').classList.remove('hidden');
+            document.getElementById('inputNewProfileName').value = '';
+        }
+        function closeAddProfileModal() { document.getElementById('addProfileModal').classList.add('hidden'); }
+
+        function saveNewProfile() {
+            playClickSound();
+            const nameInput = document.getElementById('inputNewProfileName').value.trim();
+            if (!nameInput) {
+                alert('Ingrese un nombre para el perfil.');
+                return;
+            }
+            let profiles = getProfiles();
+            const newId = 'profile_' + Date.now();
+            profiles.push({ id: newId, name: nameInput });
+            localStorage.setItem('neovita_custom_profiles', JSON.stringify(profiles));
+            closeAddProfileModal();
+            loadProfilesList();
+            switchProfile(newId);
+            speakVita(`Perfil ${nameInput} creado con éxito.`);
+        }
+
+        function deleteCurrentProfile() {
+            playClickSound();
+            let profiles = getProfiles();
+            if (profiles.length <= 1) {
+                alert('Debe existir al menos un perfil en el sistema.');
+                return;
+            }
+            const activeObj = profiles.find(p => p.id === currentProfile);
+            const name = activeObj ? activeObj.name : 'este perfil';
+
+            if (confirm(`⚠️ ¿Deseas eliminar el perfil "${name}" y todos sus datos clínicos asociados?`)) {
+                localStorage.removeItem(`neovita_meds_${currentProfile}`);
+                localStorage.removeItem(`neovita_vitals_${currentProfile}`);
+                localStorage.removeItem(`neovita_appts_${currentProfile}`);
+                localStorage.removeItem(`neovita_prescriptions_${currentProfile}`);
+                localStorage.removeItem(`neovita_profile_info_${currentProfile}`);
+
+                profiles = profiles.filter(p => p.id !== currentProfile);
+                localStorage.setItem('neovita_custom_profiles', JSON.stringify(profiles));
+
+                speakVita(`Perfil ${name} eliminado.`);
+                loadProfilesList();
+                switchProfile(profiles[0].id);
+            }
+        }
+
+        function speakVita(text) {
+            if (!isMutedVita && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleMuteVita() {
+            isMutedVita = !isMutedVita;
+            const icon = document.getElementById('iconMute');
+            const btn = document.getElementById('btnMuteVita');
+            
+            if (!isMutedVita) {
+                icon.setAttribute('data-lucide', 'volume-2');
+                icon.className = "w-5 h-5 text-sky-600";
+                btn.title = "Asistente de Voz Activo";
+                speakVita("Hola, soy Vita, soy tu asistente de voz.");
+            } else {
+                icon.setAttribute('data-lucide', 'volume-x');
+                icon.className = "w-5 h-5 text-rose-500";
+                btn.title = "Asistente Silenciado";
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance("Asistente silenciada");
+                    utterance.lang = 'es-ES';
+                    utterance.rate = 1.0;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+            lucide.createIcons();
+        }
+
+        function renderMeds() {
+            const meds = getProfileData();
+            const container = document.getElementById('medicationList');
+            const stockContainer = document.getElementById('stockList');
+            const selectedDate = document.getElementById('calendarDateSelector').value;
+            
+            container.innerHTML = '';
+            stockContainer.innerHTML = '';
+
+            const todaysMeds = meds.filter(m => m.date === selectedDate);
+
+            if (todaysMeds.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No hay medicamentos programados para esta fecha. Agrega uno o escanea una receta.</p>`;
+            } else {
+                todaysMeds.forEach(med => {
+                    const item = document.createElement('div');
+                    item.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex items-center justify-between";
+                    item.innerHTML = `
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-200 text-sky-800 px-2 py-0.5 rounded">🕒 ${med.time} hrs</span>
+                            <h4 class="font-semibold text-sm text-slate-900 mt-1">${med.name}</h4>
+                            <p class="text-xs text-slate-500">Dosis: ${med.dose || '1 unidad'} | Stock: ${med.stock} unidades</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            ${med.status === 'pendiente' ? `
+                                <button onclick="updateMedStatus(${med.id}, 'tomado')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium transition shadow-sm">Tomado</button>
+                                <button onclick="updateMedStatus(${med.id}, 'saltado')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 py-2 rounded-lg font-medium transition">Saltar</button>
+                            ` : med.status === 'tomado' ? `
+                                <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-lg font-semibold">✔ Tomado</span>
+                                <button onclick="deleteSingleMed(${med.id})" class="text-rose-500 hover:text-rose-700 text-xs px-2 py-1 font-medium transition" title="Eliminar del registro">🗑️</button>
+                            ` : `
+                                <span class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded-lg font-semibold">Saltado</span>
+                                <button onclick="deleteSingleMed(${med.id})" class="text-rose-500 hover:text-rose-700 text-xs px-2 py-1 font-medium transition" title="Eliminar del registro">🗑️</button>
+                            `}
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            if (meds.length === 0) {
+                stockContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Sin registros en el pastillero.</p>`;
+            } else {
+                const uniqueMeds = Array.from(new Set(meds.map(m => m.name)))
+                    .map(name => meds.find(m => m.name === name));
+                
+                uniqueMeds.forEach(med => {
+                    const stockItem = document.createElement('div');
+                    stockItem.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex items-center justify-between";
+                    stockItem.innerHTML = `
+                        <div>
+                            <h4 class="font-semibold text-sm text-slate-900">${med.name}</h4>
+                            <p class="text-xs ${med.stock < 5 ? 'text-rose-600 font-bold' : 'text-slate-500'}">Restantes: ${med.stock} pastillas</p>
+                        </div>
+                        <button onclick="refillStock('${med.name}')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-3 py-2 rounded-lg font-medium transition">Recargar (+30)</button>
+                    `;
+                    stockContainer.appendChild(stockItem);
+                });
+            }
+        }
+
+        function renderVitals() {
+            const vitals = getProfileVitals();
+            const container = document.getElementById('vitalsLogList');
+            container.innerHTML = '';
+            if (vitals.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">Sin registros de signos vitales hoy.</p>`;
+                return;
+            }
+            vitals.forEach(v => {
+                const div = document.createElement('div');
+                div.className = "bg-white border border-sky-100 p-3 rounded-xl flex justify-between items-center text-xs";
+                div.innerHTML = `<span>📅 ${v.date}</span><span><b>PA:</b> ${v.bp} mmHg</span><span><b>Glucosa:</b> ${v.glucose} mg/dL</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function renderAppointments() {
+            const appts = getProfileAppointments();
+            const container = document.getElementById('appointmentsList');
+            container.innerHTML = '';
+            if (appts.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No hay citas médicas programadas.</p>`;
+                return;
+            }
+            appts.forEach(a => {
+                const div = document.createElement('div');
+                div.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex justify-between items-center text-xs";
+                div.innerHTML = `
+                    <div>
+                        <h4 class="font-semibold text-sm text-slate-900">🩺 ${a.doctor}</h4>
+                        <p class="text-xs text-slate-500">📍 ${a.location}</p>
+                        <p class="text-[11px] text-sky-700 font-medium mt-1">📅 ${a.date} a las ${a.time} hrs</p>
+                    </div>
+                    <button onclick="deleteAppointment(${a.id})" class="text-rose-500 hover:text-rose-700 font-medium text-xs px-2 py-1">Eliminar</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderPrescriptions() {
+            const rx = getProfilePrescriptions();
+            const container = document.getElementById('prescriptionList');
+            container.innerHTML = '';
+            if(rx.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center">Sin recetas escaneadas.</p>`;
+                return;
+            }
+            rx.forEach((r, idx) => {
+                const div = document.createElement('div');
+                div.className = "bg-sky-50 p-2 rounded-lg text-xs flex justify-between items-center";
+                div.innerHTML = `<span>📄 ${r.name} (${r.date})</span><span class="text-sky-600 font-medium">${r.details || 'Procesado'}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function saveVitals() {
+            playClickSound();
+            const bp = document.getElementById('inputBP').value.trim();
+            const glucose = document.getElementById('inputGlucose').value.trim();
+            if (!bp && !glucose) {
+                alert('Ingrese al menos presión arterial o glucosa.');
+                return;
+            }
+            let vitals = getProfileVitals();
+            vitals.unshift({ date: new Date().toLocaleDateString(), bp: bp || 'N/A', glucose: glucose || 'N/A' });
+            saveProfileVitals(vitals);
+            document.getElementById('inputBP').value = '';
+            document.getElementById('inputGlucose').value = '';
+            speakVita("Signos vitales registrados.");
+        }
+
+        function saveAppointment() {
+            playClickSound();
+            const doctor = document.getElementById('inputApptDoctor').value.trim();
+            const location = document.getElementById('inputApptLocation').value.trim();
+            const date = document.getElementById('inputApptDate').value;
+            const time = document.getElementById('inputApptTime').value;
+
+            if (!doctor || !date) {
+                alert('Ingrese al menos el nombre del médico y la fecha.');
+                return;
+            }
+
+            let appts = getProfileAppointments();
+            appts.push({ id: Date.now(), doctor, location: location || 'Consulta Médica', date, time });
+            saveProfileAppointments(appts);
+            closeAppointmentModal();
+            speakVita(`Cita médica con ${doctor} agendada.`);
+        }
+
+        function deleteAppointment(id) {
+            playClickSound();
+            let appts = getProfileAppointments();
+            appts = appts.filter(a => a.id !== id);
+            saveProfileAppointments(appts);
+            speakVita("Cita médica eliminada.");
+        }
+
+        function handleFileSelected(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedPrescriptionFile = file.name;
+                document.getElementById('lblSelectedFileName').textContent = `📄 ${selectedPrescriptionFile}`;
+            }
+        }
+
+        function openPrescriptionConfirmModal() {
+            playClickSound();
+            if (!selectedPrescriptionFile) {
+                alert('Seleccione un archivo de galería o tome una foto primero.');
+                return;
+            }
+            closePrescriptionModal();
+            document.getElementById('prescriptionConfirmModal').classList.remove('hidden');
+        }
+
+        function closePrescriptionConfirmModal() { document.getElementById('prescriptionConfirmModal').classList.add('hidden'); }
+
+        function processVerifiedPrescriptionScan() {
+            playClickSound();
+            const medName = document.getElementById('confirmMedName').value.trim();
+            const concentration = document.getElementById('confirmMedConcentration').value.trim();
+            const dose = document.getElementById('confirmMedDose').value.trim();
+            const frequencyVal = document.getElementById('confirmMedFrequency').value;
+            const totalDays = parseInt(document.getElementById('confirmMedDays').value) || 1;
+
+            if (!medName) {
+                alert('Debe ingresar el nombre del fármaco.');
+                return;
+            }
+
+            const fullName = `${medName} (${concentration})`;
+            let rx = getProfilePrescriptions();
+            rx.unshift({ 
+                date: new Date().toLocaleDateString(), 
+                name: selectedPrescriptionFile || 'Receta Médica',
+                details: `${fullName} - Dosis: ${dose} - Frecuencia: ${frequencyVal}` 
+            });
+            saveProfilePrescriptions(rx);
+
+            const today = new Date();
+            let meds = getProfileData();
+            
+            if (frequencyVal === 'unico') {
+                const dateStr = localDateStr(today);
+                const currentHourStr = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+                meds.push({
+                    id: Date.now() + Math.random(),
+                    name: fullName,
+                    time: currentHourStr,
+                    dose: dose,
+                    stock: 30,
+                    status: 'pendiente',
+                    date: dateStr
+                });
+            } else {
+                let frequencyHours = parseInt(frequencyVal) || 8;
+                for (let i = 0; i < totalDays; i++) {
+                    let targetDate = new Date(today);
+                    targetDate.setDate(today.getDate() + i);
+                    let dateStr = localDateStr(targetDate);
+
+                    let hoursList = [];
+                    if (frequencyHours === 8) hoursList = ['08:00', '16:00', '00:00'];
+                    else if (frequencyHours === 12) hoursList = ['09:00', '21:00'];
+                    else if (frequencyHours === 24) hoursList = ['09:00'];
+                    else hoursList = ['08:00', '14:00', '20:00'];
+
+                    hoursList.forEach(timeSlot => {
+                        meds.push({
+                            id: Date.now() + Math.random(),
+                            name: fullName,
+                            time: timeSlot,
+                            dose: dose,
+                            stock: 30,
+                            status: 'pendiente',
+                            date: dateStr
+                        });
+                    });
+                }
+            }
+
+            saveProfileData(meds);
+            selectedPrescriptionFile = null;
+            document.getElementById('lblSelectedFileName').textContent = "Ningún archivo seleccionado";
+            closePrescriptionConfirmModal();
+            triggerAlarmBeepBeepBeepLoud();
+            speakVita(`Receta verificada con éxito. Fármaco ${medName} agendado.`);
+        }
+
+        function updateMedStatus(id, status) {
+            playClickSound();
+            let meds = getProfileData();
+            meds = meds.map(m => {
+                if (m.id === id) {
+                    m.status = status;
+                    if (status === 'tomado' && m.stock > 0) m.stock -= 1;
+                }
+                return m;
+            });
+            saveProfileData(meds);
+            speakVita(status === 'tomado' ? "Medicamento tomado con éxito." : "Medicamento saltado.");
+        }
+
+        function deleteSingleMed(id) {
+            playClickSound();
+            let meds = getProfileData();
+            meds = meds.filter(m => m.id !== id);
+            saveProfileData(meds);
+            speakVita("Fármaco eliminado del registro.");
+        }
+
+        function clearCompletedMedsForToday() {
+            playClickSound();
+            const selectedDate = document.getElementById('calendarDateSelector').value;
+            let meds = getProfileData();
+            meds = meds.filter(m => !(m.date === selectedDate && m.status === 'tomado'));
+            saveProfileData(meds);
+            speakVita("Registros de medicamentos tomados limpios.");
+        }
+
+        function refillStock(medName) {
+            playClickSound();
+            let meds = getProfileData();
+            meds = meds.map(m => {
+                if (m.name === medName) m.stock += 30;
+                return m;
+            });
+            saveProfileData(meds);
+            speakVita("Pastillero recargado.");
+        }
+
+        function generateWhatsAppReport() {
+            playClickSound();
+            const meds = getProfileData();
+            const vitals = getProfileVitals();
+            const appts = getProfileAppointments();
+            const profileInfo = JSON.parse(localStorage.getItem(`neovita_profile_info_${currentProfile}`) || '{}');
+            const profiles = getProfiles();
+            const activeObj = profiles.find(p => p.id === currentProfile) || { name: currentProfile };
+            
+            let text = `*INFORME CLÍNICO - NEOVITA*%0A*Perfil:* ${activeObj.name}%0A`;
+            text += `*Alergias:* ${profileInfo.allergies || 'Ninguna registrada'}%0A`;
+            text += `*Grupo Sanguíneo:* ${profileInfo.bloodType || 'N/D'}%0A%0A`;
+            
+            text += `*Próximas Citas Médicas:*%0A`;
+            if (appts.length > 0) {
+                appts.forEach(a => { text += `- ${a.doctor} en ${a.location} (${a.date} a las ${a.time})%0A`; });
+            } else {
+                text += `- Sin citas pendientes%0A`;
+            }
+
+            text += `%0A*Medicamentos Programados:*%0A`;
+            meds.forEach(m => { text += `- ${m.name} (${m.time}) [Dosis: ${m.dose || '1'}] [Stock: ${m.stock}] - ${m.status}%0A`; });
+            
+            text += `%0A*Signos Vitales Recientes:*%0A`;
+            if (vitals.length > 0) {
+                text += `- PA: ${vitals[0].bp} | Glucosa: ${vitals[0].glucose} mg/dL`;
+            } else {
+                text += `- Sin registros recientes`;
+            }
+            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        }
+
+        function filterTab(tab) {
+            playClickSound();
+            ['Hoy', 'Vitals', 'Stock', 'Citas', 'Informe'].forEach(t => {
+                document.getElementById(`view${t}`).classList.add('hidden');
+                document.getElementById(`cardTab${t}`).className = "bg-white hover:bg-sky-50 text-slate-800 border border-sky-100 p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2";
+            });
+            document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
+            document.getElementById(`cardTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "bg-sky-600 text-white p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2";
+        }
+
+        function openAddMedModal() { playClickSound(); document.getElementById('addMedModal').classList.remove('hidden'); }
+        function closeAddMedModal() { document.getElementById('addMedModal').classList.add('hidden'); }
+        function openAppointmentModal() { playClickSound(); document.getElementById('appointmentModal').classList.remove('hidden'); }
+        function closeAppointmentModal() { document.getElementById('appointmentModal').classList.add('hidden'); }
+        function openPrescriptionModal() { playClickSound(); document.getElementById('prescriptionModal').classList.remove('hidden'); }
+        function closePrescriptionModal() { document.getElementById('prescriptionModal').classList.add('hidden'); }
+
+        function saveNewMedication() {
+            playClickSound();
+            const name = document.getElementById('newMedName').value.trim();
+            const time = document.getElementById('newMedTime').value;
+            const stock = parseInt(document.getElementById('newMedStock').value) || 30;
+            const selectedDate = document.getElementById('calendarDateSelector').value;
+
+            if (!name || !time) { alert('Ingrese el nombre y la hora del fármaco.'); return; }
+            let meds = getProfileData();
+            meds.push({ id: Date.now(), name, time, dose: '1 unidad', stock, status: 'pendiente', date: selectedDate });
+            saveProfileData(meds);
+            closeAddMedModal();
+            speakVita(`Fármaco ${name} agregado para las ${time}.`);
+        }
+
+        function triggerEmergencySOS(keyword = "") {
+            playClickSound();
+            const caregiverPhone = localStorage.getItem('neovita_caregiver_phone') || '+56900000000';
+            window.location.href = `tel:${caregiverPhone}`;
+        }
+
+        function openSettings() {
+            playClickSound();
+            document.getElementById('settingsModal').classList.remove('hidden');
+            document.getElementById('configCaregiverPhone').value = localStorage.getItem('neovita_caregiver_phone') || '';
+            updateNotificationStatusLabel();
+        }
+
+        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+
+        function saveSettings() {
+            playClickSound();
+            localStorage.setItem('neovita_caregiver_phone', document.getElementById('configCaregiverPhone').value);
+            closeSettings();
+            alert('¡Configuración guardada!');
+        }
+
+        // ===== VITA: resumen del día por voz =====
+        const VITA_ANIMOS = [
+            "Cuidarte es la mejor forma de quererte. ¡Vas muy bien!",
+            "Cada toma a tiempo es un paso hacia sentirte mejor.",
+            "Estoy aquí contigo. No estás solo, ni sola, en esto.",
+            "Hoy es un buen día para cuidar de ti. ¡Tú puedes!",
+            "La constancia es tu mejor aliada. Sigue así, lo estás haciendo genial.",
+            "Qué bien que te ocupes de tu salud. Eso merece un aplauso.",
+            "Un día a la vez, un paso a la vez. Vas por muy buen camino.",
+            "Tu bienestar importa. Gracias por cuidarte con tanto cariño."
+        ];
+        function vitaSaludo() {
+            const h = new Date().getHours();
+            const base = h < 12 ? "Buenos días" : (h < 20 ? "Buenas tardes" : "Buenas noches");
+            const prof = getProfiles().find(p => p.id === currentProfile);
+            const nombre = (prof && currentProfile !== 'principal') ? ` ${prof.name}` : '';
+            return `${base}${nombre}, soy Vita.`;
+        }
+        function vitaArmarResumen() {
+            const hoy = localDateStr();
+            const ahora = new Date();
+            const hhmm = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+            const t24 = m => normalizeTimeTo24h(m.time);
+            const delDia = getProfileData().filter(m => m.date === hoy).sort((a, b) => t24(a).localeCompare(t24(b)));
+            const partes = [vitaSaludo()];
+
+            const pendientes = delDia.filter(m => m.status === 'pendiente');
+            const tomados = delDia.filter(m => m.status === 'tomado').length;
+
+            if (delDia.length === 0) {
+                partes.push("Hoy no tienes medicamentos programados.");
+            } else if (pendientes.length === 0) {
+                partes.push(delDia.length === 1 ? "Excelente. Ya tomaste el medicamento de hoy." : `Excelente. Ya completaste los ${delDia.length} medicamentos de hoy.`);
+            } else {
+                const atrasados = pendientes.filter(m => t24(m) < hhmm);
+                const proximos = pendientes.filter(m => t24(m) >= hhmm);
+                partes.push(`Hoy llevas ${tomados} de ${delDia.length} ${delDia.length === 1 ? 'medicamento' : 'medicamentos'}. Te ${pendientes.length === 1 ? 'falta 1' : 'faltan ' + pendientes.length}.`);
+                if (atrasados.length) {
+                    const lista = atrasados.slice(0, 4).map(m => `${m.name} de las ${t24(m)}`).join(", ");
+                    partes.push(`Revisa estos que ya pasaron de hora: ${lista}. Si ya los tomaste, márcalos en la app.`);
+                }
+                if (proximos.length) {
+                    const lista = proximos.slice(0, 5).map(m => `a las ${t24(m)}, ${m.name}, dosis ${m.dose || '1 unidad'}`).join(". ");
+                    partes.push(`Por tomar: ${lista}.${proximos.length > 5 ? ' Y ' + (proximos.length - 5) + ' más.' : ''}`);
+                }
+            }
+
+            const pocos = [...new Set(delDia.filter(m => m.stock <= 5).map(m => m.name))];
+            if (pocos.length) partes.push(`Ojo con el stock. Te quedan pocas unidades de ${pocos.slice(0, 3).join(" y ")}.`);
+
+            const manana = localDateStr(new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1));
+            getProfileAppointments().forEach(a => {
+                const cuando = a.date === hoy ? "Hoy" : (a.date === manana ? "Mañana" : "");
+                if (cuando) partes.push(`${cuando} tienes cita con ${a.doctor}${a.time ? ' a las ' + a.time : ''}.`);
+            });
+
+            partes.push(VITA_ANIMOS[Math.floor(Math.random() * VITA_ANIMOS.length)]);
+            return partes.join(" ");
+        }
+        // Habla aunque el asistente esté silenciado: el usuario lo pidió expresamente.
+        function vitaHablar(texto) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const voces = window.speechSynthesis.getVoices();
+            const voz = ['es-CL', 'es-US', 'es-MX', 'es-419', 'es'].map(l => voces.find(v => v.lang && v.lang.replace('_', '-').startsWith(l))).find(Boolean);
+            texto.split(/(?<=[.!?])\s+/).filter(Boolean).forEach(frase => {   // frases cortas: evita cortes en frases largas
+                const u = new SpeechSynthesisUtterance(frase);
+                u.lang = voz ? voz.lang : 'es-ES'; if (voz) u.voice = voz; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
+            });
+        }
+        function vitaResumenDelDia() {
+            playClickSound();
+            const texto = vitaArmarResumen();
+            const box = document.getElementById('vitaResumenTexto');
+            box.textContent = "🗣️ " + texto; box.classList.remove('hidden');
+            vitaHablar(texto);
+        }
+
+        // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
+        const LICENSE_VERSION = '2';
+        function getDeviceId() {
+            let d = localStorage.getItem('neovita_device_id');
+            if (!d) { d = 'D' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2)); localStorage.setItem('neovita_device_id', d); }
+            return d;
+        }
+        function showLock(msg) {
+            document.getElementById('licenseLockScreen').classList.remove('hidden');
+            if (msg) {
+                const e = document.getElementById('licenseErrorMsg');
+                e.textContent = msg; e.classList.remove('hidden', 'text-sky-600'); e.classList.add('text-rose-500');
+            }
+        }
+        function hideLock() { document.getElementById('licenseLockScreen').classList.add('hidden'); }
+        function clearLicense() {
+            ['neovita_license_activated', 'neovita_license_key', 'neovita_license_type', 'neovita_license_expires', 'neovita_license_checked', 'neovita_license_v']
+                .forEach(k => localStorage.removeItem(k));
+        }
+        function applyLicenseState() {
+            const now = Date.now();
+            if (localStorage.getItem('neovita_license_activated') === 'true') {
+                if (localStorage.getItem('neovita_license_v') !== LICENSE_VERSION) {      // activaciones antiguas: pedir el código una vez
+                    clearLicense(); showLock('Por seguridad, ingresa nuevamente tu código de licencia.'); return;
+                }
+                const exp = Number(localStorage.getItem('neovita_license_expires') || 0);
+                if (exp && now > exp) { clearLicense(); showLock('Tu plan de 30 días venció. Escríbenos por WhatsApp para renovar.'); return; }
+                hideLock(); revalidateLicense(); return;
+            }
+            const demo = Number(localStorage.getItem('neovita_demo_until') || 0);
+            if (demo && now < demo) { hideLock(); return; }
+            if (demo) showLock('Tu demo de 24 horas terminó. Ingresa un código de licencia para continuar.');
+        }
+        async function revalidateLicense() {
+            const key = localStorage.getItem('neovita_license_key');
+            if (!key || Date.now() - Number(localStorage.getItem('neovita_license_checked') || 0) < 12 * 3600 * 1000) return;
+            try {
+                const r = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(key)}&device=${encodeURIComponent(getDeviceId())}`);
+                const d = await r.json();
+                localStorage.setItem('neovita_license_checked', String(Date.now()));
+                if (d && (d.success || d.valid)) { if (d.expires) localStorage.setItem('neovita_license_expires', String(d.expires)); }
+                else { clearLicense(); showLock(d && d.message ? d.message : 'Licencia no válida.'); }
+            } catch (e) { /* sin internet: se mantiene la licencia hasta poder revalidar */ }
+        }
+        function startDemo() {
+            playClickSound();
+            const errorMsg = document.getElementById('licenseErrorMsg');
+            if (localStorage.getItem('neovita_demo_until')) {
+                errorMsg.textContent = "Este dispositivo ya usó la demo de 24 horas. Ingresa un código de licencia.";
+                errorMsg.classList.remove('hidden', 'text-sky-600'); errorMsg.classList.add('text-rose-500');
+                return;
+            }
+            localStorage.setItem('neovita_demo_until', String(Date.now() + 24 * 3600 * 1000));
+            hideLock();
+            speakVita("Demo de 24 horas activada.");
+        }
+
+        async function verifyLicense() {
+            playClickSound();
+            const licenseKey = document.getElementById('inputLicenseKey').value.trim().toUpperCase();
+            const errorMsg = document.getElementById('licenseErrorMsg');
+            const setMsg = (txt, ok) => {
+                errorMsg.textContent = txt; errorMsg.classList.remove('hidden', 'text-rose-500', 'text-sky-600');
+                errorMsg.classList.add(ok ? 'text-sky-600' : 'text-rose-500');
+            };
+            if (!licenseKey) { setMsg("Por favor ingrese su código de licencia.", false); return; }
+
+            try {
+                setMsg("Verificando licencia en la nube...", true);
+                const response = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(licenseKey)}&device=${encodeURIComponent(getDeviceId())}`);
+                const data = await response.json();
+
+                if (data && (data.success || data.valid)) {
+                    localStorage.setItem('neovita_license_activated', 'true');
+                    localStorage.setItem('neovita_license_key', licenseKey);
+                    localStorage.setItem('neovita_license_type', data.type || '');
+                    localStorage.setItem('neovita_license_expires', data.expires ? String(data.expires) : '');
+                    localStorage.setItem('neovita_license_checked', String(Date.now()));
+                    localStorage.setItem('neovita_license_v', LICENSE_VERSION);
+                    localStorage.removeItem('neovita_demo_until');
+                    hideLock();
+                    speakVita("Licencia verificada con éxito. Bienvenido a Neo Vita.");
+                } else {
+                    setMsg((data && data.message) || "Licencia no válida o expirada.", false);
+                }
+            } catch (e) {
+                // Sin conexión NO se activa nada: la licencia siempre se confirma contra la Sheet.
+                setMsg("No se pudo conectar con el servidor de licencias. Revisa tu internet e intenta de nuevo.", false);
+            }
+        }
+    </script>
+</body>
+</html>
