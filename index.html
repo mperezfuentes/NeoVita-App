@@ -22,6 +22,22 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
     </style>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ html{font-size:17px}
+ body{font-family:'Outfit','Segoe UI',system-ui,sans-serif;background:linear-gradient(180deg,#e0f2fe 0%,#f8fbff 40%,#fff 100%) fixed}
+ [id^="view"]{scroll-margin-top:78px}
+ header{background:linear-gradient(90deg,rgba(255,255,255,.96),rgba(240,249,255,.96))!important;border-bottom:1px solid #bae6fd!important}
+ header h1{font-size:1.2rem!important;font-weight:800!important}
+ .shadow-sm{box-shadow:0 8px 24px rgba(2,132,199,.10)!important}
+ .rounded-2xl{border-radius:1.25rem!important}
+ .bg-sky-600{background-image:linear-gradient(135deg,#0ea5e9,#0369a1)!important}
+ button.bg-sky-600{box-shadow:0 6px 16px rgba(3,105,161,.25)}
+ [id^="cardTab"]{border-radius:1.4rem!important;min-height:108px;transition:transform .15s}
+ [id^="cardTab"]:active{transform:scale(.97)}
+ [id^="cardTab"] h3{font-size:1.02rem!important;font-weight:700!important}
+ input,select,textarea{font-size:16px!important}
+</style>
 </head>
 <body class="bg-sky-50 text-slate-800 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
@@ -316,42 +332,30 @@
 
     <!-- MODAL NUEVO MEDICAMENTO -->
     <div id="addMedModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-3 shadow-2xl text-left max-h-[92vh] overflow-y-auto">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-slate-900">Nuevo Medicamento</h3>
-                <button onclick="closeAddMedModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <h3 class="text-lg font-bold text-slate-900">💊 Agregar fármaco</h3>
+                <button onclick="closeAddMedModal()" class="text-slate-400 hover:text-slate-600 text-xl" aria-label="Cerrar">✕</button>
             </div>
-            <div class="space-y-3 text-left">
-                <div>
-                    <label class="text-xs font-medium text-slate-600 block mb-1">Nombre del Fármaco</label>
-                    <input type="text" id="newMedName" placeholder="Ej: Paracetamol 500mg" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-xs font-medium text-slate-600 block mb-1">Horario (Compatible 12h/24h)</label>
-                        <input type="time" id="newMedTime" value="08:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-slate-600 block mb-1">Cantidad que tienes</label>
-                        <input type="number" id="newMedStock" value="30" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-xs font-medium text-slate-600 block mb-1">Dosis por toma</label>
-                        <input type="text" id="newMedDose" value="1 comprimido" placeholder="Ej: 1 comprimido o 5 ml" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-slate-600 block mb-1">Unidad del stock</label>
-                        <select id="newMedUnit" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
-                            <option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="unidades">unidades</option>
-                        </select>
-                    </div>
-                </div>
-                <p class="text-[10px] text-slate-400">Si el remedio ya existe, la cantidad se cambia con ✏️ en el Pastillero.</p>
+            <div><label class="text-xs font-medium text-slate-600 block mb-1">Nombre del fármaco</label><input type="text" id="newMedName" placeholder="Ej: Losartán 50mg" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Dosis por toma</label><input type="text" id="newMedDose" value="1 comprimido" placeholder="1 comprimido o 5 ml" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Hora primera toma</label><input type="time" id="newMedTime" value="07:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
             </div>
-            <div class="flex space-x-3 pt-2">
-                <button onclick="saveNewMedication()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar</button>
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Frecuencia</label>
+                    <select id="newMedFreq" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"><option value="0">Una sola toma</option><option value="24">Cada 24 h (1 al día)</option><option value="12">Cada 12 h</option><option value="8" selected>Cada 8 h</option><option value="6">Cada 6 h</option><option value="4">Cada 4 h</option></select></div>
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Días de tratamiento</label><input type="number" id="newMedDays" value="7" min="1" max="365" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+            </div>
+            <label class="flex items-center gap-2 text-sm text-slate-700 font-medium bg-sky-50 border border-sky-100 rounded-xl px-3 py-2"><input type="checkbox" id="newMedRecurrente" onchange="document.getElementById('newMedDays').disabled = this.checked"> 🔁 Tratamiento continuo (crónico): se repite todos los días</label>
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Cantidad que tienes</label><input type="number" id="newMedStock" min="0" step="any" placeholder="Ej: 30" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Unidad</label>
+                    <select id="newMedUnit" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"><option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="unidades">unidades</option></select></div>
+            </div>
+            <p class="text-[11px] text-slate-400">Empieza en la fecha del calendario. Si dejas la cantidad vacía, se calcula sola.</p>
+            <div class="flex space-x-3 pt-1">
+                <button onclick="saveNewMedication()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 rounded-xl transition">Guardar tratamiento</button>
                 <button onclick="closeAddMedModal()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
             </div>
         </div>
@@ -481,6 +485,7 @@
                     </div>
                 </div>
                 <p class="text-[10px] text-slate-400">Si dejas la cantidad vacía, se calcula con la receta (dosis × tomas × días). Los horarios se pueden editar después con ✏️.</p>
+                <label class="flex items-center gap-2 text-xs text-slate-700 font-medium bg-sky-50 border border-sky-100 rounded-xl px-3 py-2"><input type="checkbox" id="confirmMedRecurrente"> 🔁 Tratamiento continuo (crónico): se repite todos los días</label>
             </div>
 
             <div class="flex space-x-3 pt-2">
@@ -567,6 +572,7 @@
                 </div>
                 <div id="diagNativo" class="hidden pt-1 space-y-2">
                     <button onclick="probarAlarmaNativa()" class="w-full bg-amber-500 hover:bg-amber-400 text-white text-xs font-semibold py-2.5 rounded-xl transition">⏰ Probar alarma en 1 minuto (con la app cerrada)</button>
+                    <button onclick="guiaAjustesAlarmas()" class="w-full bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-semibold py-2.5 rounded-xl border border-sky-200 transition">📋 Guía: alarmas con el celular bloqueado</button>
                     <button onclick="verDiagnosticoAlarmas()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2.5 rounded-xl border border-slate-200 transition">🔧 Ver diagnóstico de alarmas</button>
                 </div>
             </div>
@@ -737,6 +743,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             applyLicenseState();
             setInterval(applyLicenseState, 60000);
+            extenderTratamientos(); setInterval(extenderTratamientos, 6 * 3600 * 1000);
             updateLicenseBanner(); setInterval(updateLicenseBanner, 60000);
             renderOnboarding(); setInterval(renderOnboarding, 2000);
 
@@ -1103,7 +1110,8 @@
                 icon.setAttribute('data-lucide', 'volume-x');
                 icon.className = "w-5 h-5 text-rose-500";
                 btn.title = "Asistente Silenciado";
-                if ('speechSynthesis' in window) {
+                if (esAppNativa && TTS) { hablarNativo("Asistente silenciada", false); }
+                else if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const utterance = new SpeechSynthesisUtterance("Asistente silenciada");
                     utterance.lang = 'es-ES';
@@ -1139,7 +1147,8 @@
                         <div>
                             <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-200 text-sky-800 px-2 py-0.5 rounded">🕒 ${med.time} hrs</span>
                             <h4 class="font-semibold text-sm text-slate-900 mt-1">${med.name}</h4>
-                            <p class="text-xs text-slate-500">Dosis: ${med.dose || '1 unidad'} | Stock: ${fmtQty(stockDe(med.name).qty)} ${stockDe(med.name).unit}</p>
+                            <p class="text-xs text-slate-500">Dosis: ${med.dose || '1 unidad'} | Stock: ${fmtQty(stockDe(med.name).qty)} ${stockDe(med.name).unit}${getTrats().some(t => t.id === med.tratId && t.recurrente) ? ' | 🔁 Crónico' : ''}</p>
+                            <button onclick="eliminarTratamiento(${med.id})" class="text-[11px] text-rose-500 hover:text-rose-700 underline mt-1">🗑 Eliminar tratamiento completo</button>
                         </div>
                         <div class="flex items-center space-x-2">
                             ${med.status === 'pendiente' ? `
@@ -1175,6 +1184,7 @@
                             <p class="text-xs ${bajo ? 'text-rose-600 font-bold' : 'text-slate-500'}">Restantes: ${fmtQty(st.qty)} ${st.unit}${bajo ? ' · ¡quedan pocas!' : ''}</p>
                         </div>
                         <button onclick="openEditStock('${encodeURIComponent(med.name)}')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-3 py-2 rounded-lg font-medium transition">✏️ Editar / Recargar</button>
+                        <button onclick="eliminarTratamientoPorNombre('${encodeURIComponent(med.name)}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs px-2.5 py-2 rounded-lg font-medium transition ml-1" title="Eliminar tratamiento">🗑</button>
                     `;
                     stockContainer.appendChild(stockItem);
                 });
@@ -1311,7 +1321,7 @@
             const porToma = unidadesPorToma(dose);
             const tomasDia = frequencyVal === 'unico' ? 1 : Math.floor(24 / (parseInt(frequencyVal) || 8));
             let qty = parseFloat(document.getElementById('confirmMedQty').value);
-            if (isNaN(qty) || qty < 0) qty = frequencyVal === 'unico' ? porToma : Math.round(porToma * tomasDia * totalDays * 100) / 100;
+            if (isNaN(qty) || qty < 0) qty = frequencyVal === 'unico' ? porToma : Math.round(porToma * tomasDia * ((document.getElementById('confirmMedRecurrente') || {}).checked ? 30 : totalDays) * 100) / 100;
 
             if (!medName) {
                 alert('Debe ingresar el nombre del fármaco.');
@@ -1327,45 +1337,11 @@
             });
             saveProfilePrescriptions(rx);
 
-            const today = new Date();
-            let meds = getProfileData();
-            const stockMapa = getStockMap(); stockMapa[fullName] = { qty, unit }; saveStockMap(stockMapa);
-            
-            if (frequencyVal === 'unico') {
-                const dateStr = localDateStr(today);
-                const currentHourStr = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
-                meds.push({
-                    id: Date.now() + Math.random(),
-                    name: fullName,
-                    time: currentHourStr,
-                    dose: dose,
-                    stock: qty,
-                    status: 'pendiente',
-                    date: dateStr
-                });
-            } else {
-                let frequencyHours = parseInt(frequencyVal) || 8;
-                for (let i = 0; i < totalDays; i++) {
-                    let targetDate = new Date(today);
-                    targetDate.setDate(today.getDate() + i);
-                    let dateStr = localDateStr(targetDate);
-
-                    const hoursList = horariosDesde(firstTime, frequencyHours);
-                    hoursList.forEach(timeSlot => {
-                        meds.push({
-                            id: Date.now() + Math.random(),
-                            name: fullName,
-                            time: timeSlot,
-                            dose: dose,
-                            stock: qty,
-                            status: 'pendiente',
-                            date: dateStr
-                        });
-                    });
-                }
-            }
-
-            saveProfileData(meds);
+            const hoy = new Date(), unico = frequencyVal === 'unico';
+            crearTratamiento({ name: fullName, dose, unit, qty,
+                primera: unico ? `${String(hoy.getHours()).padStart(2, '0')}:${String(hoy.getMinutes()).padStart(2, '0')}` : firstTime,
+                cada: unico ? 0 : (parseInt(frequencyVal) || 8), dias: unico ? 1 : totalDays,
+                recurrente: !unico && !!(document.getElementById('confirmMedRecurrente') || {}).checked, inicio: localDateStr(hoy) });
             selectedPrescriptionFile = null;
             document.getElementById('lblSelectedFileName').textContent = "Ningún archivo seleccionado";
             closePrescriptionConfirmModal();
@@ -1415,36 +1391,49 @@
             speakVita("Pastillero recargado.");
         }
 
+        function resumenMedicamentos(meds) {      // un bloque por tratamiento (no una línea por cada toma)
+            const hoy = localDateStr(), limite = addDaysStr(hoy, -30);
+            const fecha = d => d.split('-').reverse().join('/');
+            const grupos = {};
+            meds.forEach(m => { const k = m.tratId || m.name; (grupos[k] = grupos[k] || []).push(m); });
+            const trats = getTrats(); let n = 0, out = '';
+            Object.keys(grupos).forEach(k => {
+                const g = grupos[k].sort((x, y) => (x.date + normalizeTimeTo24h(x.time)).localeCompare(y.date + normalizeTimeTo24h(y.time)));
+                if (!g.some(m => m.date >= limite)) return;                  // omite tratamientos terminados hace más de 30 días
+                const t = trats.find(x => x.id === k);
+                const primerDia = g[0].date;
+                const horas = [...new Set(g.filter(m => m.date === primerDia).map(m => normalizeTimeTo24h(m.time)))].sort();
+                const dias = new Set(g.map(m => m.date)).size;
+                const hasta = g[g.length - 1].date;
+                const duracion = (t && t.recurrente) ? `continuo (crónico), desde ${fecha(t.inicio)}` : `${dias} ${dias === 1 ? 'día' : 'días'} (${fecha(primerDia)} al ${fecha(hasta)})`;
+                const pasadas = g.filter(m => m.date <= hoy), tomadas = pasadas.filter(m => m.status === 'tomado').length;
+                const st = stockDe(g[0].name);
+                n++;
+                out += `${n}) *${g[0].name}*\n   Dosis: ${g[0].dose || '1 unidad'} a las ${horas.join(', ')} (${horas.length} ${horas.length === 1 ? 'vez' : 'veces'} al día)\n   Duración: ${duracion}\n   Cumplimiento: ${tomadas} de ${pasadas.length} tomas\n   Stock: ${fmtQty(st.qty)} ${st.unit}\n\n`;
+            });
+            return out || '- Sin tratamientos registrados\n\n';
+        }
+
         function generateWhatsAppReport() {
             playClickSound();
             const meds = getProfileData();
             const vitals = getProfileVitals();
             const appts = getProfileAppointments();
             const profileInfo = JSON.parse(localStorage.getItem(`neovita_profile_info_${currentProfile}`) || '{}');
-            const profiles = getProfiles();
-            const activeObj = profiles.find(p => p.id === currentProfile) || { name: currentProfile };
-            
-            let text = `*INFORME CLÍNICO - NEOVITA*%0A*Perfil:* ${activeObj.name}%0A`;
-            text += `*Alergias:* ${profileInfo.allergies || 'Ninguna registrada'}%0A`;
-            text += `*Grupo Sanguíneo:* ${profileInfo.bloodType || 'N/D'}%0A%0A`;
-            
-            text += `*Próximas Citas Médicas:*%0A`;
-            if (appts.length > 0) {
-                appts.forEach(a => { text += `- ${a.doctor} en ${a.location} (${a.date} a las ${a.time})%0A`; });
-            } else {
-                text += `- Sin citas pendientes%0A`;
-            }
+            const activeObj = getProfiles().find(p => p.id === currentProfile) || { name: currentProfile };
 
-            text += `%0A*Medicamentos Programados:*%0A`;
-            meds.forEach(m => { text += `- ${m.name} (${m.time}) [Dosis: ${m.dose || '1'}] [Stock: ${fmtQty(stockDe(m.name).qty)} ${stockDe(m.name).unit}] - ${m.status}%0A`; });
-            
-            text += `%0A*Signos Vitales Recientes:*%0A`;
-            if (vitals.length > 0) {
-                text += `- PA: ${vitals[0].bp} | Glucosa: ${vitals[0].glucose} mg/dL`;
-            } else {
-                text += `- Sin registros recientes`;
-            }
-            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+            let text = `*INFORME CLÍNICO - NEOVITA*\n*Paciente:* ${activeObj.name}\n`;
+            text += `*Alergias:* ${profileInfo.allergies || 'Ninguna registrada'}\n`;
+            text += `*Grupo Sanguíneo:* ${profileInfo.bloodType || 'N/D'}\n\n`;
+
+            text += `*Tratamientos:*\n${resumenMedicamentos(meds)}`;
+
+            text += `*Próximas Citas Médicas:*\n`;
+            text += appts.length > 0 ? appts.map(a => `- ${a.doctor} en ${a.location} (${a.date} a las ${a.time})\n`).join('') : `- Sin citas pendientes\n`;
+
+            text += `\n*Signos Vitales Recientes:*\n`;
+            text += vitals.length > 0 ? `- PA: ${vitals[0].bp} | Glucosa: ${vitals[0].glucose} mg/dL` : `- Sin registros recientes`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function filterTab(tab) {
@@ -1455,6 +1444,7 @@
             });
             document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
             document.getElementById(`cardTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "bg-sky-600 text-white p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2";
+            setTimeout(() => { const el = document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
         }
 
         function openAddMedModal() { playClickSound(); document.getElementById('addMedModal').classList.remove('hidden'); }
@@ -1466,22 +1456,19 @@
 
         function saveNewMedication() {
             playClickSound();
-            const name = document.getElementById('newMedName').value.trim();
-            const time = document.getElementById('newMedTime').value;
-            const dose = document.getElementById('newMedDose').value.trim() || '1 unidad';
-            const unit = document.getElementById('newMedUnit').value;
-            const stock = parseFloat(document.getElementById('newMedStock').value);
-            const selectedDate = document.getElementById('calendarDateSelector').value;
-
-            if (!name || !time) { alert('Ingrese el nombre y la hora del fármaco.'); return; }
-            if (isNaN(stock) || stock < 0) { alert('Ingrese la cantidad que tiene (pastillas o ml).'); return; }
-            let meds = getProfileData();
-            meds.push({ id: Date.now(), name, time, dose, stock, status: 'pendiente', date: selectedDate });
-            const map = getStockMap();
-            if (!map[name]) { map[name] = { qty: stock, unit }; saveStockMap(map); }   // si ya existe, se edita con ✏️ en el Pastillero
-            saveProfileData(meds);
+            const g = id => document.getElementById(id);
+            const name = g('newMedName').value.trim(), primera = g('newMedTime').value;
+            const dose = g('newMedDose').value.trim() || '1 comprimido', unit = g('newMedUnit').value;
+            const cada = parseInt(g('newMedFreq').value) || 0, recurrente = g('newMedRecurrente').checked && cada > 0;
+            const dias = cada ? (parseInt(g('newMedDays').value) || 1) : 1;
+            if (!name || !primera) { alert('Ingrese el nombre y la hora de la primera toma.'); return; }
+            const tomasDia = cada ? Math.floor(24 / cada) : 1;
+            let qty = parseFloat(g('newMedStock').value);
+            if (isNaN(qty) || qty < 0) qty = Math.round(unidadesPorToma(dose) * tomasDia * (recurrente ? 30 : dias) * 100) / 100;
+            crearTratamiento({ name, dose, unit, qty, primera, cada, dias, recurrente, inicio: g('calendarDateSelector').value || localDateStr() });
             closeAddMedModal();
-            speakVita(`Fármaco ${name} agregado para las ${time}.`);
+            const resumen = !cada ? 'una sola toma' : `${tomasDia} ${tomasDia === 1 ? 'toma' : 'tomas'} al día, ${recurrente ? 'tratamiento continuo' : dias + (dias === 1 ? ' día' : ' días')}`;
+            speakVita(`Listo. Agregué ${name}: ${resumen}, desde las ${primera}.`);
         }
 
         function triggerEmergencySOS(keyword = "") {
@@ -1651,7 +1638,7 @@
                 }
                 lista.sort((a, b) => a.at - b.at);
                 const multiPerfil = getProfiles().length > 1;
-                const notifications = lista.slice(0, 60).map((x, i) => ({
+                const notifications = lista.slice(0, 150).map((x, i) => ({
                     id: i + 1,
                     title: multiPerfil ? '👤 ' + x.prof.name : 'NeoVita VitalSync 🩺',
                     body: `🔔 ¡Hora de tomar ${x.m.name} (${x.m.dose || '1 unidad'})! · ${x.prof.name}`,
@@ -1859,6 +1846,65 @@
             map[editStockName] = { qty: Math.round((sumar ? actual.qty + q : q) * 100) / 100, unit };
             saveStockMap(map); closeEditStock(); renderMeds();
             speakVita("Stock actualizado.");
+        }
+
+        // ===== TRATAMIENTOS: duración, crónico (recurrente) y eliminar todo de una vez =====
+        const DIAS_ADELANTE = 60;
+        function getTrats() { try { return JSON.parse(localStorage.getItem(`neovita_trat_${currentProfile}`) || '[]'); } catch (e) { return []; } }
+        function saveTrats(t) { localStorage.setItem(`neovita_trat_${currentProfile}`, JSON.stringify(t)); }
+        function addDaysStr(ds, n) { const p = ds.split('-').map(Number); return localDateStr(new Date(p[0], p[1] - 1, p[2] + n)); }
+        function generarTomas(t, meds, hasta) {          // agrega las tomas que faltan, sin tocar las ya editadas
+            const limite = (t.fin && t.fin < hasta) ? t.fin : hasta;
+            const horas = t.cada ? horariosDesde(t.primera, t.cada) : [t.primera];
+            let ds = t.generadoHasta ? addDaysStr(t.generadoHasta, 1) : t.inicio;
+            while (ds <= limite) {
+                horas.forEach(h => meds.push({ id: Date.now() + Math.random(), tratId: t.id, name: t.name, time: h, dose: t.dose, stock: 0, status: 'pendiente', date: ds }));
+                t.generadoHasta = ds; ds = addDaysStr(ds, 1);
+            }
+        }
+        function crearTratamiento(o) {
+            const hoy = localDateStr(), inicio = o.inicio || hoy;
+            const t = { id: Date.now() + '-' + Math.floor(Math.random() * 1e6), name: o.name, dose: o.dose, primera: o.primera, cada: o.cada, inicio, recurrente: !!o.recurrente,
+                        fin: o.recurrente ? null : addDaysStr(inicio, Math.max(1, o.dias) - 1), generadoHasta: null };
+            const meds = getProfileData();
+            generarTomas(t, meds, o.recurrente ? addDaysStr(inicio > hoy ? inicio : hoy, DIAS_ADELANTE) : t.fin);
+            const trats = getTrats(); trats.push(t); saveTrats(trats);
+            const map = getStockMap(); map[o.name] = { qty: o.qty, unit: o.unit }; saveStockMap(map);
+            saveProfileData(meds);
+            return t;
+        }
+        function extenderTratamientos() {                // los crónicos se mantienen 60 días hacia adelante
+            const prev = currentProfile; let cambio = false;
+            getProfiles().forEach(p => {
+                currentProfile = p.id;
+                const trats = getTrats(); let meds = null;
+                trats.forEach(t => {
+                    if (!t.recurrente) return;
+                    meds = meds || getProfileData(); const antes = meds.length;
+                    generarTomas(t, meds, addDaysStr(localDateStr(), DIAS_ADELANTE));
+                    if (meds.length !== antes) cambio = true;
+                });
+                if (meds && cambio) { saveTrats(trats); localStorage.setItem(`neovita_meds_${p.id}`, JSON.stringify(meds)); }
+            });
+            currentProfile = prev;
+            if (cambio) { renderMeds(); programarAlarmasNativas(); }
+        }
+        function eliminarTratamiento(medId) {
+            const meds = getProfileData(); const base = meds.find(m => m.id === medId); if (!base) return;
+            const grupo = base.tratId ? meds.filter(m => m.tratId === base.tratId) : meds.filter(m => m.name === base.name);
+            if (!confirm(`¿Eliminar TODO el tratamiento de ${base.name}?\nSe borrarán ${grupo.length} tomas del calendario.`)) return;
+            const quitar = new Set(grupo.map(m => m.id));
+            const resto = meds.filter(m => !quitar.has(m.id));
+            if (base.tratId) saveTrats(getTrats().filter(t => t.id !== base.tratId));
+            if (!resto.some(m => m.name === base.name)) { const map = getStockMap(); delete map[base.name]; saveStockMap(map); }
+            saveProfileData(resto);
+            speakVita(`Tratamiento de ${base.name} eliminado.`);
+        }
+        function eliminarTratamientoPorNombre(enc) {
+            const name = decodeURIComponent(enc); const m = getProfileData().find(x => x.name === name); if (m) eliminarTratamiento(m.id);
+        }
+        function guiaAjustesAlarmas() {
+            alert("Para que la alarma suene con el celular bloqueado:\n\n1) En aplicaciones recientes, mantén presionada NeoVita y toca el candado 🔒.\n2) Ajustes > Aplicaciones > NeoVita: Inicio automático ACTIVADO y Batería en 'Sin restricciones'.\n3) Notificaciones de NeoVita: todo activado, incluida la pantalla de bloqueo.\n4) No cierres NeoVita con 'Cerrar todo' o 'Limpiar'.");
         }
 
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
