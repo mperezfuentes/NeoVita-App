@@ -66,6 +66,11 @@
                     <label class="text-xs font-medium text-slate-600 block mb-1">Código de Licencia</label>
                     <input type="text" id="inputLicenseKey" placeholder="Ej: NV-PRO-XXXX-XXXX" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-sky-500 uppercase">
                 </div>
+                <div id="phoneRecoveryBox" class="hidden">
+                    <label class="text-xs font-medium text-slate-600 block mb-1">WhatsApp con el que compraste</label>
+                    <input type="tel" id="inputLicensePhone" placeholder="Ej: 56912345678" class="w-full bg-amber-50/60 border border-amber-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                    <p class="text-[11px] text-slate-500 mt-1">Con ese número, tu licencia se pasa a este celular automáticamente.</p>
+                </div>
             </div>
             <button onclick="verifyLicense()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-sky-600/20">
                 Validar Licencia
@@ -273,6 +278,7 @@
                 <i data-lucide="bell-ring" class="w-8 h-8 animate-bounce"></i>
             </div>
             <div>
+                <p id="popupProfileName" class="hidden text-3xl font-extrabold text-sky-700 mb-2 leading-tight"></p>
                 <span id="popupMedTime" class="text-xs bg-sky-100 text-sky-800 font-bold px-3 py-1 rounded-full">🕒 08:00 hrs</span>
                 <h3 id="popupMedTitle" class="text-xl font-bold text-slate-900 mt-2">Paracetamol 500mg</h3>
                 <p id="popupMedDetails" class="text-xs text-slate-500 mt-1">Dosis: 1 comprimido | Restantes: 29 pastillas</p>
@@ -326,10 +332,23 @@
                         <input type="time" id="newMedTime" value="08:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
                     </div>
                     <div>
-                        <label class="text-xs font-medium text-slate-600 block mb-1">Stock Inicial</label>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Cantidad que tienes</label>
                         <input type="number" id="newMedStock" value="30" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
                     </div>
                 </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Dosis por toma</label>
+                        <input type="text" id="newMedDose" value="1 comprimido" placeholder="Ej: 1 comprimido o 5 ml" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-600 block mb-1">Unidad del stock</label>
+                        <select id="newMedUnit" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                            <option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="unidades">unidades</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400">Si el remedio ya existe, la cantidad se cambia con ✏️ en el Pastillero.</p>
             </div>
             <div class="flex space-x-3 pt-2">
                 <button onclick="saveNewMedication()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar</button>
@@ -446,6 +465,22 @@
                         <input type="number" id="confirmMedDays" value="1" min="1" max="90" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
                     </div>
                 </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Hora de la primera toma</label>
+                        <input type="time" id="confirmMedFirstTime" value="07:00" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Cantidad total que tienes</label>
+                        <div class="flex gap-1">
+                            <input type="number" id="confirmMedQty" min="0" step="any" placeholder="Ej: 30" class="w-1/2 bg-white border border-sky-200 rounded-xl px-2 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                            <select id="confirmMedUnit" class="w-1/2 bg-white border border-sky-200 rounded-xl px-1 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                                <option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="unidades">unidades</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400">Si dejas la cantidad vacía, se calcula con la receta (dosis × tomas × días). Los horarios se pueden editar después con ✏️.</p>
             </div>
 
             <div class="flex space-x-3 pt-2">
@@ -453,6 +488,51 @@
                     <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar y Agendar Seguro
                 </button>
                 <button onclick="closePrescriptionConfirmModal()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDITAR HORARIO / DOSIS -->
+    <div id="editMedModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl text-left">
+            <h3 class="text-lg font-bold text-slate-900">✏️ Editar horario</h3>
+            <p id="editMedName" class="text-sm text-slate-600 font-medium"></p>
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Nueva hora</label>
+                    <input type="time" id="editMedTime" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Dosis</label>
+                    <input type="text" id="editMedDose" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+            </div>
+            <div><label class="text-xs font-medium text-slate-600 block mb-1">¿Dónde aplicar el cambio?</label>
+                <select id="editMedScope" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                    <option value="futuras">Esta toma y las siguientes del mismo horario</option>
+                    <option value="una">Solo esta toma</option>
+                </select></div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="saveEditMed()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar</button>
+                <button onclick="closeEditMed()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDITAR STOCK -->
+    <div id="editStockModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl text-left">
+            <h3 class="text-lg font-bold text-slate-900">📦 Stock</h3>
+            <p id="editStockName" class="text-sm text-slate-600 font-medium"></p>
+            <p class="text-xs text-slate-500">Cantidad actual: <b id="editStockActual"></b></p>
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Cantidad</label>
+                    <input type="number" id="editStockQty" min="0" step="any" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Unidad</label>
+                    <select id="editStockUnit" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
+                        <option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="unidades">unidades</option>
+                    </select></div>
+            </div>
+            <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" id="editStockSumar"> Sumar a lo que ya tengo (recarga)</label>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="saveEditStock()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar</button>
+                <button onclick="closeEditStock()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
             </div>
         </div>
     </div>
@@ -484,6 +564,10 @@
                     <button onclick="testPushNotification()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-2">
                         <i data-lucide="send" class="w-4 h-4"></i> 🔔 Enviar Notificación Push de Prueba
                     </button>
+                </div>
+                <div id="diagNativo" class="hidden pt-1 space-y-2">
+                    <button onclick="probarAlarmaNativa()" class="w-full bg-amber-500 hover:bg-amber-400 text-white text-xs font-semibold py-2.5 rounded-xl transition">⏰ Probar alarma en 1 minuto (con la app cerrada)</button>
+                    <button onclick="verDiagnosticoAlarmas()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2.5 rounded-xl border border-slate-200 transition">🔧 Ver diagnóstico de alarmas</button>
                 </div>
             </div>
             <div class="flex space-x-3 pt-2">
@@ -559,7 +643,7 @@
         function mostrarNotificacionSistema(med, prof) {
             if (esAppNativa) return;
             if (!('Notification' in window) || Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
-            navigator.serviceWorker.ready.then(reg => reg.showNotification("NeoVita VitalSync 🩺", {
+            navigator.serviceWorker.ready.then(reg => reg.showNotification(getProfiles().length > 1 ? "👤 " + prof.name : "NeoVita VitalSync 🩺", {
                 body: `🔔 ¡Hora de tomar ${med.name} (${med.dose || '1 unidad'})! · ${prof.name}`,
                 icon: "icon-192.png", badge: "icon-192.png", vibrate: [500, 200, 500, 200, 1000],
                 tag: `neovita-${prof.id}-${med.id}`, renotify: true, requireInteraction: true,
@@ -728,7 +812,7 @@
                     triggerAlarmBeepBeepBeepLoud();
                     showAlarmPopup(med);
                     startAlarmLoop();
-                    speakVitaQueue(`Atención, es hora de tomar tu medicamento, ${med.name}`);
+                    speakVitaQueue(getProfiles().length > 1 ? `Atención ${prof.name}, es hora de tomar ${med.name}` : `Atención, es hora de tomar tu medicamento, ${med.name}`);
                     mostrarNotificacionSistema(med, prof);
                     return;
                 }
@@ -740,7 +824,10 @@
             document.getElementById('popupMedTime').textContent = `🕒 ${med.time} hrs`;
             document.getElementById('popupMedTitle').textContent = med.name;
             const pn = (getProfiles().find(p => p.id === currentActiveAlarmProfile) || {}).name || '';
-            document.getElementById('popupMedDetails').textContent = `Dosis: ${med.dose || '1 unidad'} | Restantes: ${med.stock} pastillas${pn ? ' | Perfil: ' + pn : ''}`;
+            const pe = document.getElementById('popupProfileName');
+            if (getProfiles().length > 1 && pn) { pe.textContent = '👤 ' + pn; pe.classList.remove('hidden'); } else { pe.classList.add('hidden'); }
+            const stp = stockDe(med.name, currentActiveAlarmProfile);
+            document.getElementById('popupMedDetails').textContent = `Dosis: ${med.dose || '1 unidad'} | Restantes: ${fmtQty(stp.qty)} ${stp.unit}`;
             document.getElementById('alarmPopupModal').classList.remove('hidden');
         }
 
@@ -831,6 +918,14 @@
         function updateNotificationStatusLabel() {
             const label = document.getElementById('lblNotifStatus');
             if (!label) return;
+            if (esAppNativa && LN) {
+                LN.checkPermissions().then(p => {
+                    const ok = p.display === 'granted', no = p.display === 'denied';
+                    label.textContent = ok ? "✔ Activas" : (no ? "❌ Bloqueadas" : "⚠️ Pendientes");
+                    label.className = "text-xs font-bold " + (ok ? "text-emerald-600" : (no ? "text-rose-500" : "text-amber-500"));
+                }).catch(() => {});
+                return;
+            }
             if (!("Notification" in window)) {
                 label.textContent = "No soportadas";
                 label.className = "text-xs font-bold text-rose-500";
@@ -847,6 +942,14 @@
         }
 
         function requestPushNotificationPermission() {
+            if (esAppNativa && LN) {
+                LN.requestPermissions().then(p => {
+                    updateNotificationStatusLabel();
+                    alert(p.display === 'granted' ? "✅ ¡Permisos de notificaciones concedidos con éxito!" : "⚠️ Los permisos fueron denegados. Actívalos en Ajustes > Aplicaciones > NeoVita > Notificaciones.");
+                    programarAlarmasNativas();
+                }).catch(e => { ultimoErrorAlarmas = String(e); alert("Error: " + e); });
+                return;
+            }
             if (!("Notification" in window)) {
                 alert("Las notificaciones no son compatibles con este navegador.");
                 return;
@@ -862,6 +965,17 @@
         }
 
         async function testPushNotification() {
+            if (esAppNativa && LN) {
+                try {
+                    let p = await LN.checkPermissions(); if (p.display !== 'granted') p = await LN.requestPermissions();
+                    updateNotificationStatusLabel();
+                    if (p.display !== 'granted') { alert("⚠️ Permisos no concedidos."); return; }
+                    await LN.schedule({ notifications: [{ id: 999998, title: 'NeoVita VitalSync 🩺', body: '🔔 Notificación de prueba',
+                        schedule: { at: new Date(Date.now() + 15000), allowWhileIdle: true }, channelId: 'tomas' }] });
+                    alert("Listo. Cierra la app y bloquea el celular: la notificación llegará en 15 segundos.");
+                } catch (e) { ultimoErrorAlarmas = String(e); alert("Error: " + e); }
+                return;
+            }
             if (!("Notification" in window)) {
                 alert("Las notificaciones no son compatibles.");
                 return;
@@ -965,6 +1079,7 @@
         }
 
         function speakVita(text) {
+            if (!isMutedVita && esAppNativa && TTS) { hablarNativo(text, false); return; }
             if (!isMutedVita && 'speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
@@ -1024,12 +1139,13 @@
                         <div>
                             <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-200 text-sky-800 px-2 py-0.5 rounded">🕒 ${med.time} hrs</span>
                             <h4 class="font-semibold text-sm text-slate-900 mt-1">${med.name}</h4>
-                            <p class="text-xs text-slate-500">Dosis: ${med.dose || '1 unidad'} | Stock: ${med.stock} unidades</p>
+                            <p class="text-xs text-slate-500">Dosis: ${med.dose || '1 unidad'} | Stock: ${fmtQty(stockDe(med.name).qty)} ${stockDe(med.name).unit}</p>
                         </div>
                         <div class="flex items-center space-x-2">
                             ${med.status === 'pendiente' ? `
                                 <button onclick="updateMedStatus(${med.id}, 'tomado')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium transition shadow-sm">Tomado</button>
                                 <button onclick="updateMedStatus(${med.id}, 'saltado')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 py-2 rounded-lg font-medium transition">Saltar</button>
+                                <button onclick="openEditMed(${med.id})" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-2.5 py-2 rounded-lg font-medium transition" title="Editar horario">✏️</button>
                             ` : med.status === 'tomado' ? `
                                 <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-lg font-semibold">✔ Tomado</span>
                                 <button onclick="deleteSingleMed(${med.id})" class="text-rose-500 hover:text-rose-700 text-xs px-2 py-1 font-medium transition" title="Eliminar del registro">🗑️</button>
@@ -1052,12 +1168,13 @@
                 uniqueMeds.forEach(med => {
                     const stockItem = document.createElement('div');
                     stockItem.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex items-center justify-between";
+                    const st = stockDe(med.name); const bajo = st.qty < unidadesPorToma(med.dose) * 3;
                     stockItem.innerHTML = `
                         <div>
                             <h4 class="font-semibold text-sm text-slate-900">${med.name}</h4>
-                            <p class="text-xs ${med.stock < 5 ? 'text-rose-600 font-bold' : 'text-slate-500'}">Restantes: ${med.stock} pastillas</p>
+                            <p class="text-xs ${bajo ? 'text-rose-600 font-bold' : 'text-slate-500'}">Restantes: ${fmtQty(st.qty)} ${st.unit}${bajo ? ' · ¡quedan pocas!' : ''}</p>
                         </div>
-                        <button onclick="refillStock('${med.name}')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-3 py-2 rounded-lg font-medium transition">Recargar (+30)</button>
+                        <button onclick="openEditStock('${encodeURIComponent(med.name)}')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-3 py-2 rounded-lg font-medium transition">✏️ Editar / Recargar</button>
                     `;
                     stockContainer.appendChild(stockItem);
                 });
@@ -1189,6 +1306,12 @@
             const dose = document.getElementById('confirmMedDose').value.trim();
             const frequencyVal = document.getElementById('confirmMedFrequency').value;
             const totalDays = parseInt(document.getElementById('confirmMedDays').value) || 1;
+            const firstTime = document.getElementById('confirmMedFirstTime').value || '07:00';
+            const unit = document.getElementById('confirmMedUnit').value;
+            const porToma = unidadesPorToma(dose);
+            const tomasDia = frequencyVal === 'unico' ? 1 : Math.floor(24 / (parseInt(frequencyVal) || 8));
+            let qty = parseFloat(document.getElementById('confirmMedQty').value);
+            if (isNaN(qty) || qty < 0) qty = frequencyVal === 'unico' ? porToma : Math.round(porToma * tomasDia * totalDays * 100) / 100;
 
             if (!medName) {
                 alert('Debe ingresar el nombre del fármaco.');
@@ -1206,6 +1329,7 @@
 
             const today = new Date();
             let meds = getProfileData();
+            const stockMapa = getStockMap(); stockMapa[fullName] = { qty, unit }; saveStockMap(stockMapa);
             
             if (frequencyVal === 'unico') {
                 const dateStr = localDateStr(today);
@@ -1215,7 +1339,7 @@
                     name: fullName,
                     time: currentHourStr,
                     dose: dose,
-                    stock: 30,
+                    stock: qty,
                     status: 'pendiente',
                     date: dateStr
                 });
@@ -1226,19 +1350,14 @@
                     targetDate.setDate(today.getDate() + i);
                     let dateStr = localDateStr(targetDate);
 
-                    let hoursList = [];
-                    if (frequencyHours === 8) hoursList = ['08:00', '16:00', '00:00'];
-                    else if (frequencyHours === 12) hoursList = ['09:00', '21:00'];
-                    else if (frequencyHours === 24) hoursList = ['09:00'];
-                    else hoursList = ['08:00', '14:00', '20:00'];
-
+                    const hoursList = horariosDesde(firstTime, frequencyHours);
                     hoursList.forEach(timeSlot => {
                         meds.push({
                             id: Date.now() + Math.random(),
                             name: fullName,
                             time: timeSlot,
                             dose: dose,
-                            stock: 30,
+                            stock: qty,
                             status: 'pendiente',
                             date: dateStr
                         });
@@ -1260,7 +1379,7 @@
             meds = meds.map(m => {
                 if (m.id === id) {
                     m.status = status;
-                    if (status === 'tomado' && m.stock > 0) m.stock -= 1;
+                    if (status === 'tomado') descontarStock(m);
                 }
                 return m;
             });
@@ -1317,7 +1436,7 @@
             }
 
             text += `%0A*Medicamentos Programados:*%0A`;
-            meds.forEach(m => { text += `- ${m.name} (${m.time}) [Dosis: ${m.dose || '1'}] [Stock: ${m.stock}] - ${m.status}%0A`; });
+            meds.forEach(m => { text += `- ${m.name} (${m.time}) [Dosis: ${m.dose || '1'}] [Stock: ${fmtQty(stockDe(m.name).qty)} ${stockDe(m.name).unit}] - ${m.status}%0A`; });
             
             text += `%0A*Signos Vitales Recientes:*%0A`;
             if (vitals.length > 0) {
@@ -1349,12 +1468,17 @@
             playClickSound();
             const name = document.getElementById('newMedName').value.trim();
             const time = document.getElementById('newMedTime').value;
-            const stock = parseInt(document.getElementById('newMedStock').value) || 30;
+            const dose = document.getElementById('newMedDose').value.trim() || '1 unidad';
+            const unit = document.getElementById('newMedUnit').value;
+            const stock = parseFloat(document.getElementById('newMedStock').value);
             const selectedDate = document.getElementById('calendarDateSelector').value;
 
             if (!name || !time) { alert('Ingrese el nombre y la hora del fármaco.'); return; }
+            if (isNaN(stock) || stock < 0) { alert('Ingrese la cantidad que tiene (pastillas o ml).'); return; }
             let meds = getProfileData();
-            meds.push({ id: Date.now(), name, time, dose: '1 unidad', stock, status: 'pendiente', date: selectedDate });
+            meds.push({ id: Date.now(), name, time, dose, stock, status: 'pendiente', date: selectedDate });
+            const map = getStockMap();
+            if (!map[name]) { map[name] = { qty: stock, unit }; saveStockMap(map); }   // si ya existe, se edita con ✏️ en el Pastillero
             saveProfileData(meds);
             closeAddMedModal();
             speakVita(`Fármaco ${name} agregado para las ${time}.`);
@@ -1429,7 +1553,7 @@
                 }
             }
 
-            const pocos = [...new Set(delDia.filter(m => m.stock <= 5).map(m => m.name))];
+            const pocos = [...new Set(delDia.filter(m => stockDe(m.name).qty < unidadesPorToma(m.dose) * 3).map(m => m.name))];
             if (pocos.length) partes.push(`Ojo con el stock. Te quedan pocas unidades de ${pocos.slice(0, 3).join(" y ")}.`);
 
             const manana = localDateStr(new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1));
@@ -1443,6 +1567,7 @@
         }
         // Habla aunque el asistente esté silenciado: el usuario lo pidió expresamente.
         function vitaHablar(texto) {
+            if (esAppNativa && TTS) { texto.split(/(?<=[.!?])\s+/).filter(Boolean).forEach((f, i) => hablarNativo(f, i > 0)); return; }
             if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
             const voces = window.speechSynthesis.getVoices();
@@ -1464,6 +1589,17 @@
         // ===== ALARMAS NATIVAS (solo dentro de la app Android hecha con Capacitor) =====
         // En el navegador normal estas funciones no hacen nada: todo lo anterior sigue funcionando igual.
         const SONIDO_ALARMA = '';   // opcional: si agregas res/raw/alarma.wav al proyecto Android, escribe 'alarma.wav'
+        const DEV = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Device) || null;
+        async function getDeviceIdAsync() {   // en la app Android se usa el ID del equipo, que no cambia al reinstalar
+            if (esAppNativa && DEV) { try { const r = await DEV.getId(); if (r && r.identifier) return 'A-' + r.identifier; } catch (e) {} }
+            return getDeviceId();
+        }
+        const TTS = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) || null;
+        let ultimoErrorAlarmas = '';
+        async function hablarNativo(texto, encolar) {
+            try { await TTS.speak({ text: texto, lang: 'es-ES', rate: 1.0, pitch: 1.0, volume: 1.0, category: 'ambient', queueStrategy: encolar ? 1 : 0 }); }
+            catch (e) { ultimoErrorAlarmas = 'Voz: ' + e; }
+        }
         const LN = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) || null;
         const esAppNativa = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
         let programandoAlarmas = false, reprogramarAlarmas = false;
@@ -1482,14 +1618,14 @@
                 });
                 try {   // Android 12+: las alarmas exactas requieren que el usuario las permita (se pide una sola vez)
                     const ex = await LN.checkExactNotificationSetting();
-                    if (ex.exact_alarm !== 'granted' && !localStorage.getItem('neovita_exact_pedido')) {
-                        localStorage.setItem('neovita_exact_pedido', '1');
+                    if (ex.exact_alarm !== 'granted' && Date.now() - Number(localStorage.getItem('neovita_exact_pedido') || 0) > 86400000) {
+                        localStorage.setItem('neovita_exact_pedido', String(Date.now()));
                         alert('Para que la alarma suene a la hora exacta, activa "Alarmas y recordatorios" para NeoVita en la pantalla que se abrirá.');
                         await LN.changeExactNotificationSetting();
                     }
                 } catch (e) {}
                 programarAlarmasNativas();
-            } catch (e) { console.log('Alarmas nativas:', e); }
+            } catch (e) { ultimoErrorAlarmas = 'Inicio: ' + e; console.log('Alarmas nativas:', e); }
         }
 
         // Cancela lo programado y vuelve a programar las próximas tomas pendientes (todas las personas)
@@ -1499,7 +1635,7 @@
             programandoAlarmas = true;
             try {
                 const pend = await LN.getPending();
-                if (pend.notifications && pend.notifications.length) await LN.cancel({ notifications: pend.notifications.map(n => ({ id: n.id })) });
+                if (pend.notifications && pend.notifications.filter(n => n.id < 999990).length) await LN.cancel({ notifications: pend.notifications.filter(n => n.id < 999990).map(n => ({ id: n.id })) });
                 const ahora = Date.now(), lista = [];
                 for (const prof of getProfiles()) {
                     let meds = [];
@@ -1514,18 +1650,40 @@
                     });
                 }
                 lista.sort((a, b) => a.at - b.at);
+                const multiPerfil = getProfiles().length > 1;
                 const notifications = lista.slice(0, 60).map((x, i) => ({
                     id: i + 1,
-                    title: 'NeoVita VitalSync 🩺',
+                    title: multiPerfil ? '👤 ' + x.prof.name : 'NeoVita VitalSync 🩺',
                     body: `🔔 ¡Hora de tomar ${x.m.name} (${x.m.dose || '1 unidad'})! · ${x.prof.name}`,
                     schedule: { at: x.at, allowWhileIdle: true },
                     channelId: 'tomas', actionTypeId: 'TOMA',
                     extra: { medId: x.m.id, profileId: x.prof.id }
                 }));
                 if (notifications.length) await LN.schedule({ notifications });
-            } catch (e) { console.log('Error programando alarmas:', e); }
+            } catch (e) { ultimoErrorAlarmas = 'Programar: ' + e; console.log('Error programando alarmas:', e); }
             finally { programandoAlarmas = false; if (reprogramarAlarmas) { reprogramarAlarmas = false; programarAlarmasNativas(); } }
         }
+        async function verDiagnosticoAlarmas() {
+            const l = ['App instalada (nativa): ' + (esAppNativa ? 'sí' : 'no'), 'Plugin de alarmas: ' + (LN ? 'sí' : 'NO'), 'Plugin de voz: ' + (TTS ? 'sí' : 'NO')];
+            if (LN) {
+                try { const p = await LN.checkPermissions(); l.push('Permiso de notificaciones: ' + p.display); } catch (e) { l.push('Permiso: error ' + e); }
+                try { const x = await LN.checkExactNotificationSetting(); l.push('Alarma exacta: ' + x.exact_alarm); } catch (e) { l.push('Alarma exacta: sin dato'); }
+                try { const pe = await LN.getPending(); l.push('Alarmas programadas: ' + pe.notifications.length); } catch (e) {}
+            }
+            if (ultimoErrorAlarmas) l.push('Último error: ' + ultimoErrorAlarmas);
+            alert(l.join('\n'));
+        }
+        async function probarAlarmaNativa() {
+            if (!esAppNativa || !LN) { alert('Esta prueba solo funciona en la app instalada (APK).'); return; }
+            try {
+                let p = await LN.checkPermissions(); if (p.display !== 'granted') p = await LN.requestPermissions();
+                if (p.display !== 'granted') { alert('Falta el permiso de notificaciones.'); return; }
+                await LN.schedule({ notifications: [{ id: 999999, title: 'NeoVita VitalSync 🩺', body: '🔔 Alarma de prueba: ¡funciona!',
+                    schedule: { at: new Date(Date.now() + 60000), allowWhileIdle: true }, channelId: 'tomas', actionTypeId: 'TOMA' }] });
+                alert('Listo. Cierra la app, bloquea el celular y espera 1 minuto: debe sonar y vibrar.');
+            } catch (e) { ultimoErrorAlarmas = String(e); alert('Error: ' + e); }
+        }
+        window.addEventListener('load', () => { const d = document.getElementById('diagNativo'); if (esAppNativa && d) d.classList.remove('hidden'); });
         window.addEventListener('load', iniciarAlarmasNativas);
         document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') programarAlarmasNativas(); });
 
@@ -1617,6 +1775,92 @@
                     </div>`).join('')}</div>`;
         }
 
+        // ===== STOCK: una sola cantidad por medicamento (antes cada toma tenía su propio número) =====
+        function getStockMap(pid) { try { return JSON.parse(localStorage.getItem(`neovita_stockmap_${pid || currentProfile}`) || '{}'); } catch (e) { return {}; } }
+        function saveStockMap(m, pid) { localStorage.setItem(`neovita_stockmap_${pid || currentProfile}`, JSON.stringify(m)); }
+        function unidadesPorToma(dose) {
+            const t = String(dose || '').replace(',', '.');
+            if (/\b(mg|mcg|µg|g)\b/i.test(t) && !/(comprim|tablet|c[aá]psula|pastilla|gota|ml|cc|cucharada|sobre|ampolla)/i.test(t)) return 1;
+            const fr = t.match(/(\d+)\s*\/\s*(\d+)/);
+            if (fr && Number(fr[2]) > 0) return Number(fr[1]) / Number(fr[2]);
+            const m = t.match(/\d+(?:\.\d+)?/);
+            const n = m ? parseFloat(m[0]) : 1;
+            return n > 0 ? n : 1;
+        }
+        function stockDe(name, pid) {
+            pid = pid || currentProfile;
+            const map = getStockMap(pid);
+            if (!map[name]) {                                   // datos antiguos: se toma el número del primer registro
+                let meds = []; try { meds = JSON.parse(localStorage.getItem(`neovita_meds_${pid}`) || '[]'); } catch (e) {}
+                const m = meds.find(x => x.name === name);
+                map[name] = { qty: m ? (Number(m.stock) || 0) : 0, unit: 'pastillas' };
+                saveStockMap(map, pid);
+            }
+            return map[name];
+        }
+        function fmtQty(n) { return String(Math.round(Number(n) * 100) / 100); }
+        function descontarStock(m) {
+            const cur = stockDe(m.name); const map = getStockMap();
+            map[m.name] = { qty: Math.max(0, Math.round((cur.qty - unidadesPorToma(m.dose)) * 100) / 100), unit: cur.unit };
+            saveStockMap(map);
+        }
+        // Horarios a partir de la primera toma: 07:00 cada 8 h -> 07:00, 15:00, 23:00
+        function horariosDesde(primera, cadaHoras) {
+            const p = (primera || '07:00').split(':'); const h = parseInt(p[0]) || 0, mi = parseInt(p[1]) || 0;
+            const c = Math.min(24, Math.max(1, parseInt(cadaHoras) || 8)); const out = [];
+            for (let i = 0; i < Math.floor(24 / c); i++) out.push(`${String((h + i * c) % 24).padStart(2, '0')}:${String(mi).padStart(2, '0')}`);
+            return out.sort();
+        }
+        // ----- editar horario / dosis de una toma -----
+        let editMedId = null;
+        function openEditMed(id) {
+            const m = getProfileData().find(x => x.id === id); if (!m) return;
+            editMedId = id; playClickSound();
+            document.getElementById('editMedName').textContent = m.name;
+            document.getElementById('editMedTime').value = normalizeTimeTo24h(m.time);
+            document.getElementById('editMedDose').value = m.dose || '';
+            document.getElementById('editMedScope').value = 'futuras';
+            document.getElementById('editMedModal').classList.remove('hidden');
+        }
+        function closeEditMed() { document.getElementById('editMedModal').classList.add('hidden'); editMedId = null; }
+        function saveEditMed() {
+            const nuevaHora = document.getElementById('editMedTime').value;
+            const dosis = document.getElementById('editMedDose').value.trim();
+            if (!nuevaHora) { alert('Ingresa la nueva hora.'); return; }
+            const alcance = document.getElementById('editMedScope').value;
+            const meds = getProfileData(); const base = meds.find(x => x.id === editMedId); if (!base) { closeEditMed(); return; }
+            const horaVieja = normalizeTimeTo24h(base.time);
+            meds.forEach(m => {
+                const mismaSerie = alcance === 'futuras' && m.name === base.name && m.status === 'pendiente' && m.date >= base.date && normalizeTimeTo24h(m.time) === horaVieja;
+                if (m.id === base.id || mismaSerie) { m.time = nuevaHora; if (dosis) m.dose = dosis; }
+            });
+            saveProfileData(meds); closeEditMed();
+            speakVita(`Horario actualizado a las ${nuevaHora}.`);
+        }
+        // ----- editar / recargar stock -----
+        let editStockName = null;
+        function openEditStock(encName) {
+            const name = decodeURIComponent(encName); editStockName = name; playClickSound();
+            const st = stockDe(name);
+            document.getElementById('editStockName').textContent = name;
+            document.getElementById('editStockActual').textContent = `${fmtQty(st.qty)} ${st.unit}`;
+            document.getElementById('editStockQty').value = fmtQty(st.qty);
+            document.getElementById('editStockUnit').value = st.unit;
+            document.getElementById('editStockSumar').checked = false;
+            document.getElementById('editStockModal').classList.remove('hidden');
+        }
+        function closeEditStock() { document.getElementById('editStockModal').classList.add('hidden'); editStockName = null; }
+        function saveEditStock() {
+            const q = parseFloat(document.getElementById('editStockQty').value);
+            if (isNaN(q) || q < 0) { alert('Ingresa una cantidad válida.'); return; }
+            const unit = document.getElementById('editStockUnit').value;
+            const sumar = document.getElementById('editStockSumar').checked;
+            const map = getStockMap(); const actual = stockDe(editStockName);
+            map[editStockName] = { qty: Math.round((sumar ? actual.qty + q : q) * 100) / 100, unit };
+            saveStockMap(map); closeEditStock(); renderMeds();
+            speakVita("Stock actualizado.");
+        }
+
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
         const LICENSE_VERSION = '2';
         const DEMO_DIAS = 7;
@@ -1655,11 +1899,15 @@
             const key = localStorage.getItem('neovita_license_key');
             if (!key || Date.now() - Number(localStorage.getItem('neovita_license_checked') || 0) < 12 * 3600 * 1000) return;
             try {
-                const r = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(key)}&device=${encodeURIComponent(getDeviceId())}`);
+                const r = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(key)}&device=${encodeURIComponent(await getDeviceIdAsync())}`);
                 const d = await r.json();
                 localStorage.setItem('neovita_license_checked', String(Date.now()));
                 if (d && (d.success || d.valid)) { if (d.expires) localStorage.setItem('neovita_license_expires', String(d.expires)); }
-                else { clearLicense(); showLock(d && d.message ? d.message : 'Licencia no válida.'); }
+                else {
+                    clearLicense(); showLock(d && d.message ? d.message : 'Licencia no válida.');
+                    document.getElementById('inputLicenseKey').value = key;                       // ya viene escrita: solo falta el WhatsApp
+                    if (d && d.needPhone) document.getElementById('phoneRecoveryBox').classList.remove('hidden');
+                }
             } catch (e) { /* sin internet: se mantiene la licencia hasta poder revalidar */ }
         }
         function startDemo() {
@@ -1687,7 +1935,8 @@
 
             try {
                 setMsg("Verificando licencia en la nube...", true);
-                const response = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(licenseKey)}&device=${encodeURIComponent(getDeviceId())}`);
+                const tel = (document.getElementById('inputLicensePhone').value || '').trim();
+                const response = await fetch(`${FIXED_GAS_URL}?license=${encodeURIComponent(licenseKey)}&device=${encodeURIComponent(await getDeviceIdAsync())}${tel ? '&phone=' + encodeURIComponent(tel) : ''}`);
                 const data = await response.json();
 
                 if (data && (data.success || data.valid)) {
@@ -1702,6 +1951,7 @@
                     hideLock();
                     speakVita("Licencia verificada con éxito. Bienvenido a Neo Vita.");
                 } else {
+                    if (data && data.needPhone) document.getElementById('phoneRecoveryBox').classList.remove('hidden');
                     setMsg((data && data.message) || "Licencia no válida o expirada.", false);
                 }
             } catch (e) {
