@@ -25,6 +25,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
  html{font-size:17px}
+ html,body{overflow-x:hidden;max-width:100%}
+ main{width:100%}
+ main *{min-width:0}
+ h3,h4,p,span,label{overflow-wrap:anywhere}
+ button{max-width:100%}
  body{font-family:'Outfit','Segoe UI',system-ui,sans-serif;background:linear-gradient(180deg,#e0f2fe 0%,#f8fbff 40%,#fff 100%) fixed}
  [id^="view"]{scroll-margin-top:78px}
  header{background:linear-gradient(90deg,rgba(255,255,255,.96),rgba(240,249,255,.96))!important;border-bottom:1px solid #bae6fd!important}
@@ -557,7 +562,7 @@
                     <input type="text" id="configCaregiverPhone" placeholder="Ej: +56912345678" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
                 </div>
                 
-                <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex items-center justify-between">
+                <div class="bg-sky-50 border border-sky-100 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2">
                     <span class="text-xs font-medium text-slate-600">Estado de Notificaciones:</span>
                     <span id="lblNotifStatus" class="text-xs font-bold text-slate-700">Verificando...</span>
                 </div>
@@ -1142,15 +1147,15 @@
             } else {
                 todaysMeds.forEach(med => {
                     const item = document.createElement('div');
-                    item.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex items-center justify-between";
+                    item.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-2";
                     item.innerHTML = `
-                        <div>
+                        <div class="min-w-0 flex-1">
                             <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-200 text-sky-800 px-2 py-0.5 rounded">🕒 ${med.time} hrs</span>
                             <h4 class="font-semibold text-sm text-slate-900 mt-1">${med.name}</h4>
                             <p class="text-xs text-slate-500">Dosis: ${med.dose || '1 unidad'} | Stock: ${fmtQty(stockDe(med.name).qty)} ${stockDe(med.name).unit}${getTrats().some(t => t.id === med.tratId && t.recurrente) ? ' | 🔁 Crónico' : ''}</p>
                             <button onclick="eliminarTratamiento(${med.id})" class="text-[11px] text-rose-500 hover:text-rose-700 underline mt-1">🗑 Eliminar tratamiento completo</button>
                         </div>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex flex-wrap items-center gap-2">
                             ${med.status === 'pendiente' ? `
                                 <button onclick="updateMedStatus(${med.id}, 'tomado')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium transition shadow-sm">Tomado</button>
                                 <button onclick="updateMedStatus(${med.id}, 'saltado')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 py-2 rounded-lg font-medium transition">Saltar</button>
@@ -1176,15 +1181,15 @@
                 
                 uniqueMeds.forEach(med => {
                     const stockItem = document.createElement('div');
-                    stockItem.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex items-center justify-between";
+                    stockItem.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-2";
                     const st = stockDe(med.name); const bajo = st.qty < unidadesPorToma(med.dose) * 3;
                     stockItem.innerHTML = `
-                        <div>
+                        <div class="min-w-0 flex-1">
                             <h4 class="font-semibold text-sm text-slate-900">${med.name}</h4>
                             <p class="text-xs ${bajo ? 'text-rose-600 font-bold' : 'text-slate-500'}">Restantes: ${fmtQty(st.qty)} ${st.unit}${bajo ? ' · ¡quedan pocas!' : ''}</p>
                         </div>
                         <button onclick="openEditStock('${encodeURIComponent(med.name)}')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-3 py-2 rounded-lg font-medium transition">✏️ Editar / Recargar</button>
-                        <button onclick="eliminarTratamientoPorNombre('${encodeURIComponent(med.name)}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs px-2.5 py-2 rounded-lg font-medium transition ml-1" title="Eliminar tratamiento">🗑</button>
+                        <button onclick="eliminarTratamientoPorNombre('${encodeURIComponent(med.name)}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs px-2.5 py-2 rounded-lg font-medium transition " title="Eliminar tratamiento">🗑</button>
                     `;
                     stockContainer.appendChild(stockItem);
                 });
