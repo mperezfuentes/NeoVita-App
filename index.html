@@ -24,11 +24,10 @@
     </style>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
- html{font-size:17px}
+ html{font-size:16px}
  html,body{overflow-x:hidden;max-width:100%}
  main{width:100%}
- main *{min-width:0}
- h3,h4,p,span,label{overflow-wrap:anywhere}
+ h3,h4{overflow-wrap:break-word}
  button{max-width:100%}
  body{font-family:'Outfit','Segoe UI',system-ui,sans-serif;background:linear-gradient(180deg,#e0f2fe 0%,#f8fbff 40%,#fff 100%) fixed}
  [id^="view"]{scroll-margin-top:78px}
@@ -63,7 +62,8 @@
  #calMes .dia.sel{background:#e0f2fe;outline:2px solid #0ea5e9}
  #calMes .dia.hoy{font-weight:800;color:#0369a1}
  #calMes .punto{width:7px;height:7px;border-radius:50%;margin-top:2px}
- .fab-vita{position:fixed;left:16px;bottom:96px;z-index:46;width:56px;height:56px;border-radius:50%;background-image:linear-gradient(135deg,#06b6d4,#6d28d9);color:#fff;font-size:1.5rem;box-shadow:0 10px 24px rgba(109,40,217,.4);display:flex;align-items:center;justify-content:center;border:0}
+ .ibtn{width:36px;height:36px;border-radius:10px;background:#f0f9ff;border:1px solid #bae6fd;display:flex;align-items:center;justify-content:center;font-size:1rem}
+ .fab-vita{position:fixed;left:16px;bottom:96px;z-index:46;width:52px;height:52px;border-radius:50%;background-image:linear-gradient(135deg,#06b6d4,#6d28d9);color:#fff;font-size:1.5rem;box-shadow:0 10px 24px rgba(109,40,217,.4);display:flex;align-items:center;justify-content:center;border:0}
  .tarjeta-dash{background:linear-gradient(135deg,#ecfeff,#f5f3ff);border:1px solid #bae6fd;border-radius:1.5rem;padding:18px;box-shadow:0 10px 28px rgba(2,132,199,.12)}
  html.modo-facil{font-size:21px}
  html.modo-facil button{min-height:48px}
@@ -241,9 +241,6 @@
                         <input type="date" id="calendarDateSelector" onchange="renderMeds()" class="text-xs bg-sky-50 text-sky-700 px-3 py-1 rounded-full border border-sky-200 font-medium focus:outline-none">
                     </div>
                 </div>
-                <button onclick="vitaResumenDelDia()" class="w-full bg-gradient-to-r from-sky-500 to-cyan-500 hover:opacity-95 text-white rounded-xl p-3.5 flex items-center justify-center gap-2 font-semibold text-sm shadow-md transition">
-                    <i data-lucide="sparkles" class="w-5 h-5"></i> Hablar con Vita: ¿qué me falta hoy?
-                </button>
                 <p id="vitaResumenTexto" class="hidden text-xs text-sky-900 bg-sky-50 border border-sky-200 rounded-xl p-3 leading-relaxed"></p>
                 <div id="medicationList" class="space-y-3"></div>
             </div>
@@ -337,9 +334,9 @@
 
     <!-- AUTOMATIC EMERGENCY SOS (DIRECTO SIN FILTROS) -->
     <div class="fixed bottom-24 right-4 z-[46]">
-        <button onclick="triggerEmergencySOS()" class="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-rose-600/40 font-bold transition transform hover:scale-105 active:scale-95 border border-rose-400/30">
-            <i data-lucide="phone-call" class="w-6 h-6 animate-bounce"></i>
-            <span>SOS Cuidador</span>
+        <button onclick="triggerEmergencySOS()" aria-label="SOS Cuidador" title="SOS Cuidador" class="flex flex-col items-center justify-center bg-rose-600 text-white rounded-full border-4 border-white" style="width:60px;height:60px;box-shadow:0 10px 24px rgba(225,29,72,.45)">
+            <i data-lucide="phone-call" class="w-5 h-5"></i>
+            <span class="text-[10px] font-extrabold leading-none mt-0.5">SOS</span>
         </button>
     </div>
 
@@ -1208,27 +1205,24 @@
                     const g = momentoDia(med.time);
                     if (g.id !== grupoActual) { grupoActual = g.id; const t = document.createElement('div'); t.className = 'momento-titulo'; t.innerHTML = `<span>${g.icono}</span>${g.nombre}`; container.appendChild(t); }
                     const item = document.createElement('div');
-                    item.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-2";
+                    const pend = med.status === 'pendiente', st = stockDe(med.name);
+                    item.className = "bg-white border border-sky-100 rounded-2xl p-3.5 shadow-sm space-y-2.5";
                     item.innerHTML = `
-                        <div class="min-w-0 flex-1">
-                            <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-200 text-sky-800 px-2 py-0.5 rounded">🕒 ${med.time} hrs</span>
-                            <h4 class="font-semibold text-sm text-slate-900 mt-1">${med.name}</h4>
-                            <p class="text-xs text-slate-500">Dosis: ${med.dose || '1 unidad'} | Stock: ${fmtQty(stockDe(med.name).qty)} ${stockDe(med.name).unit}${getTrats().some(t => t.id === med.tratId && t.recurrente) ? ' | 🔁 Crónico' : ''}</p>
-                            <button onclick="eliminarTratamiento(${med.id})" class="text-[11px] text-rose-500 hover:text-rose-700 underline mt-1">🗑 Eliminar tratamiento completo</button>
+                        <div class="flex items-start justify-between gap-2">
+                            <div style="min-width:0;flex:1">
+                                <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md whitespace-nowrap">🕒 ${normalizeTimeTo24h(med.time)}</span>
+                                <h4 class="font-bold text-[15px] text-slate-900 mt-1 leading-snug">${med.name}</h4>
+                                <p class="text-xs text-slate-500">${med.dose || '1 unidad'} · Stock ${fmtQty(st.qty)} ${st.unit}${getTrats().some(t => t.id === med.tratId && t.recurrente) ? ' · 🔁 Crónico' : ''}</p>
+                            </div>
+                            <div class="flex gap-1.5 shrink-0">
+                                ${pend ? `<button onclick="openEditMed(${med.id})" class="ibtn" title="Editar horario">✏️</button>` : ''}
+                                <button onclick="${pend ? `eliminarTratamiento(${med.id})` : `deleteSingleMed(${med.id})`}" class="ibtn" title="${pend ? 'Eliminar todo el tratamiento' : 'Eliminar del registro'}">🗑️</button>
+                            </div>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            ${med.status === 'pendiente' ? `
-                                <button onclick="updateMedStatus(${med.id}, 'tomado')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium transition shadow-sm">Tomado</button>
-                                <button onclick="updateMedStatus(${med.id}, 'saltado')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 py-2 rounded-lg font-medium transition">Saltar</button>
-                                <button onclick="openEditMed(${med.id})" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-2.5 py-2 rounded-lg font-medium transition" title="Editar horario">✏️</button>
-                            ` : med.status === 'tomado' ? `
-                                <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-lg font-semibold">✔ Tomado</span>
-                                <button onclick="deleteSingleMed(${med.id})" class="text-rose-500 hover:text-rose-700 text-xs px-2 py-1 font-medium transition" title="Eliminar del registro">🗑️</button>
-                            ` : `
-                                <span class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded-lg font-semibold">Saltado</span>
-                                <button onclick="deleteSingleMed(${med.id})" class="text-rose-500 hover:text-rose-700 text-xs px-2 py-1 font-medium transition" title="Eliminar del registro">🗑️</button>
-                            `}
-                        </div>
+                        ${pend ? `<div class="grid grid-cols-2 gap-2">
+                                <button onclick="updateMedStatus(${med.id}, 'tomado')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm py-2.5 rounded-xl font-bold shadow-sm transition">✅ Tomado</button>
+                                <button onclick="updateMedStatus(${med.id}, 'saltado')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm py-2.5 rounded-xl font-semibold transition">Saltar</button>
+                            </div>` : `<span class="inline-block text-xs ${med.status === 'tomado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} px-3 py-1.5 rounded-lg font-semibold">${med.status === 'tomado' ? '✔ Tomado' : 'Saltado'}</span>`}
                     `;
                     container.appendChild(item);
                 });
@@ -1242,15 +1236,17 @@
                 
                 uniqueMeds.forEach(med => {
                     const stockItem = document.createElement('div');
-                    stockItem.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-2";
+                    stockItem.className = "bg-white border border-sky-100 rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-2";
                     const st = stockDe(med.name); const bajo = st.qty < unidadesPorToma(med.dose) * 3;
                     stockItem.innerHTML = `
-                        <div class="min-w-0 flex-1">
-                            <h4 class="font-semibold text-sm text-slate-900">${med.name}</h4>
+                        <div style="min-width:0;flex:1">
+                            <h4 class="font-bold text-[15px] text-slate-900 leading-snug">${med.name}</h4>
                             <p class="text-xs ${bajo ? 'text-rose-600 font-bold' : 'text-slate-500'}">Restantes: ${fmtQty(st.qty)} ${st.unit}${bajo ? ' · ¡quedan pocas!' : ''}</p>
                         </div>
-                        <button onclick="openEditStock('${encodeURIComponent(med.name)}')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs px-3 py-2 rounded-lg font-medium transition">✏️ Editar / Recargar</button>
-                        <button onclick="eliminarTratamientoPorNombre('${encodeURIComponent(med.name)}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs px-2.5 py-2 rounded-lg font-medium transition " title="Eliminar tratamiento">🗑</button>
+                        <div class="flex gap-1.5 shrink-0">
+                            <button onclick="openEditStock('${encodeURIComponent(med.name)}')" class="ibtn" title="Editar / recargar stock">✏️</button>
+                            <button onclick="eliminarTratamientoPorNombre('${encodeURIComponent(med.name)}')" class="ibtn" title="Eliminar tratamiento">🗑️</button>
+                        </div>
                     `;
                     stockContainer.appendChild(stockItem);
                 });
@@ -2057,6 +2053,7 @@
         }
         async function toggleNube(on) {
             const chk = document.getElementById('chkNube');
+            if (on && esAppNativa && !PN) { alert('Esta versión de la APK todavía no incluye las alarmas en la nube. Instala la APK nueva (con Firebase).'); if (chk) chk.checked = false; localStorage.setItem('neovita_nube', '0'); estadoNube('⚠️ Falta actualizar la APK'); return; }
             if (on) {
                 if (!localStorage.getItem('neovita_license_key')) { alert('Primero activa tu licencia con tu clave.'); if (chk) chk.checked = false; return; }
                 if (!confirm('Alarmas en la nube\n\nPara avisarte a la hora exacta aunque la app esté cerrada, enviaremos a un servidor seguro los horarios, los nombres de tus remedios y tus citas. Puedes desactivarlo cuando quieras.\n\n¿Activar?')) {
@@ -2077,6 +2074,7 @@
         }
         window.addEventListener('load', () => {
             const c = document.getElementById('chkNube'); if (c) c.checked = localStorage.getItem('neovita_nube') === '1';
+            if (esAppNativa && !PN) { localStorage.setItem('neovita_nube', '0'); if (c) c.checked = false; estadoNube('⚠️ Esta APK aún no incluye la nube: instala la APK nueva'); }
             iniciarNube();
             setTimeout(() => { if (esAppNativa && PN && localStorage.getItem('neovita_nube') === null && localStorage.getItem('neovita_license_key')) { if (c) c.checked = true; toggleNube(true); } }, 5000);
         });
