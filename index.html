@@ -43,24 +43,48 @@
  [id^="cardTab"] h3{font-size:1.02rem!important;font-weight:700!important}
  input,select,textarea{font-size:16px!important}
 </style>
+<style>
+ :root{--c1:#06b6d4;--c2:#7c3aed}
+ header{background:linear-gradient(90deg,rgba(255,255,255,.97),rgba(236,254,255,.97))!important}
+ .brand-title{background:linear-gradient(90deg,#0891b2,#6d28d9);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;font-size:1.3rem;letter-spacing:-.3px}
+ .bg-sky-600,[id^="cardTab"].bg-sky-600{background-image:linear-gradient(135deg,#06b6d4,#6d28d9)!important}
+ #navBar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid #bae6fd;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px rgba(3,105,161,.10)}
+ #navBar button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.68rem;font-weight:600;color:#64748b;padding:6px 2px;border-radius:14px;transition:.15s;background:none;border:0}
+ #navBar button .ico{font-size:1.35rem;line-height:1}
+ #navBar button.activo{color:#fff;background-image:linear-gradient(135deg,#06b6d4,#6d28d9);box-shadow:0 6px 14px rgba(109,40,217,.3)}
+ .momento-titulo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.95rem;color:#0f172a;margin:14px 0 6px}
+ .momento-titulo span{width:30px;height:30px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:#e0f2fe}
+ #avatarRow{display:flex;gap:12px;overflow-x:auto;padding:6px 4px}
+ .avatar{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.7rem;font-weight:600;color:#475569;max-width:72px;background:none;border:0}
+ .avatar .circ{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.2rem;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+ .avatar.activo .circ{box-shadow:0 0 0 3px #fff,0 0 0 6px var(--col),0 8px 16px rgba(0,0,0,.2);transform:scale(1.05)}
+ .avatar.activo{color:#0f172a}
+ #calMes .dia{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;font-size:.8rem;font-weight:600;color:#334155;background:none;border:0}
+ #calMes .dia.sel{background:#e0f2fe;outline:2px solid #0ea5e9}
+ #calMes .dia.hoy{font-weight:800;color:#0369a1}
+ #calMes .punto{width:7px;height:7px;border-radius:50%;margin-top:2px}
+ .fab-vita{position:fixed;left:16px;bottom:96px;z-index:46;width:56px;height:56px;border-radius:50%;background-image:linear-gradient(135deg,#06b6d4,#6d28d9);color:#fff;font-size:1.5rem;box-shadow:0 10px 24px rgba(109,40,217,.4);display:flex;align-items:center;justify-content:center;border:0}
+ .tarjeta-dash{background:linear-gradient(135deg,#ecfeff,#f5f3ff);border:1px solid #bae6fd;border-radius:1.5rem;padding:18px;box-shadow:0 10px 28px rgba(2,132,199,.12)}
+ html.modo-facil{font-size:21px}
+ html.modo-facil button{min-height:48px}
+ html.modo-facil #calMes,html.modo-facil .solo-detalle{display:none!important}
+ main{padding-bottom:9rem!important}
+</style>
 </head>
 <body class="bg-sky-50 text-slate-800 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
     <!-- TOP NAVIGATION BAR -->
     <header class="bg-white/90 backdrop-blur-md border-b border-sky-100 sticky top-0 z-40 px-4 py-3 flex items-center justify-between shadow-sm">
         <div class="flex items-center space-x-3">
-            <div class="bg-sky-500/10 border border-sky-200 p-2 rounded-xl text-sky-600">
-                <i data-lucide="activity" class="w-6 h-6"></i>
-            </div>
+            <img src="icon-192.png" alt="NeoVita" class="w-11 h-11 rounded-2xl shadow-md" style="box-shadow:0 4px 12px rgba(109,40,217,.25)">
             <div>
-                <h1 class="font-bold text-base tracking-tight text-slate-900 flex items-center gap-2">
-                    NeoVita <span class="text-xs bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full font-medium">VitalSync</span>
-                </h1>
-                <p id="lblActiveUserHeader" class="text-xs text-sky-600 font-medium">Perfil: Usuario Principal</p>
+                <h1 class="brand-title leading-tight">NeoVita <span class="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-semibold" style="-webkit-text-fill-color:#6d28d9">VitalSync</span></h1>
+                <p id="lblActiveUserHeader" class="text-xs text-sky-700 font-medium">Perfil: Usuario Principal</p>
             </div>
         </div>
         
         <div class="flex items-center space-x-2">
+            <button onclick="toggleModoFacil()" class="p-2 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 font-extrabold text-sm leading-none" title="Modo fácil: letras más grandes">A+</button>
             <!-- Voice Assistant Vita -->
             <button id="btnMuteVita" onclick="toggleMuteVita()" class="p-2 rounded-xl bg-sky-50 border border-sky-200 text-slate-600 hover:text-sky-700 transition" title="Asistente de Voz Vita">
                 <i data-lucide="volume-2" id="iconMute" class="w-5 h-5 text-sky-600"></i>
@@ -105,13 +129,14 @@
     <!-- MAIN APP CONTENT -->
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 space-y-6 pb-24">
         
+        <div id="avatarRow"></div>
         <!-- PROFILE SELECTOR BAR -->
         <div class="bg-white border border-sky-100 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-3">
             <div class="flex items-center space-x-2 w-full sm:w-auto">
                 <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-200 flex items-center justify-center text-sky-600 shrink-0">
                     <i data-lucide="user" class="w-5 h-5"></i>
                 </div>
-                <div class="flex-1">
+                <div class="flex-1 hidden">
                     <label class="text-xs text-slate-400 block font-medium">Perfil Clínico Activo</label>
                     <select id="selectUserProfile" onchange="switchProfile(this.value)" class="bg-sky-50 border border-sky-200 rounded-lg px-2 py-1 text-sm font-semibold text-slate-900 focus:outline-none focus:border-sky-500 w-full">
                         <!-- Dinámico -->
@@ -159,8 +184,8 @@
             </div>
         </div>
 
-        <!-- MENU DE BOTONES PRINCIPALES -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <!-- MENU DE BOTONES PRINCIPALES (reemplazado por la barra inferior) -->
+        <div class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             <div onclick="filterTab('hoy')" id="cardTabHoy" class="bg-sky-600 text-white p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2">
                 <i data-lucide="calendar-check" class="w-6 h-6"></i>
                 <div>
@@ -204,6 +229,8 @@
         <!-- VIEW 1: CALENDARIO -->
         <div id="viewHoy" class="space-y-4">
             <div id="onboardingCard" class="hidden bg-white border border-sky-200 rounded-2xl p-5 shadow-sm"></div>
+            <div id="dashHoy"></div>
+            <div id="calMes"></div>
             <div class="bg-white border border-sky-100 rounded-2xl p-5 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-sky-100 pb-3">
                     <h3 class="font-bold text-slate-900 flex items-center gap-2">
@@ -284,8 +311,32 @@
 
     </main>
 
+        <!-- BARRA INFERIOR -->
+    <nav id="navBar">
+        <button id="navHoy" onclick="filterTab('hoy')"><span class="ico">🏠</span>Hoy</button>
+        <button id="navStock" onclick="filterTab('stock')"><span class="ico">💊</span>Pastillero</button>
+        <button id="navCitas" onclick="filterTab('citas')"><span class="ico">📅</span>Citas</button>
+        <button id="navVitals" onclick="filterTab('vitals')"><span class="ico">❤️</span>Salud</button>
+        <button id="navInforme" onclick="filterTab('informe')"><span class="ico">📋</span>Informe</button>
+    </nav>
+    <button class="fab-vita" onclick="vitaResumenDelDia()" aria-label="Hablar con Vita" title="Hablar con Vita">✨</button>
+
+    <!-- BIENVENIDA -->
+    <div id="welcomeModal" class="fixed inset-0 bg-sky-950/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-7 text-center space-y-4 shadow-2xl">
+            <div id="welIcono" class="text-6xl"></div>
+            <h3 id="welTitulo" class="text-xl font-extrabold text-slate-900"></h3>
+            <p id="welTexto" class="text-sm text-slate-600 leading-relaxed"></p>
+            <div id="welPuntos" class="flex justify-center gap-2"></div>
+            <div class="flex gap-2 pt-1">
+                <button onclick="cerrarBienvenida()" class="px-4 py-3 rounded-xl text-slate-500 text-sm font-medium">Saltar</button>
+                <button id="welBtn" onclick="siguienteBienvenida()" class="flex-1 bg-sky-600 text-white font-semibold py-3 rounded-xl">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
     <!-- AUTOMATIC EMERGENCY SOS (DIRECTO SIN FILTROS) -->
-    <div class="fixed bottom-6 right-6 z-50">
+    <div class="fixed bottom-24 right-4 z-[46]">
         <button onclick="triggerEmergencySOS()" class="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-rose-600/40 font-bold transition transform hover:scale-105 active:scale-95 border border-rose-400/30">
             <i data-lucide="phone-call" class="w-6 h-6 animate-bounce"></i>
             <span>SOS Cuidador</span>
@@ -576,6 +627,12 @@
                     </button>
                 </div>
                 <div id="diagNativo" class="hidden pt-1 space-y-2">
+                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-3 space-y-1.5">
+                        <label class="flex items-start gap-2 text-sm text-slate-800 font-semibold"><input type="checkbox" id="chkNube" onchange="toggleNube(this.checked)" class="mt-1"><span>☁️ Alarmas en la nube (más confiables)</span></label>
+                        <p class="text-[11px] text-slate-500">Llegan a la hora exacta aunque la app esté cerrada. Se envían a un servidor seguro tus horarios, remedios y citas. Puedes desactivarlo cuando quieras.</p>
+                        <p id="nubeEstado" class="text-[11px] font-semibold text-slate-600"></p>
+                        <button onclick="probarNube()" class="w-full bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold py-2 rounded-lg transition">☁️ Probar alarma en la nube (1 min)</button>
+                    </div>
                     <button onclick="probarAlarmaNativa()" class="w-full bg-amber-500 hover:bg-amber-400 text-white text-xs font-semibold py-2.5 rounded-xl transition">⏰ Probar alarma en 1 minuto (con la app cerrada)</button>
                     <button onclick="guiaAjustesAlarmas()" class="w-full bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-semibold py-2.5 rounded-xl border border-sky-200 transition">📋 Guía: alarmas con el celular bloqueado</button>
                     <button onclick="verDiagnosticoAlarmas()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2.5 rounded-xl border border-slate-200 transition">🔧 Ver diagnóstico de alarmas</button>
@@ -1128,6 +1185,7 @@
         }
 
         function renderMeds() {
+            renderUI();
             const meds = getProfileData();
             const container = document.getElementById('medicationList');
             const stockContainer = document.getElementById('stockList');
@@ -1145,7 +1203,10 @@
                         <p class="text-[11px] text-slate-400">Te avisaremos a la hora de cada toma.</p></div>`
                     : `<p class="text-xs text-slate-400 text-center py-6">No hay medicamentos programados para esta fecha. Agrega uno o escanea una receta.</p>`;
             } else {
-                todaysMeds.forEach(med => {
+                let grupoActual = '';
+                todaysMeds.sort((a, b) => ordenHora(a.time) - ordenHora(b.time)).forEach(med => {
+                    const g = momentoDia(med.time);
+                    if (g.id !== grupoActual) { grupoActual = g.id; const t = document.createElement('div'); t.className = 'momento-titulo'; t.innerHTML = `<span>${g.icono}</span>${g.nombre}`; container.appendChild(t); }
                     const item = document.createElement('div');
                     item.className = "bg-sky-50/50 border border-sky-100 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-2";
                     item.innerHTML = `
@@ -1443,13 +1504,14 @@
 
         function filterTab(tab) {
             playClickSound();
+            actualizarNav(tab);
             ['Hoy', 'Vitals', 'Stock', 'Citas', 'Informe'].forEach(t => {
                 document.getElementById(`view${t}`).classList.add('hidden');
                 document.getElementById(`cardTab${t}`).className = "bg-white hover:bg-sky-50 text-slate-800 border border-sky-100 p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2";
             });
             document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
             document.getElementById(`cardTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "bg-sky-600 text-white p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2";
-            setTimeout(() => { const el = document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+            setTimeout(() => { const el = document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`); if (el) window.scrollTo({ top: 0, behavior: 'smooth' }); }, 80);
         }
 
         function openAddMedModal() { playClickSound(); document.getElementById('addMedModal').classList.remove('hidden'); }
@@ -1550,8 +1612,10 @@
 
             const manana = localDateStr(new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1));
             getProfileAppointments().forEach(a => {
-                const cuando = a.date === hoy ? "Hoy" : (a.date === manana ? "Mañana" : "");
-                if (cuando) partes.push(`${cuando} tienes cita con ${a.doctor}${a.time ? ' a las ' + a.time : ''}.`);
+                const p = String(a.date || '').split('-').map(Number); if (p.length < 3 || p.some(isNaN)) return;
+                const dif = Math.round((new Date(p[0], p[1] - 1, p[2]) - new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate())) / 86400000);
+                const cuando = dif === 0 ? "Hoy" : (dif === 1 ? "Mañana" : (dif > 1 && dif <= 3 ? `En ${dif} días` : ""));
+                if (cuando) partes.push(`${cuando} tienes cita con ${a.doctor}${a.time ? ' a las ' + a.time : ''}.${dif > 0 ? ' Prepara tus exámenes y tu receta.' : ''}`);
             });
 
             partes.push(VITA_ANIMOS[Math.floor(Math.random() * VITA_ANIMOS.length)]);
@@ -1646,17 +1710,19 @@
                 const notifications = lista.slice(0, 150).map((x, i) => ({
                     id: i + 1,
                     title: multiPerfil ? '👤 ' + x.prof.name : 'NeoVita VitalSync 🩺',
-                    body: `🔔 ¡Hora de tomar ${x.m.name} (${x.m.dose || '1 unidad'})! · ${x.prof.name}`,
-                    schedule: { at: x.at, allowWhileIdle: true },
+                    body: `${nubeActiva() ? '⏰ Recordatorio: ' : ''}🔔 ¡Hora de tomar ${x.m.name} (${x.m.dose || '1 unidad'})! · ${x.prof.name}`,
+                    schedule: { at: nubeActiva() ? new Date(x.at.getTime() + 180000) : x.at, allowWhileIdle: true },
                     channelId: 'tomas', actionTypeId: 'TOMA',
                     extra: { medId: x.m.id, profileId: x.prof.id }
                 }));
+                recordatoriosCitas().slice(0, 40).forEach((c, i) => notifications.push({ id: 1000 + i, title: c.ti, body: c.b,
+                    schedule: { at: nubeActiva() ? new Date(c.at.getTime() + 180000) : c.at, allowWhileIdle: true }, channelId: 'tomas' }));
                 if (notifications.length) await LN.schedule({ notifications });
             } catch (e) { ultimoErrorAlarmas = 'Programar: ' + e; console.log('Error programando alarmas:', e); }
-            finally { programandoAlarmas = false; if (reprogramarAlarmas) { reprogramarAlarmas = false; programarAlarmasNativas(); } }
+            finally { programandoAlarmas = false; sincronizarNube(); if (reprogramarAlarmas) { reprogramarAlarmas = false; programarAlarmasNativas(); } }
         }
         async function verDiagnosticoAlarmas() {
-            const l = ['App instalada (nativa): ' + (esAppNativa ? 'sí' : 'no'), 'Plugin de alarmas: ' + (LN ? 'sí' : 'NO'), 'Plugin de voz: ' + (TTS ? 'sí' : 'NO')];
+            const l = ['App instalada (nativa): ' + (esAppNativa ? 'sí' : 'no'), 'Plugin de alarmas: ' + (LN ? 'sí' : 'NO'), 'Plugin de voz: ' + (TTS ? 'sí' : 'NO'), 'Plugin de nube: ' + (PN ? 'sí' : 'NO') + ' | activa: ' + (nubeActiva() ? 'sí' : 'no')];
             if (LN) {
                 try { const p = await LN.checkPermissions(); l.push('Permiso de notificaciones: ' + p.display); } catch (e) { l.push('Permiso: error ' + e); }
                 try { const x = await LN.checkExactNotificationSetting(); l.push('Alarma exacta: ' + x.exact_alarm); } catch (e) { l.push('Alarma exacta: sin dato'); }
@@ -1911,6 +1977,230 @@
         function guiaAjustesAlarmas() {
             alert("Para que la alarma suene con el celular bloqueado:\n\n1) En aplicaciones recientes, mantén presionada NeoVita y toca el candado 🔒.\n2) Ajustes > Aplicaciones > NeoVita: Inicio automático ACTIVADO y Batería en 'Sin restricciones'.\n3) Notificaciones de NeoVita: todo activado, incluida la pantalla de bloqueo.\n4) No cierres NeoVita con 'Cerrar todo' o 'Limpiar'.");
         }
+
+        // ===== AVISOS DE CITAS MÉDICAS: 3 días antes, 1 día antes (09:00) y 2 horas antes =====
+        function recordatoriosCitas() {
+            const ahora = Date.now(), out = [], multi = getProfiles().length > 1;
+            getProfiles().forEach(prof => {
+                let citas = []; try { citas = JSON.parse(localStorage.getItem(`neovita_appts_${prof.id}`) || '[]'); } catch (e) {}
+                citas.forEach(a => {
+                    const d = String(a.date || '').split('-').map(Number); if (d.length < 3 || d.some(isNaN)) return;
+                    const hm = String(a.time || '09:00').split(':').map(Number);
+                    const cita = new Date(d[0], d[1] - 1, d[2], hm[0] || 0, hm[1] || 0, 0);
+                    const donde = a.location ? ` · ${a.location}` : '', para = multi ? ` · Para: ${prof.name}` : '', hora = a.time || '';
+                    const f = cita.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+                    [[new Date(d[0], d[1] - 1, d[2] - 3, 9, 0), '📅 Cita médica en 3 días', `${a.doctor}${donde} · ${f} ${hora}. Prepara tus exámenes, receta e informe.${para}`],
+                     [new Date(d[0], d[1] - 1, d[2] - 1, 9, 0), '📅 Mañana tienes cita médica', `${a.doctor}${donde} a las ${hora}. Revisa que tengas todo listo.${para}`],
+                     [new Date(cita.getTime() - 2 * 3600000), '📅 Tu cita es en 2 horas', `${a.doctor}${donde} a las ${hora}.${para}`]]
+                    .forEach(x => { if (x[0].getTime() > ahora) out.push({ at: x[0], ti: x[1], b: x[2] }); });
+                });
+            });
+            return out.sort((x, y) => x.at - y.at);
+        }
+        function proximasTomas() {
+            const ahora = Date.now(), lista = [];
+            getProfiles().forEach(prof => {
+                let meds = []; try { meds = JSON.parse(localStorage.getItem(`neovita_meds_${prof.id}`) || '[]'); } catch (e) {}
+                meds.forEach(m => {
+                    if (m.status !== 'pendiente') return;
+                    const hm = normalizeTimeTo24h(m.time).split(':').map(Number), ymd = String(m.date).split('-').map(Number);
+                    if (hm.length < 2 || ymd.length < 3 || hm.concat(ymd).some(isNaN)) return;
+                    const at = new Date(ymd[0], ymd[1] - 1, ymd[2], hm[0], hm[1], 0);
+                    if (at.getTime() > ahora) lista.push({ at, m, prof });
+                });
+            });
+            return lista.sort((a, b) => a.at - b.at);
+        }
+
+        // ===== ALARMAS EN LA NUBE (servidor + Firebase): llegan aunque la app esté cerrada =====
+        const PN = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) || null;
+        let nubeTimer = null;
+        function nubeActiva() { return !!(esAppNativa && PN && localStorage.getItem('neovita_nube') === '1' && localStorage.getItem('neovita_fcm_token')); }
+        function estadoNube(t) { const e = document.getElementById('nubeEstado'); if (e) e.textContent = t; }
+        function listaNube() {
+            const multi = getProfiles().length > 1;
+            const tomas = proximasTomas().slice(0, 150).map(x => ({ t: x.at.getTime(), ti: multi ? '👤 ' + x.prof.name : 'NeoVita VitalSync 🩺',
+                b: `🔔 ¡Hora de tomar ${x.m.name} (${x.m.dose || '1 unidad'})! · ${x.prof.name}` }));
+            const citas = recordatoriosCitas().slice(0, 40).map(c => ({ t: c.at.getTime(), ti: c.ti, b: c.b }));
+            const prueba = (window._pruebaNube && window._pruebaNube.t > Date.now()) ? [window._pruebaNube] : [];
+            return tomas.concat(citas, prueba);
+        }
+        async function postNube(token, key, lista) {
+            try {
+                const f = new URLSearchParams();
+                f.append('action', 'syncAlarmas'); f.append('license', key); f.append('device', await getDeviceIdAsync());
+                f.append('token', token); f.append('alarmas', JSON.stringify(lista));
+                const d = await (await fetch(FIXED_GAS_URL, { method: 'POST', body: f })).json();
+                estadoNube(d.status === 'success' ? `✅ Activas (${d.programadas} avisos programados)` : '❌ ' + (d.message || 'Error'));
+                return d.status === 'success';
+            } catch (e) { estadoNube('⚠️ Sin conexión: se reintentará'); return false; }
+        }
+        function sincronizarNube(ya) { clearTimeout(nubeTimer); nubeTimer = setTimeout(enviarNube, ya ? 300 : 4000); }
+        async function enviarNube() {
+            const token = localStorage.getItem('neovita_fcm_token'), key = localStorage.getItem('neovita_license_key');
+            if (localStorage.getItem('neovita_nube') !== '1' || !token || !key) return;
+            await postNube(token, key, listaNube());
+        }
+        async function iniciarNube() {
+            if (!esAppNativa || !PN || localStorage.getItem('neovita_nube') !== '1') return;
+            try {
+                let p = await PN.checkPermissions(); if (p.receive !== 'granted') p = await PN.requestPermissions();
+                if (p.receive !== 'granted') { estadoNube('❌ Permiso de notificaciones denegado'); return; }
+                if (!window._pnListeners) {
+                    window._pnListeners = true;
+                    PN.addListener('registration', t => { localStorage.setItem('neovita_fcm_token', t.value); sincronizarNube(true); });
+                    PN.addListener('registrationError', e => { ultimoErrorAlarmas = 'Push: ' + JSON.stringify(e); estadoNube('❌ No se pudo registrar el celular'); });
+                    PN.addListener('pushNotificationActionPerformed', () => { checkAlarmTimes(); });
+                }
+                estadoNube('⏳ Registrando…'); await PN.register();
+            } catch (e) { ultimoErrorAlarmas = 'Nube: ' + e; estadoNube('❌ ' + e); }
+        }
+        async function toggleNube(on) {
+            const chk = document.getElementById('chkNube');
+            if (on) {
+                if (!localStorage.getItem('neovita_license_key')) { alert('Primero activa tu licencia con tu clave.'); if (chk) chk.checked = false; return; }
+                if (!confirm('Alarmas en la nube\n\nPara avisarte a la hora exacta aunque la app esté cerrada, enviaremos a un servidor seguro los horarios, los nombres de tus remedios y tus citas. Puedes desactivarlo cuando quieras.\n\n¿Activar?')) {
+                    if (chk) chk.checked = false; localStorage.setItem('neovita_nube', '0'); return; }
+                localStorage.setItem('neovita_nube', '1'); await iniciarNube();
+            } else {
+                const t = localStorage.getItem('neovita_fcm_token'), k = localStorage.getItem('neovita_license_key');
+                localStorage.setItem('neovita_nube', '0');
+                if (t && k) await postNube(t, k, []);
+                localStorage.removeItem('neovita_fcm_token'); estadoNube('Desactivadas'); programarAlarmasNativas();
+            }
+        }
+        async function probarNube() {
+            if (!nubeActiva()) { alert('Primero activa las alarmas en la nube.'); return; }
+            window._pruebaNube = { t: Date.now() + 70000, ti: '☁️ NeoVita', b: 'Prueba de alarma en la nube: ¡funciona!' };
+            await enviarNube();
+            alert('Listo. Cierra la app, bloquea el celular y espera 1 minuto.');
+        }
+        window.addEventListener('load', () => {
+            const c = document.getElementById('chkNube'); if (c) c.checked = localStorage.getItem('neovita_nube') === '1';
+            iniciarNube();
+            setTimeout(() => { if (esAppNativa && PN && localStorage.getItem('neovita_nube') === null && localStorage.getItem('neovita_license_key')) { if (c) c.checked = true; toggleNube(true); } }, 5000);
+        });
+
+        // ===== REDISEÑO: tablero "Hoy", momentos del día, avatares, calendario del mes, modo fácil, bienvenida =====
+        const COLORES_PERFIL = ['#0ea5e9', '#7c3aed', '#f59e0b', '#10b981', '#ef4444', '#ec4899'];
+        const $ = id => document.getElementById(id);
+        function ordenHora(t) { const p = normalizeTimeTo24h(t).split(':').map(Number); return (p[0] < 5 ? p[0] + 24 : p[0]) * 60 + (p[1] || 0); }
+        function momentoDia(t) {
+            const h = parseInt(normalizeTimeTo24h(t).split(':')[0]);
+            if (h >= 5 && h < 12) return { id: 'm', icono: '🌅', nombre: 'Mañana' };
+            if (h >= 12 && h < 19) return { id: 't', icono: '☀️', nombre: 'Tarde' };
+            return { id: 'n', icono: '🌙', nombre: 'Noche' };
+        }
+        function colorPerfil(id) { const ids = getProfiles().map(p => p.id); return COLORES_PERFIL[Math.max(0, ids.indexOf(id)) % COLORES_PERFIL.length]; }
+        function nombrePerfil() { const p = getProfiles().find(x => x.id === currentProfile); return p ? p.name : ''; }
+
+        function renderAvatares() {
+            const row = $('avatarRow'); if (!row) return;
+            row.innerHTML = getProfiles().map(p => {
+                const col = colorPerfil(p.id), ini = (p.name || '?').trim().charAt(0).toUpperCase();
+                return `<button class="avatar ${p.id === currentProfile ? 'activo' : ''}" style="--col:${col}" onclick="switchProfile('${p.id}')">
+                    <div class="circ" style="background:${col}">${ini}</div><span class="nombre">${p.name}</span></button>`;
+            }).join('') + `<button class="avatar" onclick="openAddProfileModal()"><div class="circ" style="background:#e2e8f0;color:#64748b">+</div><span class="nombre">Nuevo</span></button>`;
+        }
+
+        function calcularRacha() {
+            const porDia = {}; getProfileData().forEach(m => { (porDia[m.date] = porDia[m.date] || []).push(m); });
+            const completo = ds => porDia[ds] && porDia[ds].length && porDia[ds].every(m => m.status === 'tomado');
+            let d = localDateStr(), n = 0;
+            if (!completo(d)) d = addDaysStr(d, -1);                   // si hoy aún no termina, cuenta desde ayer
+            while (completo(d) && n < 365) { n++; d = addDaysStr(d, -1); }
+            return n;
+        }
+        function renderDashboard() {
+            const el = $('dashHoy'); if (!el) return;
+            const hoy = localDateStr(), meds = getProfileData().filter(m => m.date === hoy).sort((a, b) => ordenHora(a.time) - ordenHora(b.time));
+            const total = meds.length, tom = meds.filter(m => m.status === 'tomado').length, pend = meds.filter(m => m.status === 'pendiente');
+            const pct = total ? tom / total : 0, C = 226.2, racha = calcularRacha();
+            const h = new Date().getHours(), saludo = h < 12 ? 'Buenos días' : (h < 20 ? 'Buenas tardes' : 'Buenas noches');
+            const nom = nombrePerfil(), nomTxt = (nom && nom !== 'Usuario Principal') ? `, ${nom}` : '';
+            const fecha = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+            let proxima;
+            if (total === 0) proxima = `<p class="text-sm text-slate-600">Hoy no tienes tomas programadas.</p>`;
+            else if (!pend.length) {
+                proxima = `<p class="text-lg font-extrabold text-emerald-600">🎉 ¡Día completo!</p><p class="text-sm text-slate-600">Tomaste todo a tiempo. ¡Lo hiciste muy bien!</p>`;
+                const k = `neovita_celebrado_${currentProfile}_${hoy}`;
+                if (!localStorage.getItem(k)) { localStorage.setItem(k, '1'); speakVita('¡Excelente! Completaste todas tus tomas de hoy.'); }
+            } else {
+                const n = pend[0];
+                proxima = `<p class="text-[11px] font-bold uppercase tracking-wider text-violet-600">Próxima toma · ${normalizeTimeTo24h(n.time)}</p>
+                    <p class="text-lg font-extrabold text-slate-900 leading-tight">${n.name}</p><p class="text-sm text-slate-600 mb-2">${n.dose || '1 unidad'}</p>
+                    <button onclick="updateMedStatus(${n.id}, 'tomado')" class="bg-sky-600 text-white font-bold px-6 py-3 rounded-xl shadow-md w-full">✅ Tomar ahora</button>`;
+            }
+            el.innerHTML = `<div class="tarjeta-dash space-y-3">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0"><p class="text-xs text-slate-500 capitalize">${fecha}</p><h2 class="text-xl font-extrabold text-slate-900 leading-tight">${saludo}${nomTxt}</h2>
+                        ${racha >= 1 ? `<p class="text-sm font-bold text-orange-500 mt-1">🔥 ${racha} ${racha === 1 ? 'día' : 'días'} seguidos</p>` : ''}</div>
+                    <svg width="86" height="86" viewBox="0 0 86 86" class="shrink-0"><defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+                        <circle cx="43" cy="43" r="36" fill="none" stroke="#e0f2fe" stroke-width="9"/>
+                        <circle cx="43" cy="43" r="36" fill="none" stroke="url(#gr)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct)}" transform="rotate(-90 43 43)"/>
+                        <text x="43" y="49" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${tom}/${total}</text></svg>
+                </div>
+                <div class="bg-white/80 rounded-2xl p-3.5">${proxima}</div></div>`;
+        }
+
+        let calMes = null;
+        function cambiarMes(d) { const b = calMes || { y: new Date().getFullYear(), m: new Date().getMonth() }; const x = new Date(b.y, b.m + d, 1); calMes = { y: x.getFullYear(), m: x.getMonth() }; renderMesCalendario(); }
+        function elegirDia(ds) { const inp = $('calendarDateSelector'); inp.value = ds; renderMeds(); }
+        function renderMesCalendario() {
+            const el = $('calMes'); if (!el) return;
+            const sel = $('calendarDateSelector').value || localDateStr(), hoy = localDateStr();
+            const b = calMes || { y: +sel.slice(0, 4), m: +sel.slice(5, 7) - 1 };
+            const por = {}; getProfileData().forEach(m => { const o = por[m.date] = por[m.date] || { t: 0, ok: 0 }; o.t++; if (m.status === 'tomado') o.ok++; });
+            const primero = (new Date(b.y, b.m, 1).getDay() + 6) % 7, dias = new Date(b.y, b.m + 1, 0).getDate();
+            const mes = new Date(b.y, b.m, 1).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+            let celdas = ''.padEnd(0);
+            for (let i = 0; i < primero; i++) celdas += '<div></div>';
+            for (let d = 1; d <= dias; d++) {
+                const ds = `${b.y}-${String(b.m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`, o = por[ds];
+                let col = '';
+                if (o) col = o.ok === o.t ? '#10b981' : (o.ok > 0 ? '#f59e0b' : (ds < hoy ? '#ef4444' : '#7dd3fc'));
+                celdas += `<button class="dia ${ds === sel ? 'sel' : ''} ${ds === hoy ? 'hoy' : ''}" onclick="elegirDia('${ds}')">${d}${col ? `<i class="punto" style="background:${col}"></i>` : '<i class="punto"></i>'}</button>`;
+            }
+            el.innerHTML = `<div class="bg-white border border-sky-100 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-2"><button onclick="cambiarMes(-1)" class="px-3 py-1 text-lg text-slate-500">‹</button>
+                    <h3 class="font-extrabold text-slate-900 capitalize">${mes}</h3><button onclick="cambiarMes(1)" class="px-3 py-1 text-lg text-slate-500">›</button></div>
+                <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 mb-1">${['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(x => `<div>${x}</div>`).join('')}</div>
+                <div class="grid grid-cols-7 gap-1">${celdas}</div>
+                <p class="text-[10px] text-slate-400 mt-2 text-center">🟢 completo · 🟠 parcial · 🔴 sin tomar · 🔵 programado</p></div>`;
+        }
+        function renderUI() { renderAvatares(); renderDashboard(); renderMesCalendario(); }
+        function actualizarNav(tab) {
+            ['Hoy', 'Stock', 'Citas', 'Vitals', 'Informe'].forEach(t => { const b = $('nav' + t); if (b) b.classList.toggle('activo', t.toLowerCase() === tab); });
+        }
+        function toggleModoFacil() {
+            const on = !document.documentElement.classList.contains('modo-facil');
+            document.documentElement.classList.toggle('modo-facil', on); localStorage.setItem('neovita_facil', on ? '1' : '0');
+            speakVita(on ? 'Modo fácil activado: letras más grandes.' : 'Modo fácil desactivado.');
+        }
+        // ----- bienvenida -----
+        const BIENVENIDA = [
+            { i: '💊', t: 'Nunca olvides una toma', x: 'Te avisamos a la hora exacta con sonido y vibración, y llevas el control de cada remedio.' },
+            { i: '👨‍👩‍👧', t: 'Cuida a toda tu familia', x: 'Crea un perfil con su propio color para cada persona y ve de un vistazo de quién es cada remedio.' },
+            { i: '🚨', t: 'Ayuda en un toque', x: 'El botón SOS y tu asistente Vita (✨) están siempre a mano. Empecemos agregando tu primer remedio.' }
+        ];
+        let welI = 0;
+        function pintarBienvenida() {
+            const s = BIENVENIDA[welI];
+            $('welIcono').textContent = s.i; $('welTitulo').textContent = s.t; $('welTexto').textContent = s.x;
+            $('welPuntos').innerHTML = BIENVENIDA.map((_, k) => `<i style="width:9px;height:9px;border-radius:50%;background:${k === welI ? '#0ea5e9' : '#cbd5e1'}"></i>`).join('');
+            $('welBtn').textContent = welI === BIENVENIDA.length - 1 ? 'Comenzar' : 'Siguiente';
+        }
+        function siguienteBienvenida() { if (welI < BIENVENIDA.length - 1) { welI++; pintarBienvenida(); } else cerrarBienvenida(); }
+        function cerrarBienvenida() { $('welcomeModal').classList.add('hidden'); localStorage.setItem('neovita_bienvenida', '1'); }
+        function revisarBienvenida() {
+            if (localStorage.getItem('neovita_bienvenida') || !$('licenseLockScreen').classList.contains('hidden')) return;
+            welI = 0; pintarBienvenida(); $('welcomeModal').classList.remove('hidden');
+        }
+        window.addEventListener('load', () => {
+            if (localStorage.getItem('neovita_facil') === '1') document.documentElement.classList.add('modo-facil');
+            actualizarNav('hoy'); renderUI();
+            setInterval(revisarBienvenida, 2000);
+        });
 
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
         const LICENSE_VERSION = '2';
