@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <script>if (localStorage.getItem("neovita_tema") !== "claro") document.documentElement.classList.add("neon");</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeoVita ~ VitalSync Clinical PWA</title>
     
@@ -70,20 +71,95 @@
  html.modo-facil #calMes,html.modo-facil .solo-detalle{display:none!important}
  main{padding-bottom:9rem!important}
 </style>
+<style>
+ /* ===== VitalSync Neón ===== */
+ #navBar{left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;border-radius:28px!important;padding:6px!important;border:1px solid #bae6fd!important}
+ #navBar button.activo{box-shadow:0 0 18px rgba(34,211,238,.55)!important}
+ #navBar button.activo::after{content:"";width:18px;height:3px;border-radius:3px;background:#fff;opacity:.9;margin-top:1px}
+ .fab-vita{bottom:104px!important}
+ .fixed.bottom-24{bottom:104px!important}
+ .logo-brand{box-shadow:0 0 0 2px rgba(34,211,238,.5),0 0 18px rgba(34,211,238,.45)}
+ .pulso-marca{fill:none;stroke:#22d3ee;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:140;stroke-dashoffset:140;animation:trazo2 3s ease-in-out infinite}
+ @keyframes trazo2{0%{stroke-dashoffset:140}55%,100%{stroke-dashoffset:0}}
+ .pulso{stroke-dasharray:90;stroke-dashoffset:90;animation:trazo 2.4s ease-in-out infinite}
+ @keyframes trazo{0%{stroke-dashoffset:90}60%,100%{stroke-dashoffset:0}}
+ @keyframes latido{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(34,211,238,.6)}50%{transform:scale(1.25);box-shadow:0 0 0 8px rgba(34,211,238,0)}}
+ .aro{padding:4px;border-radius:50%;background:conic-gradient(var(--col) calc(var(--p)*1%),rgba(148,163,184,.35) 0)}
+ .avatar.activo .circ{box-shadow:0 6px 14px rgba(0,0,0,.3)!important;transform:scale(1.04)}
+ .avatar.activo .nombre{font-weight:800}
+ .linea-dia{overflow-x:auto;padding:12px 4px 2px}
+ .linea-puntos{position:relative;display:flex;gap:20px;min-width:max-content;padding:0 6px}
+ .linea-puntos::before{content:"";position:absolute;left:0;right:0;top:15px;height:5px;border-radius:5px;background:linear-gradient(90deg,#fcd34d,#fb923c,#22d3ee,#7c3aed,#312e81);opacity:.85}
+ .lp{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.7rem;font-weight:700;color:#475569}
+ .lp-dot{width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+ .lp-next{animation:latido 1.4s infinite}
+ .destello{position:fixed;inset:0;pointer-events:none;z-index:70;background:radial-gradient(circle at 50% 60%,rgba(34,211,238,.35),transparent 60%);animation:flash .5s ease-out forwards}
+ @keyframes flash{from{opacity:1}to{opacity:0}}
+ .confeti{position:fixed;top:-20px;z-index:71;pointer-events:none;font-size:1.3rem;animation:caer 2.2s ease-in forwards}
+ @keyframes caer{to{transform:translateY(108vh) rotate(540deg);opacity:.9}}
+ /* --- tema oscuro --- */
+ html.neon{color-scheme:dark}
+ html.neon body{background:radial-gradient(900px 500px at 12% -8%,rgba(124,58,237,.30),transparent 60%),radial-gradient(800px 500px at 100% 8%,rgba(6,182,212,.22),transparent 55%),#050b1c!important;color:#e6f1ff}
+ html.neon header{background:rgba(6,12,32,.9)!important;border-bottom:1px solid rgba(103,232,249,.22)!important}
+ html.neon .brand-title{background:linear-gradient(90deg,#22d3ee,#a78bfa);-webkit-background-clip:text;background-clip:text}
+ html.neon .bg-white,html.neon .bg-white\/80,html.neon .bg-white\/90{background:rgba(14,24,54,.8)!important}
+ html.neon .bg-sky-50,html.neon .bg-sky-50\/50{background:rgba(24,38,78,.62)!important}
+ html.neon .bg-sky-100,html.neon .bg-sky-200{background:rgba(34,211,238,.14)!important}
+ html.neon .bg-slate-100,html.neon .bg-slate-200,html.neon .bg-slate-300{background:rgba(148,163,184,.16)!important}
+ html.neon .bg-amber-50,html.neon .bg-amber-50\/60{background:rgba(251,191,36,.10)!important}
+ html.neon .bg-amber-100{background:rgba(251,191,36,.18)!important}
+ html.neon .bg-rose-50,html.neon .bg-rose-50\/40{background:rgba(244,63,94,.10)!important}
+ html.neon .bg-rose-100{background:rgba(244,63,94,.18)!important}
+ html.neon .bg-emerald-100{background:rgba(52,211,153,.18)!important}
+ html.neon .bg-violet-50,html.neon .bg-violet-100{background:rgba(124,58,237,.22)!important}
+ html.neon .border-sky-100,html.neon .border-sky-200,html.neon .border-slate-200{border-color:rgba(103,232,249,.24)!important}
+ html.neon .border-amber-100,html.neon .border-amber-200,html.neon .border-amber-300{border-color:rgba(251,191,36,.38)!important}
+ html.neon .border-rose-100,html.neon .border-rose-200{border-color:rgba(244,63,94,.38)!important}
+ html.neon .border-violet-200{border-color:rgba(167,139,250,.45)!important}
+ html.neon .text-slate-900,html.neon .text-slate-800{color:#f1f7ff!important}
+ html.neon .text-slate-700,html.neon .text-slate-600{color:#c3d3ee!important}
+ html.neon .text-slate-500{color:#9db0d0!important}
+ html.neon .text-slate-400{color:#7f93b8!important}
+ html.neon .text-sky-900,html.neon .text-sky-800,html.neon .text-sky-700,html.neon .text-sky-600,html.neon .text-sky-500{color:#67e8f9!important}
+ html.neon .text-amber-900,html.neon .text-amber-800,html.neon .text-amber-700,html.neon .text-amber-500{color:#fcd34d!important}
+ html.neon .text-rose-700,html.neon .text-rose-600,html.neon .text-rose-500{color:#fda4af!important}
+ html.neon .text-emerald-800,html.neon .text-emerald-600{color:#6ee7b7!important}
+ html.neon .text-violet-700,html.neon .text-violet-600{color:#c4b5fd!important}
+ html.neon .text-orange-500{color:#fdba74!important}
+ html.neon .shadow-sm{box-shadow:0 0 0 1px rgba(103,232,249,.08),0 10px 30px rgba(0,0,0,.35)!important}
+ html.neon input,html.neon select,html.neon textarea{background:rgba(10,18,44,.92)!important;color:#e6f1ff!important;border-color:rgba(103,232,249,.32)!important}
+ html.neon ::placeholder{color:#7f93b8!important}
+ html.neon .tarjeta-dash{background:linear-gradient(135deg,rgba(8,47,73,.72),rgba(46,16,101,.62));border:1px solid rgba(103,232,249,.32);box-shadow:0 0 34px rgba(34,211,238,.16)}
+ html.neon #navBar{background:rgba(8,14,36,.84);border:1px solid rgba(103,232,249,.3)!important;box-shadow:0 12px 40px rgba(0,0,0,.55),0 0 24px rgba(34,211,238,.12)}
+ html.neon #navBar button{color:#9db0d0}
+ html.neon #navBar button.activo{color:#fff}
+ html.neon .momento-titulo{color:#f1f7ff}
+ html.neon .momento-titulo span{background:rgba(34,211,238,.14)}
+ html.neon .ibtn{background:rgba(34,211,238,.10);border-color:rgba(103,232,249,.32)}
+ html.neon #calMes .dia{color:#c3d3ee}
+ html.neon #calMes .dia.sel{background:rgba(34,211,238,.2);outline-color:#22d3ee}
+ html.neon #calMes .dia.hoy{color:#67e8f9}
+ html.neon .avatar{color:#9db0d0}
+ html.neon .avatar.activo{color:#f1f7ff}
+ html.neon .lp{color:#9db0d0}
+ html.neon .lp-dot{border-color:#0b1330}
+</style>
 </head>
 <body class="bg-sky-50 text-slate-800 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
     <!-- TOP NAVIGATION BAR -->
     <header class="bg-white/90 backdrop-blur-md border-b border-sky-100 sticky top-0 z-40 px-4 py-3 flex items-center justify-between shadow-sm">
-        <div class="flex items-center space-x-3">
-            <img src="icon-192.png" alt="NeoVita" class="w-11 h-11 rounded-2xl shadow-md" style="box-shadow:0 4px 12px rgba(109,40,217,.25)">
-            <div>
-                <h1 class="brand-title leading-tight">NeoVita <span class="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-semibold" style="-webkit-text-fill-color:#6d28d9">VitalSync</span></h1>
-                <p id="lblActiveUserHeader" class="text-xs text-sky-700 font-medium">Perfil: Usuario Principal</p>
+        <div class="flex items-center space-x-3 min-w-0">
+            <img src="icon-192.png" alt="NeoVita" class="w-12 h-12 rounded-full logo-brand shrink-0">
+            <div class="min-w-0">
+                <h1 class="brand-title leading-tight whitespace-nowrap">NeoVita~VitalSync</h1>
+                <svg width="120" height="14" viewBox="0 0 120 14" aria-hidden="true"><polyline class="pulso-marca" points="0,8 28,8 34,2 40,13 46,5 52,8 120,8"/></svg>
+                <p id="lblActiveUserHeader" class="text-xs text-sky-700 font-medium truncate">Perfil: Usuario Principal</p>
             </div>
         </div>
         
         <div class="flex items-center space-x-2">
+            <button id="btnTema" onclick="toggleTema()" class="p-2 rounded-xl bg-sky-50 border border-sky-200 text-base leading-none" title="Cambiar tema Neón / Claro">🌙</button>
             <button onclick="toggleModoFacil()" class="p-2 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 font-extrabold text-sm leading-none" title="Modo fácil: letras más grandes">A+</button>
             <!-- Voice Assistant Vita -->
             <button id="btnMuteVita" onclick="toggleMuteVita()" class="p-2 rounded-xl bg-sky-50 border border-sky-200 text-slate-600 hover:text-sky-700 transition" title="Asistente de Voz Vita">
@@ -1207,11 +1283,12 @@
                     const item = document.createElement('div');
                     const pend = med.status === 'pendiente', st = stockDe(med.name);
                     item.className = "bg-white border border-sky-100 rounded-2xl p-3.5 shadow-sm space-y-2.5";
+                    item.style.borderLeft = "4px solid " + colorPerfil(currentProfile);
                     item.innerHTML = `
                         <div class="flex items-start justify-between gap-2">
                             <div style="min-width:0;flex:1">
                                 <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md whitespace-nowrap">🕒 ${normalizeTimeTo24h(med.time)}</span>
-                                <h4 class="font-bold text-[15px] text-slate-900 mt-1 leading-snug">${med.name}</h4>
+                                <h4 class="font-bold text-[15px] text-slate-900 mt-1 leading-snug">${iconoMed(med.name)} ${med.name}</h4>
                                 <p class="text-xs text-slate-500">${med.dose || '1 unidad'} · Stock ${fmtQty(st.qty)} ${st.unit}${getTrats().some(t => t.id === med.tratId && t.recurrente) ? ' · 🔁 Crónico' : ''}</p>
                             </div>
                             <div class="flex gap-1.5 shrink-0">
@@ -1240,7 +1317,7 @@
                     const st = stockDe(med.name); const bajo = st.qty < unidadesPorToma(med.dose) * 3;
                     stockItem.innerHTML = `
                         <div style="min-width:0;flex:1">
-                            <h4 class="font-bold text-[15px] text-slate-900 leading-snug">${med.name}</h4>
+                            <h4 class="font-bold text-[15px] text-slate-900 leading-snug">${iconoMed(med.name)} ${med.name}</h4>
                             <p class="text-xs ${bajo ? 'text-rose-600 font-bold' : 'text-slate-500'}">Restantes: ${fmtQty(st.qty)} ${st.unit}${bajo ? ' · ¡quedan pocas!' : ''}</p>
                         </div>
                         <div class="flex gap-1.5 shrink-0">
@@ -1412,6 +1489,7 @@
         }
 
         function updateMedStatus(id, status) {
+            if (status === 'tomado') { destello(); try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} }
             playClickSound();
             let meds = getProfileData();
             meds = meds.map(m => {
@@ -2112,7 +2190,7 @@
             row.innerHTML = getProfiles().map(p => {
                 const col = colorPerfil(p.id), ini = (p.name || '?').trim().charAt(0).toUpperCase();
                 return `<button class="avatar ${p.id === currentProfile ? 'activo' : ''}" style="--col:${col}" onclick="switchProfile('${p.id}')">
-                    <div class="circ" style="background:${col}">${ini}</div><span class="nombre">${p.name}</span></button>`;
+                    <div class="aro" style="--p:${progresoPerfil(p.id)}"><div class="circ" style="background:${col}">${ini}</div></div><span class="nombre">${p.name}</span></button>`;
             }).join('') + `<button class="avatar" onclick="openAddProfileModal()"><div class="circ" style="background:#e2e8f0;color:#64748b">+</div><span class="nombre">Nuevo</span></button>`;
         }
 
@@ -2137,11 +2215,11 @@
             else if (!pend.length) {
                 proxima = `<p class="text-lg font-extrabold text-emerald-600">🎉 ¡Día completo!</p><p class="text-sm text-slate-600">Tomaste todo a tiempo. ¡Lo hiciste muy bien!</p>`;
                 const k = `neovita_celebrado_${currentProfile}_${hoy}`;
-                if (!localStorage.getItem(k)) { localStorage.setItem(k, '1'); speakVita('¡Excelente! Completaste todas tus tomas de hoy.'); }
+                if (!localStorage.getItem(k)) { localStorage.setItem(k, '1'); speakVita('¡Excelente! Completaste todas tus tomas de hoy.'); confeti(); }
             } else {
                 const n = pend[0];
                 proxima = `<p class="text-[11px] font-bold uppercase tracking-wider text-violet-600">Próxima toma · ${normalizeTimeTo24h(n.time)}</p>
-                    <p class="text-lg font-extrabold text-slate-900 leading-tight">${n.name}</p><p class="text-sm text-slate-600 mb-2">${n.dose || '1 unidad'}</p>
+                    <p class="text-lg font-extrabold text-slate-900 leading-tight">${iconoMed(n.name)} ${n.name}</p><p class="text-sm text-slate-600 mb-2">${n.dose || '1 unidad'}</p>
                     <button onclick="updateMedStatus(${n.id}, 'tomado')" class="bg-sky-600 text-white font-bold px-6 py-3 rounded-xl shadow-md w-full">✅ Tomar ahora</button>`;
             }
             el.innerHTML = `<div class="tarjeta-dash space-y-3">
@@ -2151,9 +2229,10 @@
                     <svg width="86" height="86" viewBox="0 0 86 86" class="shrink-0"><defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
                         <circle cx="43" cy="43" r="36" fill="none" stroke="#e0f2fe" stroke-width="9"/>
                         <circle cx="43" cy="43" r="36" fill="none" stroke="url(#gr)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct)}" transform="rotate(-90 43 43)"/>
-                        <text x="43" y="49" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${tom}/${total}</text></svg>
+                        <polyline class="pulso" points="22,66 33,66 38,59 44,73 50,62 55,66 64,66" fill="none" stroke="url(#gr)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <text x="43" y="47" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${tom}/${total}</text></svg>
                 </div>
-                <div class="bg-white/80 rounded-2xl p-3.5">${proxima}</div></div>`;
+                <div class="bg-white/80 rounded-2xl p-3.5">${proxima}</div>${lineaDelDia(meds)}</div>`;
         }
 
         let calMes = null;
@@ -2214,6 +2293,37 @@
             actualizarNav('hoy'); renderUI();
             setInterval(revisarBienvenida, 2000);
         });
+
+        // ===== VitalSync Neón: íconos por tipo, línea del día, pulso familiar, destellos y tema =====
+        function iconoMed(name) { const u = stockDe(name).unit; return u === 'ml' ? '🧴' : (u === 'gotas' ? '💧' : '💊'); }
+        function progresoPerfil(id) {
+            let m = []; try { m = JSON.parse(localStorage.getItem(`neovita_meds_${id}`) || '[]'); } catch (e) {}
+            const d = m.filter(x => x.date === localDateStr());
+            return d.length ? Math.round(100 * d.filter(x => x.status === 'tomado').length / d.length) : 0;
+        }
+        function lineaDelDia(meds) {
+            if (!meds.length) return '';
+            const sig = meds.find(m => m.status === 'pendiente'), col = { tomado: '#34d399', saltado: '#fbbf24', pendiente: '#22d3ee' };
+            return `<div class="linea-dia"><div class="linea-puntos">${meds.map(m => `<div class="lp"><i class="lp-dot ${m === sig ? 'lp-next' : ''}" style="background:${col[m.status] || '#22d3ee'}"></i><span>${normalizeTimeTo24h(m.time)}</span><span>${momentoDia(m.time).icono}</span></div>`).join('')}</div></div>`;
+        }
+        function destello() { const d = document.createElement('div'); d.className = 'destello'; document.body.appendChild(d); setTimeout(() => d.remove(), 600); }
+        function confeti() {
+            const e = ['🎉', '✨', '💜', '💙', '⭐', '🩵'];
+            for (let i = 0; i < 28; i++) {
+                const c = document.createElement('div'); c.className = 'confeti'; c.textContent = e[i % e.length];
+                c.style.left = Math.random() * 100 + 'vw'; c.style.animationDelay = Math.random() * 0.6 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 3200);
+            }
+        }
+        function aplicarTema() {
+            const neon = document.documentElement.classList.contains('neon'), b = $('btnTema');
+            if (b) b.textContent = neon ? '🌙' : '☀️';
+            const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', neon ? '#050b1c' : '#0284c7');
+        }
+        function toggleTema() {
+            const neon = document.documentElement.classList.toggle('neon'); localStorage.setItem('neovita_tema', neon ? 'neon' : 'claro');
+            aplicarTema(); speakVita(neon ? 'Tema neón activado.' : 'Tema claro activado.');
+        }
+        window.addEventListener('load', aplicarTema);
 
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
         const LICENSE_VERSION = '2';
