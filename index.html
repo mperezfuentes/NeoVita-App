@@ -1834,7 +1834,7 @@
                 const pend = await LN.getPending();
                 const viejos = (pend.notifications || []).filter(n => n.id !== 999998 && n.id !== 999999);   // se conservan las de prueba
                 if (viejos.length) await LN.cancel({ notifications: viejos.map(n => ({ id: n.id })) });
-                const retraso = nubeActiva() ? 180000 : 0;
+                const retraso = nubeFunciona() ? 180000 : 0;
                 const notifications = agruparTomas(proximasTomas()).slice(0, 150).map(g => notifLocal(g, new Date(g.at.getTime() + retraso), retraso > 0));
                 recordatoriosCitas().slice(0, 40).forEach((c, i) => notifications.push({ id: 1000 + i, title: c.ti, body: c.b,
                     schedule: { at: new Date(c.at.getTime() + retraso), allowWhileIdle: true }, channelId: CANAL_ALARMA }));
@@ -1847,7 +1847,13 @@
             if (LN) {
                 try { const p = await LN.checkPermissions(); l.push('Permiso de notificaciones: ' + p.display); } catch (e) { l.push('Permiso: error ' + e); }
                 try { const x = await LN.checkExactNotificationSetting(); l.push('Alarma exacta: ' + x.exact_alarm); } catch (e) { l.push('Alarma exacta: sin dato'); }
-                try { const pe = await LN.getPending(); l.push('Alarmas programadas: ' + pe.notifications.length); } catch (e) {}
+                try {
+                    const pe = await LN.getPending(); l.push('Alarmas programadas: ' + pe.notifications.length);
+                    const hora = n => { const a = n.schedule && (n.schedule.at || n.schedule.on); return a ? new Date(a).getTime() : 0; };
+                    pe.notifications.filter(n => n.id !== 999998 && n.id !== 999999).sort((a, b) => hora(a) - hora(b)).slice(0, 4)
+                        .forEach(n => l.push('  • ' + (hora(n) ? new Date(hora(n)).toLocaleString('es-CL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '?') + ' · ' + String(n.body || n.title || '').slice(0, 42)));
+                    l.push('Nube: ' + (nubeFunciona() ? 'funcionando (las locales se retrasan 3 min)' : (nubeActiva() ? 'sin confirmar (locales a la hora exacta)' : 'desactivada')));
+                } catch (e) {}
             }
             if (ultimoErrorAlarmas) l.push('Último error: ' + ultimoErrorAlarmas);
             alert(l.join('\n'));
@@ -2137,6 +2143,7 @@
         const PN = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) || null;
         let nubeTimer = null;
         function nubeActiva() { return !!(esAppNativa && PN && localStorage.getItem('neovita_nube') === '1' && localStorage.getItem('neovita_fcm_token')); }
+        function nubeFunciona() { return nubeActiva() && Date.now() - Number(localStorage.getItem('neovita_nube_ok') || 0) < 2 * 86400000; }
         function estadoNube(t) { const e = document.getElementById('nubeEstado'); if (e) e.textContent = t; }
         function listaNube() {
             const tomas = agruparTomas(proximasTomas()).slice(0, 150).map(g => { const t = textoGrupo(g, false); return { t: g.at.getTime(), ti: t.titulo, b: t.cuerpo }; });
@@ -2150,6 +2157,7 @@
                 f.append('action', 'syncAlarmas'); f.append('license', key); f.append('device', await getDeviceIdAsync());
                 f.append('token', token); f.append('alarmas', JSON.stringify(lista));
                 const d = await (await fetch(FIXED_GAS_URL, { method: 'POST', body: f })).json();
+                if (d.status === 'success') localStorage.setItem('neovita_nube_ok', String(Date.now()));
                 estadoNube(d.status === 'success' ? `✅ Activas (${d.programadas} avisos programados)` : '❌ ' + (d.message || 'Error'));
                 return d.status === 'success';
             } catch (e) { estadoNube('⚠️ Sin conexión: se reintentará'); return false; }
