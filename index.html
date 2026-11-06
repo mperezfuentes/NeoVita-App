@@ -507,7 +507,7 @@
             <div class="grid grid-cols-2 gap-2">
                 <div><label class="text-xs font-medium text-slate-600 block mb-1">Cantidad que tienes</label><input type="number" id="newMedStock" min="0" step="any" placeholder="Ej: 30" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
                 <div><label class="text-xs font-medium text-slate-600 block mb-1">Unidad</label>
-                    <select id="newMedUnit" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"><option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="unidades">unidades</option></select></div>
+                    <select id="newMedUnit" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"><option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="puffs">puffs (inhalador)</option><option value="unidades">unidades</option></select></div>
             </div>
             <p class="text-[11px] text-slate-400">Empieza en la fecha del calendario. Si dejas la cantidad vacía, se calcula sola.</p>
             <div class="flex space-x-3 pt-1">
@@ -635,7 +635,7 @@
                         <div class="flex gap-1">
                             <input type="number" id="confirmMedQty" min="0" step="any" placeholder="Ej: 30" class="w-1/2 bg-white border border-sky-200 rounded-xl px-2 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
                             <select id="confirmMedUnit" class="w-1/2 bg-white border border-sky-200 rounded-xl px-1 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
-                                <option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="unidades">unidades</option>
+                                <option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="puffs">puffs (inhalador)</option><option value="unidades">unidades</option>
                             </select>
                         </div>
                     </div>
@@ -687,7 +687,7 @@
                     <input type="number" id="editStockQty" min="0" step="any" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
                 <div><label class="text-xs font-medium text-slate-600 block mb-1">Unidad</label>
                     <select id="editStockUnit" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
-                        <option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="unidades">unidades</option>
+                        <option value="pastillas">pastillas</option><option value="ml">ml (jarabe)</option><option value="gotas">gotas</option><option value="puffs">puffs (inhalador)</option><option value="unidades">unidades</option>
                     </select></div>
             </div>
             <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" id="editStockSumar"> Sumar a lo que ya tengo (recarga)</label>
@@ -932,7 +932,7 @@
             renderAppointments();
             renderPrescriptions();
 
-            // REVISOR AUTOMÁTICO CADA 30 SEGUNDOS
+            // REVISOR AUTOMÁTICO CADA 15 SEGUNDOS
             setInterval(checkAlarmTimes, 15000);
             checkAlarmTimes();
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { requestWakeLock(); checkAlarmTimes(); } });
@@ -1888,7 +1888,6 @@
         if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
             mostrarBannerInstalar('Para instalar en iPhone: toca <b>Compartir</b> ⬆️ y luego <b>“Agregar a pantalla de inicio”</b>.', false);
         }
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
 
         // ===== AVISO DE DÍAS RESTANTES (demo o plan mensual por vencer) =====
         function diasRestantes(ms) { return Math.ceil((Number(ms) - Date.now()) / 86400000); }
@@ -2050,7 +2049,7 @@
             const horas = t.cada ? horariosDesde(t.primera, t.cada) : [t.primera];
             let ds = t.generadoHasta ? addDaysStr(t.generadoHasta, 1) : t.inicio;
             while (ds <= limite) {
-                horas.forEach(h => meds.push({ id: Date.now() + Math.random(), tratId: t.id, name: t.name, time: h, dose: t.dose, stock: 0, status: 'pendiente', date: ds }));
+                horas.forEach(h => meds.push({ id: Date.now() * 1000 + Math.floor(Math.random() * 1000), tratId: t.id, name: t.name, time: h, dose: t.dose, stock: 0, status: 'pendiente', date: ds }));
                 t.generadoHasta = ds; ds = addDaysStr(ds, 1);
             }
         }
@@ -2325,7 +2324,7 @@
         });
 
         // ===== VitalSync Neón: íconos por tipo, línea del día, pulso familiar, destellos y tema =====
-        function iconoMed(name) { const u = stockDe(name).unit; return u === 'ml' ? '🧴' : (u === 'gotas' ? '💧' : '💊'); }
+        function iconoMed(name) { const u = stockDe(name).unit; return u === 'ml' ? '🧴' : (u === 'gotas' ? '💧' : (u === 'puffs' ? '💨' : '💊')); }
         function progresoPerfil(id) {
             let m = []; try { m = JSON.parse(localStorage.getItem(`neovita_meds_${id}`) || '[]'); } catch (e) {}
             const d = m.filter(x => x.date === localDateStr());
