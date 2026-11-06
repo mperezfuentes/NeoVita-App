@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <script>if (localStorage.getItem("neovita_tema") !== "claro") document.documentElement.classList.add("neon");</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tu copiloto de salud familiar: alarmas de remedios, perfiles familiares, citas y SOS.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_CL">
+    <meta property="og:site_name" content="NeoVita~VitalSync">
+    <meta property="og:title" content="NeoVita~VitalSync - Tu copiloto de salud familiar">
+    <meta property="og:description" content="Alarmas de remedios, perfiles familiares, citas médicas y botón SOS en una sola app.">
+    <meta property="og:url" content="https://neovita-app-blond.vercel.app/">
+    <meta property="og:image" content="https://neovita-app-blond.vercel.app/og-image.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://neovita-app-blond.vercel.app/og-image.jpg">
     <title>NeoVita ~ VitalSync Clinical PWA</title>
     
     <!-- PWA Manifest & Theme Color -->
@@ -144,6 +157,20 @@
  html.neon .lp{color:#9db0d0}
  html.neon .lp-dot{border-color:#0b1330}
 </style>
+<style>
+ html.neon .hover\:bg-sky-100:hover,html.neon .hover\:bg-sky-200:hover,html.neon .hover\:bg-sky-50:hover{background:rgba(34,211,238,.22)!important}
+ html.neon .hover\:bg-slate-200:hover,html.neon .hover\:bg-slate-300:hover{background:rgba(148,163,184,.26)!important}
+ html.neon .hover\:bg-rose-100:hover{background:rgba(244,63,94,.26)!important}
+ html.neon .hover\:text-slate-600:hover,html.neon .hover\:text-slate-700:hover{color:#f1f7ff!important}
+ html.neon .hover\:text-sky-700:hover{color:#a5f3fc!important}
+ html.neon .hover\:text-rose-700:hover{color:#fecdd3!important}
+ html.neon svg text{fill:#f1f7ff}
+ html.neon svg circle[stroke="#e0f2fe"]{stroke:rgba(148,163,184,.28)}
+ html.neon .avatar .circ[style*="e2e8f0"]{background:rgba(148,163,184,.22)!important;color:#c3d3ee!important}
+ html.neon option{background:#0b1330;color:#e6f1ff}
+ html.neon input[type=time]::-webkit-calendar-picker-indicator,html.neon input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1)}
+ html.neon .bg-emerald-600{color:#fff!important}
+</style>
 </head>
 <body class="bg-sky-50 text-slate-800 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
@@ -152,7 +179,7 @@
         <div class="flex items-center space-x-3 min-w-0">
             <img src="icon-192.png" alt="NeoVita" class="w-12 h-12 rounded-full logo-brand shrink-0">
             <div class="min-w-0">
-                <h1 class="brand-title leading-tight whitespace-nowrap">NeoVita~VitalSync</h1>
+                <h1 class="brand-title leading-tight whitespace-nowrap">NeoVita</h1>
                 <svg width="120" height="14" viewBox="0 0 120 14" aria-hidden="true"><polyline class="pulso-marca" points="0,8 28,8 34,2 40,13 46,5 52,8 120,8"/></svg>
                 <p id="lblActiveUserHeader" class="text-xs text-sky-700 font-medium truncate">Perfil: Usuario Principal</p>
             </div>
@@ -1002,22 +1029,23 @@
                     if (ctx.state === 'suspended') ctx.resume();
                     const now = ctx.currentTime;
 
+                    const comp = ctx.createDynamicsCompressor(); comp.connect(ctx.destination);
                     function playLoudBeep(startTime) {
                         const osc = ctx.createOscillator();
                         const gain = ctx.createGain();
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(950, startTime); // Tono más agudo y penetrante
-                        gain.gain.setValueAtTime(0.8, startTime); // Ganancia alta (volumen fuerte)
-                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(1760, startTime);                // tono agudo y penetrante, tipo despertador
+                        gain.gain.setValueAtTime(0.0001, startTime);
+                        gain.gain.exponentialRampToValueAtTime(1.0, startTime + 0.01);   // volumen máximo
+                        gain.gain.setValueAtTime(1.0, startTime + 0.24);
+                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
                         osc.connect(gain);
-                        gain.connect(ctx.destination);
+                        gain.connect(comp);
                         osc.start(startTime);
-                        osc.stop(startTime + 0.35);
+                        osc.stop(startTime + 0.32);
                     }
 
-                    playLoudBeep(now);
-                    playLoudBeep(now + 0.45);
-                    playLoudBeep(now + 0.90);
+                    [0, 0.42, 0.84, 1.7, 2.12, 2.54].forEach(t => playLoudBeep(now + t));   // beep beep beep ... beep beep beep
 
                     
                 }
@@ -1113,7 +1141,7 @@
                     updateNotificationStatusLabel();
                     if (p.display !== 'granted') { alert("⚠️ Permisos no concedidos."); return; }
                     await LN.schedule({ notifications: [{ id: 999998, title: 'NeoVita VitalSync 🩺', body: '🔔 Notificación de prueba',
-                        schedule: { at: new Date(Date.now() + 15000), allowWhileIdle: true }, channelId: 'tomas' }] });
+                        schedule: { at: new Date(Date.now() + 15000), allowWhileIdle: true }, channelId: CANAL_ALARMA }] });
                     alert("Listo. Cierra la app y bloquea el celular: la notificación llegará en 15 segundos.");
                 } catch (e) { ultimoErrorAlarmas = String(e); alert("Error: " + e); }
                 return;
@@ -1718,7 +1746,8 @@
 
         // ===== ALARMAS NATIVAS (solo dentro de la app Android hecha con Capacitor) =====
         // En el navegador normal estas funciones no hacen nada: todo lo anterior sigue funcionando igual.
-        const SONIDO_ALARMA = '';   // opcional: si agregas res/raw/alarma.wav al proyecto Android, escribe 'alarma.wav'
+        const CANAL_ALARMA = 'alarma_v2';   // canal nuevo: Android no permite cambiar el sonido de un canal ya creado
+        const SONIDO_ALARMA = 'alarma.wav';   // opcional: si agregas res/raw/alarma.wav al proyecto Android, escribe 'alarma.wav'
         const DEV = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Device) || null;
         async function getDeviceIdAsync() {   // en la app Android se usa el ID del equipo, que no cambia al reinstalar
             if (esAppNativa && DEV) { try { const r = await DEV.getId(); if (r && r.identifier) return 'A-' + r.identifier; } catch (e) {} }
@@ -1739,7 +1768,8 @@
             try {
                 let p = await LN.checkPermissions();
                 if (p.display !== 'granted') p = await LN.requestPermissions();
-                await LN.createChannel(Object.assign({ id: 'tomas', name: 'Alarmas de medicamentos', description: 'Avisos de la hora de cada toma',
+                try { await LN.deleteChannel({ id: 'tomas' }); } catch (e) {}
+                await LN.createChannel(Object.assign({ id: CANAL_ALARMA, name: 'Alarmas de medicamentos', description: 'Avisos de la hora de cada toma (sonido fuerte)',
                     importance: 5, visibility: 1, vibration: true, lights: true }, SONIDO_ALARMA ? { sound: SONIDO_ALARMA } : {}));
                 await LN.registerActionTypes({ types: [{ id: 'TOMA', actions: [{ id: 'tomado', title: '✔ Tomar' }, { id: 'saltado', title: '❌ Saltar' }] }] });
                 LN.addListener('localNotificationActionPerformed', ev => {
@@ -1778,7 +1808,7 @@
         }
         function notifLocal(g, at, recordatorio) {
             const t = textoGrupo(g, recordatorio);
-            const n = { id: g.k, title: t.titulo, body: t.cuerpo, schedule: { at, allowWhileIdle: true }, channelId: 'tomas' };
+            const n = { id: g.k, title: t.titulo, body: t.cuerpo, schedule: { at, allowWhileIdle: true }, channelId: CANAL_ALARMA };
             if (g.items.length > 1) n.largeBody = t.largo;                       // varios: se ve la lista completa al desplegar
             else { n.actionTypeId = 'TOMA'; n.extra = { medId: g.items[0].m.id, profileId: g.items[0].prof.id }; }
             return n;
@@ -1807,7 +1837,7 @@
                 const retraso = nubeActiva() ? 180000 : 0;
                 const notifications = agruparTomas(proximasTomas()).slice(0, 150).map(g => notifLocal(g, new Date(g.at.getTime() + retraso), retraso > 0));
                 recordatoriosCitas().slice(0, 40).forEach((c, i) => notifications.push({ id: 1000 + i, title: c.ti, body: c.b,
-                    schedule: { at: new Date(c.at.getTime() + retraso), allowWhileIdle: true }, channelId: 'tomas' }));
+                    schedule: { at: new Date(c.at.getTime() + retraso), allowWhileIdle: true }, channelId: CANAL_ALARMA }));
                 if (notifications.length) await LN.schedule({ notifications });
             } catch (e) { ultimoErrorAlarmas = 'Programar: ' + e; console.log('Error programando alarmas:', e); }
             finally { programandoAlarmas = false; sincronizarNube(); if (reprogramarAlarmas) { reprogramarAlarmas = false; programarAlarmasNativas(); } }
@@ -1828,7 +1858,7 @@
                 let p = await LN.checkPermissions(); if (p.display !== 'granted') p = await LN.requestPermissions();
                 if (p.display !== 'granted') { alert('Falta el permiso de notificaciones.'); return; }
                 await LN.schedule({ notifications: [{ id: 999999, title: 'NeoVita VitalSync 🩺', body: '🔔 Alarma de prueba: ¡funciona!',
-                    schedule: { at: new Date(Date.now() + 60000), allowWhileIdle: true }, channelId: 'tomas', actionTypeId: 'TOMA' }] });
+                    schedule: { at: new Date(Date.now() + 60000), allowWhileIdle: true }, channelId: CANAL_ALARMA, actionTypeId: 'TOMA' }] });
                 alert('Listo. Cierra la app, bloquea el celular y espera 1 minuto: debe sonar y vibrar.');
             } catch (e) { ultimoErrorAlarmas = String(e); alert('Error: ' + e); }
         }
