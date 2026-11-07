@@ -630,7 +630,7 @@
                     </div>
                     <div>
                         <label class="text-[11px] font-semibold text-slate-600 block mb-1">Duración (Días)</label>
-                        <input type="number" id="confirmMedDays" value="1" min="1" max="90" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
+                        <input type="number" id="confirmMedDays" value="7" min="1" max="90" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -1325,7 +1325,7 @@
                             <div style="min-width:0;flex:1">
                                 <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md whitespace-nowrap">🕒 ${normalizeTimeTo24h(med.time)}</span>
                                 <h4 class="font-bold text-[15px] text-slate-900 mt-1 leading-snug">${iconoMed(med.name)} ${med.name}</h4>
-                                <p class="text-xs text-slate-500">${med.dose || '1 unidad'} · Stock ${fmtQty(st.qty)} ${st.unit}${getTrats().some(t => t.id === med.tratId && t.recurrente) ? ' · 🔁 Crónico' : ''}</p>
+                                <p class="text-xs text-slate-500">${med.dose || '1 unidad'} · Stock ${fmtQty(st.qty)} ${st.unit}${infoDuracion(med)}</p>
                             </div>
                             <div class="flex gap-1.5 shrink-0">
                                 ${pend ? `<button onclick="openEditMed(${med.id})" class="ibtn" title="Editar horario">✏️</button>` : ''}
@@ -1349,17 +1349,20 @@
                 
                 uniqueMeds.forEach(med => {
                     const stockItem = document.createElement('div');
-                    stockItem.className = "bg-white border border-sky-100 rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-2";
+                    stockItem.className = "bg-white border border-sky-100 rounded-2xl p-3.5 shadow-sm flex flex-wrap items-center justify-between gap-2";
+                    const dur = resumenDuracion(med.name), encN = encodeURIComponent(med.name);
                     const st = stockDe(med.name); const bajo = st.qty < unidadesPorToma(med.dose) * 3;
                     stockItem.innerHTML = `
                         <div style="min-width:0;flex:1">
                             <h4 class="font-bold text-[15px] text-slate-900 leading-snug">${iconoMed(med.name)} ${med.name}</h4>
                             <p class="text-xs ${bajo ? 'text-rose-600 font-bold' : 'text-slate-500'}">Restantes: ${fmtQty(st.qty)} ${st.unit}${bajo ? ' · ¡quedan pocas!' : ''}</p>
+                            <p class="text-[11px] text-slate-500">${dur.txt}</p>
                         </div>
                         <div class="flex gap-1.5 shrink-0">
                             <button onclick="openEditStock('${encodeURIComponent(med.name)}')" class="ibtn" title="Editar / recargar stock">✏️</button>
                             <button onclick="eliminarTratamientoPorNombre('${encodeURIComponent(med.name)}')" class="ibtn" title="Eliminar tratamiento">🗑️</button>
                         </div>
+                        ${dur.cron ? '' : `<div class="w-full flex gap-2"><button onclick="extenderTratamiento('${encN}')" class="flex-1 bg-sky-100 text-sky-800 text-xs font-semibold py-2 rounded-lg">📆 Extender días</button><button onclick="hacerCronico('${encN}')" class="flex-1 bg-violet-100 text-violet-700 text-xs font-semibold py-2 rounded-lg">🔁 Hacer crónico</button></div>`}
                     `;
                     stockContainer.appendChild(stockItem);
                 });
@@ -2061,7 +2064,7 @@
         function addDaysStr(ds, n) { const p = ds.split('-').map(Number); return localDateStr(new Date(p[0], p[1] - 1, p[2] + n)); }
         function generarTomas(t, meds, hasta) {          // agrega las tomas que faltan, sin tocar las ya editadas
             const limite = (t.fin && t.fin < hasta) ? t.fin : hasta;
-            const horas = t.cada ? horariosDesde(t.primera, t.cada) : [t.primera];
+            const horas = t.horas || (t.cada ? horariosDesde(t.primera, t.cada) : [t.primera]);
             let ds = t.generadoHasta ? addDaysStr(t.generadoHasta, 1) : t.inicio;
             while (ds <= limite) {
                 horas.forEach(h => meds.push({ id: Date.now() + Math.random(), tratId: t.id, name: t.name, time: h, dose: t.dose, stock: 0, status: 'pendiente', date: ds }));
@@ -2278,7 +2281,7 @@
                         <polyline class="pulso" points="22,66 33,66 38,59 44,73 50,62 55,66 64,66" fill="none" stroke="url(#gr)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                         <text x="43" y="47" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${tom}/${total}</text></svg>
                 </div>
-                <div class="bg-white/80 rounded-2xl p-3.5">${proxima}</div>${lineaDelDia(meds)}</div>`;
+                <div class="bg-white/80 rounded-2xl p-3.5">${proxima}</div>${lineaDelDia(meds)}${avisoFin()}</div>`;
         }
 
         let calMes = null;
@@ -2370,6 +2373,63 @@
             aplicarTema(); speakVita(neon ? 'Tema neón activado.' : 'Tema claro activado.');
         }
         window.addEventListener('load', aplicarTema);
+
+        // ===== DURACIÓN DE CADA TRATAMIENTO: verla, extenderla o dejarla continua =====
+        function grupoTrat(name) {
+            const meds = getProfileData().filter(m => m.name === name);
+            const tid = (meds.find(m => m.tratId) || {}).tratId;
+            return { meds, t: getTrats().find(x => x.id === tid) || null };
+        }
+        function rangoTrat(name) {
+            const g = grupoTrat(name), fechas = g.meds.map(m => m.date).sort();
+            const ini = g.t ? g.t.inicio : fechas[0], fin = fechas[fechas.length - 1];
+            return { g, ini, fin, total: Math.round((new Date(fin + 'T00:00') - new Date(ini + 'T00:00')) / 86400000) + 1 };
+        }
+        function infoDuracion(med) {
+            const r = rangoTrat(med.name); if (r.g.t && r.g.t.recurrente) return ' · 🔁 Crónico';
+            const dia = Math.round((new Date(med.date + 'T00:00') - new Date(r.ini + 'T00:00')) / 86400000) + 1;
+            return r.total > 1 ? ` · Día ${dia} de ${r.total}${med.date === r.fin ? ' (último)' : ''}` : ' · 1 día';
+        }
+        function resumenDuracion(name) {
+            const r = rangoTrat(name), f = d => d.split('-').reverse().slice(0, 2).join('/');
+            if (r.g.t && r.g.t.recurrente) return { txt: '🔁 Crónico (continuo)', cron: true };
+            return { txt: `${r.fin < localDateStr() ? '⚠️ Terminó' : '📆 Hasta'} el ${f(r.fin)} · ${r.total} ${r.total === 1 ? 'día' : 'días'}`, cron: false };
+        }
+        function asegurarTrat(name) {          // tratamientos antiguos sin "ficha": se crea a partir de sus tomas
+            const meds = getProfileData(), trats = getTrats(), mm = meds.filter(m => m.name === name); if (!mm.length) return null;
+            let t = trats.find(x => x.id === (mm.find(m => m.tratId) || {}).tratId);
+            if (!t) {
+                const fechas = mm.map(m => m.date).sort(), ultimo = fechas[fechas.length - 1];
+                const horas = [...new Set(mm.filter(m => m.date === ultimo).map(m => normalizeTimeTo24h(m.time)))].sort();
+                t = { id: Date.now() + '-' + Math.floor(Math.random() * 1e6), name, dose: mm[mm.length - 1].dose, primera: horas[0], cada: 0, horas,
+                      inicio: fechas[0], recurrente: false, fin: ultimo, generadoHasta: ultimo };
+                trats.push(t); mm.forEach(m => { m.tratId = t.id; });
+            }
+            return { meds, trats, t };
+        }
+        function extenderTratamiento(enc) {
+            const name = decodeURIComponent(enc), r = asegurarTrat(name); if (!r || r.t.recurrente) return;
+            const n = parseInt(prompt(`¿Cuántos días más quieres extender ${name}?`, '7')); if (!n || n < 1 || n > 365) return;
+            const hoy = localDateStr(), t = r.t, base = (t.fin && t.fin >= hoy) ? t.fin : addDaysStr(hoy, -1);
+            t.fin = addDaysStr(base, n); if (!t.generadoHasta || t.generadoHasta < base) t.generadoHasta = base;
+            generarTomas(t, r.meds, t.fin); saveTrats(r.trats); saveProfileData(r.meds);
+            speakVita(`${name} extendido ${n} días.`);
+        }
+        function hacerCronico(enc) {
+            const name = decodeURIComponent(enc), r = asegurarTrat(name); if (!r) return;
+            const hoy = localDateStr(), t = r.t, ayer = addDaysStr(hoy, -1);
+            t.recurrente = true; t.fin = null; if (!t.generadoHasta || t.generadoHasta < ayer) t.generadoHasta = ayer;
+            generarTomas(t, r.meds, addDaysStr(hoy, DIAS_ADELANTE)); saveTrats(r.trats); saveProfileData(r.meds);
+            speakVita(`${name} ahora es un tratamiento continuo.`);
+        }
+        function avisoFin() {                  // avisa en "Hoy" qué tratamientos terminan hoy o mañana
+            const hoy = localDateStr(), man = addDaysStr(hoy, 1), grupos = {};
+            getProfileData().forEach(m => { const g = grupos[m.name] = grupos[m.name] || { name: m.name, max: m.date }; if (m.date > g.max) g.max = m.date; });
+            const fin = Object.values(grupos).filter(g => (g.max === hoy || g.max === man) && !resumenDuracion(g.name).cron);
+            if (!fin.length) return '';
+            return `<div class="rounded-2xl p-3 text-xs bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5">${fin.map(g =>
+                `<div class="flex items-center justify-between gap-2"><span>⏳ <b>${g.name}</b> ${g.max === hoy ? 'termina hoy' : 'termina mañana'}</span><button onclick="extenderTratamiento('${encodeURIComponent(g.name)}')" class="ibtn" style="width:auto;padding:0 10px;font-size:.72rem">📆 Extender</button></div>`).join('')}</div>`;
+        }
 
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
         const LICENSE_VERSION = '2';
