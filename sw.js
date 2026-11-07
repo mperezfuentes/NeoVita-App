@@ -7,29 +7,17 @@ self.addEventListener('fetch', event => {
     const req = event.request;
     if (req.method !== 'GET') return;
     const url = new URL(req.url);
-    if (url.origin !== self.location.origin && !HOSTS_OK.includes(url.hostname)) return;
-    event.respondWith(
-        fetch(req).then(res => {
-            if (res && (res.ok || res.type === 'opaque')) { const copia = res.clone(); caches.open(CACHE).then(c => c.put(req, copia)).catch(() => {}); }
-            return res;
-        }).catch(() => caches.match(req).then(r => r || caches.match('./') || caches.match('/')))
-    );
+    const propio = url.origin === self.location.origin;
+    if (!propio && !HOSTS_OK.includes(url.hostname)) return;
+    const guardar = res => { if (res && (res.ok || res.type === 'opaque')) { const copia = res.clone(); caches.open(CACHE).then(c => c.put(req, copia)).catch(() => {}); } return res; };
+    if (!propio) {   // librerías externas: primero la copia guardada (carga instantánea) y se actualiza en segundo plano
+        event.respondWith(caches.match(req).then(hit => { const red = fetch(req).then(guardar).catch(() => hit); return hit || red; }));
+        return;
+    }
+    // archivos propios: red primero (siempre lo último de GitHub/Vercel); sin internet, la copia guardada
+    event.respondWith(fetch(req).then(guardar).catch(() => caches.match(req).then(r => r || caches.match('./') || caches.match('/'))));
 });
 
-// Aviso push enviado desde un servidor (para uso futuro)
-self.addEventListener('push', event => {
-    const data = event.data ? event.data.json() : {};
-    event.waitUntil(self.registration.showNotification(data.title || "NeoVita VitalSync 🩺", {
-        body: data.body || "🔔 ¡Es hora de tomar tu medicamento!",
-        icon: "icon-192.png", badge: "icon-192.png",
-        vibrate: [500, 200, 500, 200, 1000],
-        tag: data.tag || 'neovita-alarm', renotify: true, requireInteraction: true,
-        data: data.data || {},
-        actions: [{ action: 'tomado', title: '✔ Tomar' }, { action: 'saltado', title: '❌ Saltar' }]
-    }));
-});
-
-// Toque en la notificación o en sus botones Tomar / Saltar
 self.addEventListener('notificationclick', event => {
     event.notification.close();
     const action = event.action;
