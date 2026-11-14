@@ -502,10 +502,12 @@
                 <button onclick="closeAddMedModal()" class="text-slate-400 hover:text-slate-600 text-xl" aria-label="Cerrar">✕</button>
             </div>
             <div><label class="text-xs font-medium text-slate-600 block mb-1">Nombre del fármaco</label><input type="text" id="newMedName" placeholder="Ej: Losartán 50mg" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+            <div><label class="text-xs font-medium text-slate-600 block mb-1">Tipo de remedio</label><select id="newMedTipo" onchange="cambiarTipoRem('newMed')" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"><option value="pastilla">💊 Pastilla / cápsula</option><option value="jarabe">🧴 Jarabe / líquido</option><option value="gotas">💧 Gotas</option><option value="otro">🩹 Otro (sobre, ampolla…)</option></select></div>
             <div class="grid grid-cols-2 gap-2">
-                <div><label class="text-xs font-medium text-slate-600 block mb-1">Dosis por toma</label><input type="text" id="newMedDose" value="1 comprimido" placeholder="1 comprimido o 5 ml" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
-                <div><label class="text-xs font-medium text-slate-600 block mb-1">Hora primera toma</label><input type="time" id="newMedTime" value="07:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Cantidad por toma</label><input type="number" id="newMedDosisN" value="1" min="0.25" step="0.25" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+                <div><label class="text-xs font-medium text-slate-600 block mb-1">Medida</label><select id="newMedDosisU" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"><option value="comprimido">comprimido(s)</option><option value="cápsula">cápsula(s)</option></select></div>
             </div>
+            <div><label class="text-xs font-medium text-slate-600 block mb-1">Hora de la primera toma</label><input type="time" id="newMedTime" value="07:00" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
             <div class="grid grid-cols-2 gap-2">
                 <div><label class="text-xs font-medium text-slate-600 block mb-1">Frecuencia</label>
                     <select id="newMedFreq" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"><option value="0">Una sola toma</option><option value="24">Cada 24 h (1 al día)</option><option value="12">Cada 12 h</option><option value="8" selected>Cada 8 h</option><option value="6">Cada 6 h</option><option value="4">Cada 4 h</option></select></div>
@@ -607,15 +609,11 @@
                     <label class="text-[11px] font-semibold text-slate-600 block mb-1">Nombre del Fármaco</label>
                     <input type="text" id="confirmMedName" value="Paracetamol" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
                 </div>
+                <div><label class="text-[11px] font-semibold text-slate-600 block mb-1">Concentración (mg / ml)</label><input type="text" id="confirmMedConcentration" value="500 mg" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500"></div>
+                <div><label class="text-[11px] font-semibold text-slate-600 block mb-1">Tipo de remedio</label><select id="confirmMedTipo" onchange="cambiarTipoRem('confirmMed')" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500"><option value="pastilla">💊 Pastilla / cápsula</option><option value="jarabe">🧴 Jarabe / líquido</option><option value="gotas">💧 Gotas</option><option value="otro">🩹 Otro (sobre, ampolla…)</option></select></div>
                 <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Concentración (mg / ml)</label>
-                        <input type="text" id="confirmMedConcentration" value="500 mg" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Dosis (ej: 1 comprimido)</label>
-                        <input type="text" id="confirmMedDose" value="1 comprimido" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500">
-                    </div>
+                    <div><label class="text-[11px] font-semibold text-slate-600 block mb-1">Cantidad por toma</label><input type="number" id="confirmMedDosisN" value="1" min="0.25" step="0.25" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500"></div>
+                    <div><label class="text-[11px] font-semibold text-slate-600 block mb-1">Medida</label><select id="confirmMedDosisU" class="w-full bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-sky-500"><option value="comprimido">comprimido(s)</option><option value="cápsula">cápsula(s)</option></select></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -664,13 +662,14 @@
     <!-- EDITAR HORARIO / DOSIS -->
     <div id="editMedModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl text-left">
-            <h3 class="text-lg font-bold text-slate-900">✏️ Editar horario</h3>
-            <p id="editMedName" class="text-sm text-slate-600 font-medium"></p>
+            <h3 class="text-lg font-bold text-slate-900">✏️ Editar remedio</h3>
+            <div><label class="text-xs font-medium text-slate-600 block mb-1">Nombre del remedio (con miligramos)</label><input type="text" id="editMedNombre" placeholder="Ej: Losartán 50 mg" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+            <p id="editMedName" class="hidden"></p>
             <div class="grid grid-cols-2 gap-2">
                 <div><label class="text-xs font-medium text-slate-600 block mb-1">Nueva hora</label>
                     <input type="time" id="editMedTime" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
                 <div><label class="text-xs font-medium text-slate-600 block mb-1">Dosis</label>
-                    <input type="text" id="editMedDose" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+                    <input type="text" id="editMedDose" placeholder="Ej: 2 cucharadas (30 ml)" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
             </div>
             <div><label class="text-xs font-medium text-slate-600 block mb-1">¿Dónde aplicar el cambio?</label>
                 <select id="editMedScope" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500">
@@ -688,7 +687,8 @@
     <div id="editStockModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl text-left">
             <h3 class="text-lg font-bold text-slate-900">📦 Stock</h3>
-            <p id="editStockName" class="text-sm text-slate-600 font-medium"></p>
+            <div><label class="text-xs font-medium text-slate-600 block mb-1">Nombre del remedio (con miligramos)</label><input type="text" id="editStockNombre" placeholder="Ej: Losartán 50 mg" class="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-sky-500"></div>
+            <p id="editStockName" class="hidden"></p>
             <p class="text-xs text-slate-500">Cantidad actual: <b id="editStockActual"></b></p>
             <div class="grid grid-cols-2 gap-2">
                 <div><label class="text-xs font-medium text-slate-600 block mb-1">Cantidad</label>
@@ -1491,7 +1491,7 @@
             playClickSound();
             const medName = document.getElementById('confirmMedName').value.trim();
             const concentration = document.getElementById('confirmMedConcentration').value.trim();
-            const dose = document.getElementById('confirmMedDose').value.trim();
+            const dose = componerDosis('confirmMed');
             const frequencyVal = document.getElementById('confirmMedFrequency').value;
             const totalDays = parseInt(document.getElementById('confirmMedDays').value) || 1;
             const firstTime = document.getElementById('confirmMedFirstTime').value || '07:00';
@@ -1638,7 +1638,7 @@
             playClickSound();
             const g = id => document.getElementById(id);
             const name = g('newMedName').value.trim(), primera = g('newMedTime').value;
-            const dose = g('newMedDose').value.trim() || '1 comprimido', unit = g('newMedUnit').value;
+            const dose = componerDosis('newMed'), unit = g('newMedUnit').value;
             const cada = parseInt(g('newMedFreq').value) || 0, recurrente = g('newMedRecurrente').checked && cada > 0;
             const dias = cada ? (parseInt(g('newMedDays').value) || 1) : 1;
             if (!name || !primera) { alert('Ingrese el nombre y la hora de la primera toma.'); return; }
@@ -1976,11 +1976,14 @@
         function saveStockMap(m, pid) { localStorage.setItem(`neovita_stockmap_${pid || currentProfile}`, JSON.stringify(m)); }
         function unidadesPorToma(dose) {
             const t = String(dose || '').replace(',', '.');
+            const par = t.match(/\((\d+(?:\.\d+)?)\s*ml\)/i); if (par) return parseFloat(par[1]);          // "2 cucharadas (30 ml)" -> 30 ml
             if (/\b(mg|mcg|µg|g)\b/i.test(t) && !/(comprim|tablet|c[aá]psula|pastilla|gota|ml|cc|cucharada|sobre|ampolla)/i.test(t)) return 1;
             const fr = t.match(/(\d+)\s*\/\s*(\d+)/);
             if (fr && Number(fr[2]) > 0) return Number(fr[1]) / Number(fr[2]);
             const m = t.match(/\d+(?:\.\d+)?/);
             const n = m ? parseFloat(m[0]) : 1;
+            if (/cucharadita/i.test(t)) return n * 5;
+            if (/cucharada/i.test(t)) return n * 15;
             return n > 0 ? n : 1;
         }
         function stockDe(name, pid) {
@@ -2013,6 +2016,7 @@
             const m = getProfileData().find(x => x.id === id); if (!m) return;
             editMedId = id; playClickSound();
             document.getElementById('editMedName').textContent = m.name;
+            document.getElementById('editMedNombre').value = m.name;
             document.getElementById('editMedTime').value = normalizeTimeTo24h(m.time);
             document.getElementById('editMedDose').value = m.dose || '';
             document.getElementById('editMedScope').value = 'futuras';
@@ -2020,6 +2024,9 @@
         }
         function closeEditMed() { document.getElementById('editMedModal').classList.add('hidden'); editMedId = null; }
         function saveEditMed() {
+            const nombreNuevo = (document.getElementById('editMedNombre').value || '').trim();
+            const antes = getProfileData().find(x => x.id === editMedId);
+            if (antes && nombreNuevo && nombreNuevo !== antes.name) renombrarRemedio(antes.name, nombreNuevo);   // cambia el nombre en todo el tratamiento
             const nuevaHora = document.getElementById('editMedTime').value;
             const dosis = document.getElementById('editMedDose').value.trim();
             if (!nuevaHora) { alert('Ingresa la nueva hora.'); return; }
@@ -2039,6 +2046,7 @@
             const name = decodeURIComponent(encName); editStockName = name; playClickSound();
             const st = stockDe(name);
             document.getElementById('editStockName').textContent = name;
+            document.getElementById('editStockNombre').value = name;
             document.getElementById('editStockActual').textContent = `${fmtQty(st.qty)} ${st.unit}`;
             document.getElementById('editStockQty').value = fmtQty(st.qty);
             document.getElementById('editStockUnit').value = st.unit;
@@ -2047,6 +2055,8 @@
         }
         function closeEditStock() { document.getElementById('editStockModal').classList.add('hidden'); editStockName = null; }
         function saveEditStock() {
+            const nn = (document.getElementById('editStockNombre').value || '').trim();
+            if (nn && nn !== editStockName && renombrarRemedio(editStockName, nn)) editStockName = nn;
             const q = parseFloat(document.getElementById('editStockQty').value);
             if (isNaN(q) || q < 0) { alert('Ingresa una cantidad válida.'); return; }
             const unit = document.getElementById('editStockUnit').value;
@@ -2429,6 +2439,35 @@
             if (!fin.length) return '';
             return `<div class="rounded-2xl p-3 text-xs bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5">${fin.map(g =>
                 `<div class="flex items-center justify-between gap-2"><span>⏳ <b>${g.name}</b> ${g.max === hoy ? 'termina hoy' : 'termina mañana'}</span><button onclick="extenderTratamiento('${encodeURIComponent(g.name)}')" class="ibtn" style="width:auto;padding:0 10px;font-size:.72rem">📆 Extender</button></div>`).join('')}</div>`;
+        }
+
+        // Cambia el nombre de un remedio en TODO su tratamiento (tomas, stock y ficha)
+        function renombrarRemedio(viejo, nuevo) {
+            nuevo = (nuevo || '').trim(); if (!nuevo || nuevo === viejo) return false;
+            const meds = getProfileData(); meds.forEach(m => { if (m.name === viejo) m.name = nuevo; });
+            const trats = getTrats(); trats.forEach(t => { if (t.name === viejo) t.name = nuevo; }); saveTrats(trats);
+            const map = getStockMap(); if (map[viejo]) { if (!map[nuevo]) map[nuevo] = map[viejo]; delete map[viejo]; saveStockMap(map); }
+            saveProfileData(meds); return true;
+        }
+
+        // ===== TIPO DE REMEDIO y MEDIDA (comprimidos, cucharadas, ml, gotas…) =====
+        const TIPOS_REM = {
+            pastilla: { stock: 'pastillas', medidas: [['comprimido', 'comprimido(s)', 0], ['cápsula', 'cápsula(s)', 0]] },
+            jarabe:   { stock: 'ml', medidas: [['cucharadita', 'cucharadita(s) · 5 ml', 5], ['cucharada', 'cucharada(s) · 15 ml', 15], ['ml', 'ml', 1]] },
+            gotas:    { stock: 'gotas', medidas: [['gota', 'gota(s)', 0]] },
+            otro:     { stock: 'unidades', medidas: [['sobre', 'sobre(s)', 0], ['ampolla', 'ampolla(s)', 0], ['inyección', 'inyección(es)', 0], ['puff', 'puff(s) / inhalación', 0]] }
+        };
+        function cambiarTipoRem(pref) {
+            const t = TIPOS_REM[$(pref + 'Tipo').value];
+            $(pref + 'DosisU').innerHTML = t.medidas.map(m => `<option value="${m[0]}">${m[1]}</option>`).join('');
+            $(pref + 'Unit').value = t.stock;                      // el stock cambia solo: pastillas / ml / gotas / unidades
+        }
+        function componerDosis(pref) {                             // "2 cucharadas (30 ml)", "1/2 comprimido", "10 ml"
+            const n = parseFloat($(pref + 'DosisN').value) || 1, v = $(pref + 'DosisU').value;
+            const m = TIPOS_REM[$(pref + 'Tipo').value].medidas.find(x => x[0] === v) || [v, v, 0];
+            const singular = n <= 1, num = n === 0.5 ? '1/2' : String(n);
+            const nombre = (v === 'ml') ? 'ml' : (singular ? v : (v === 'inyección' ? 'inyecciones' : v + 's'));
+            return `${num} ${nombre}${m[2] > 1 ? ` (${Math.round(n * m[2] * 100) / 100} ml)` : ''}`;
         }
 
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
