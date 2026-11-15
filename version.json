@@ -1,0 +1,10 @@
+{
+  "apkRequiere": [
+    "LocalNotifications",
+    "PushNotifications",
+    "TextToSpeech",
+    "Device"
+  ],
+  "apkUrl": "https://drive.google.com/uc?export=download&id=1PRruJEQ3Zz2X4XQaMPsgDnzwcTevjQur",
+  "notas": "alarmas más confiables, sonido fuerte y alarmas en la nube"
+}

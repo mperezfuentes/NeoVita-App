@@ -337,6 +337,8 @@
         <!-- AVISO DE DEMO / VENCIMIENTO -->
         <div id="licenseBanner" class="hidden rounded-2xl p-4 text-sm flex items-center justify-between gap-3 border"></div>
 
+        <div id="updateBanner" class="hidden space-y-2"></div>
+
         <!-- VIEW 1: CALENDARIO -->
         <div id="viewHoy" class="space-y-4">
             <div id="onboardingCard" class="hidden bg-white border border-sky-200 rounded-2xl p-5 shadow-sm"></div>
@@ -2501,6 +2503,35 @@
             out.push({ at: new Date(exp - 3600000), ti: demo ? '⏳ Tu demo termina en 1 hora' : '⏳ Tu plan vence en 1 hora', b: `Escríbenos por WhatsApp para ${accion} y no perder tus alarmas.` });
             return out.filter(x => x.at.getTime() > ahora).sort((a, b) => a.at - b.at);
         }
+
+        // ===== AVISO DE ACTUALIZACIÓN (versión nueva de la app o de la APK) =====
+        let huellaInicial = null, ultimoChequeoUpd = 0;
+        async function huellaIndex() {       // "huella" del index.html publicado: cambia cada vez que subes una versión nueva
+            try { const r = await fetch(location.pathname, { cache: 'no-store' }); return r.headers.get('etag') || r.headers.get('last-modified') || String((await r.text()).length); }
+            catch (e) { return null; }
+        }
+        async function revisarActualizacion() {
+            if (huellaInicial && Date.now() - ultimoChequeoUpd < 600000) return;        // como máximo cada 10 min
+            ultimoChequeoUpd = Date.now();
+            const h = await huellaIndex(); if (!h) return;
+            if (huellaInicial === null) huellaInicial = h;
+            const caja = document.getElementById('updateBanner'); if (!caja) return;
+            const fila = (txt, btn, fn) => `<div class="rounded-2xl p-3 text-sm flex items-center justify-between gap-3 border bg-violet-50 border-violet-200 text-violet-900"><span>${txt}</span><button onclick="${fn}" class="shrink-0 bg-sky-600 text-white font-semibold text-xs px-3 py-2 rounded-lg">${btn}</button></div>`;
+            let html = '';
+            if (huellaInicial !== h) html += fila('🔄 Hay una versión nueva de NeoVita con mejoras.', 'Actualizar', 'actualizarAhora()');
+            if (esAppNativa && Date.now() > Number(localStorage.getItem('neovita_apk_oculto') || 0)) {
+                try {
+                    const v = await (await fetch('version.json?t=' + Date.now(), { cache: 'no-store' })).json();
+                    const falta = (v.apkRequiere || []).filter(n => !(window.Capacitor.Plugins && window.Capacitor.Plugins[n]));
+                    if (falta.length && v.apkUrl) html += fila(`📲 Hay una nueva versión de la app Android${v.notas ? ': ' + v.notas : ''}.`, 'Descargar', `window.open('${v.apkUrl}', '_blank'); localStorage.setItem('neovita_apk_oculto', String(Date.now() + 86400000))`);
+                } catch (e) {}
+            }
+            caja.innerHTML = html; caja.classList.toggle('hidden', !html);
+        }
+        function actualizarAhora() { location.reload(); }
+        window.addEventListener('load', () => setTimeout(revisarActualizacion, 4000));
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') revisarActualizacion(); });
+        setInterval(revisarActualizacion, 3600000);
 
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
         const LICENSE_VERSION = '2';
