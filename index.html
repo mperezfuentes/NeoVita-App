@@ -1335,10 +1335,15 @@
                                 <button onclick="${pend ? `eliminarTratamiento(${med.id})` : `deleteSingleMed(${med.id})`}" class="ibtn" title="${pend ? 'Eliminar todo el tratamiento' : 'Eliminar del registro'}">🗑️</button>
                             </div>
                         </div>
-                        ${pend ? `<div class="grid grid-cols-2 gap-2">
+                        ${pend
+                            ? `<div class="grid grid-cols-2 gap-2">
                                 <button onclick="updateMedStatus(${med.id}, 'tomado')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm py-2.5 rounded-xl font-bold shadow-sm transition">✅ Tomado</button>
                                 <button onclick="updateMedStatus(${med.id}, 'saltado')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm py-2.5 rounded-xl font-semibold transition">Saltar</button>
-                            </div>` : `<span class="inline-block text-xs ${med.status === 'tomado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} px-3 py-1.5 rounded-lg font-semibold">${med.status === 'tomado' ? '✔ Tomado' : 'Saltado'}</span>`}
+                               </div>`
+                            : `<div class="flex items-center justify-between gap-2">
+                                <span class="inline-block text-xs ${med.status === 'tomado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} px-3 py-1.5 rounded-lg font-semibold">${med.status === 'tomado' ? '✔ Tomado' : '⏭ Saltado'}</span>
+                                <button onclick="destomar(${med.id})" class="text-[11px] text-slate-400 hover:text-rose-500 underline transition" title="Revertir esta toma a pendiente">↩ Deshacer</button>
+                               </div>`}
                     `;
                     container.appendChild(item);
                 });
@@ -1531,8 +1536,19 @@
             speakVita(`Receta verificada con éxito. Fármaco ${medName} agendado.`);
         }
 
+        function destomar(id) {               // revierte "tomado" o "saltado" a "pendiente" y devuelve la unidad al stock
+            playClickSound();
+            let meds = getProfileData(); const med = meds.find(m => m.id === id); if (!med) return;
+            if (med.status === 'tomado') {
+                const map = getStockMap(); const nombre = med.name;
+                map[nombre] = { qty: Math.round(((map[nombre]||{qty:0}).qty + unidadesPorToma(med.dose)) * 100) / 100, unit: (map[nombre]||{unit:'pastillas'}).unit };
+                saveStockMap(map);
+            }
+            meds = meds.map(m => { if (m.id === id) m.status = 'pendiente'; return m; });
+            saveProfileData(meds); speakVita('Toma revertida.'); renderMeds(); renderUI(); if(typeof sincronizarNube==='function') sincronizarNube();
+        }
         function updateMedStatus(id, status) {
-            if (status === 'tomado') { destello(); try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} }
+            if (status === 'tomado') { if(typeof destello==='function') destello(); try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} }
             playClickSound();
             let meds = getProfileData();
             meds = meds.map(m => {
@@ -1543,7 +1559,8 @@
                 return m;
             });
             saveProfileData(meds);
-            speakVita(status === 'tomado' ? "Medicamento tomado con éxito." : "Medicamento saltado.");
+            const v = status === 'tomado' ? 'Medicamento tomado.' : (status === 'pendiente' ? 'Toma revertida.' : 'Medicamento saltado.');
+            speakVita(v); renderMeds(); renderUI(); sincronizarNube ? sincronizarNube() : null;
         }
 
         function deleteSingleMed(id) {
