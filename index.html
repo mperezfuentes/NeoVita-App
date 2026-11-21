@@ -361,6 +361,8 @@
 
         <!-- VIEW 2: SIGNOS VITALES -->
         <div id="viewVitals" class="space-y-4 hidden">
+            <div id="qrEmergenciaBox"></div>
+            <button onclick="generarQR()" class="w-full bg-gradient-to-r from-cyan-600 to-violet-600 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg mb-2">🆘 Generar QR de Emergencia</button>
             <div class="bg-white border border-sky-100 rounded-2xl p-5 shadow-sm space-y-4">
                 <h3 class="font-bold text-slate-900 flex items-center gap-2">
                     <i data-lucide="heart-pulse" class="w-5 h-5 text-sky-600"></i> Registro de Signos Vitales Diarios
@@ -429,6 +431,7 @@
         <button id="navVitals" onclick="filterTab('vitals')"><span class="ico">❤️</span>Salud</button>
         <button id="navInforme" onclick="filterTab('informe')"><span class="ico">📋</span>Informe</button>
     </nav>
+    <button onclick="abrirContactoRapido()" aria-label="Contacto rápido" style="position:fixed;right:80px;bottom:96px;z-index:46;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#059669,#06b6d4);color:#fff;font-size:1.3rem;box-shadow:0 10px 24px rgba(5,150,105,.4);display:flex;align-items:center;justify-content:center;border:0">📞</button>
     <button class="fab-vita" onclick="vitaResumenDelDia()" aria-label="Hablar con Vita" title="Hablar con Vita">✨</button>
 
     <!-- BIENVENIDA -->
@@ -705,6 +708,18 @@
                 <button onclick="saveEditStock()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition">Guardar</button>
                 <button onclick="closeEditStock()" class="px-4 bg-sky-50 hover:bg-sky-100 text-slate-700 rounded-xl border border-sky-200 transition">Cancelar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- CONTACTO RÁPIDO -->
+    <div id="contactoModal" class="fixed inset-0 bg-sky-950/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-sm w-full space-y-3 shadow-2xl">
+            <h3 class="text-lg font-bold text-slate-900">📞 Contacto rápido</h3>
+            <p class="text-xs text-slate-500">Llamada, WhatsApp o email al cuidador y al médico.</p>
+            <a id="ctaLlamada" href="#" class="flex items-center gap-3 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl transition"><span class="text-xl">📞</span>Llamar al cuidador</a>
+            <a id="ctaWhatsApp" href="#" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-3 px-4 rounded-xl transition"><span class="text-xl">💬</span>WhatsApp al cuidador</a>
+            <a id="ctaEmail" href="#" class="flex items-center gap-3 w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 px-4 rounded-xl transition"><span class="text-xl">✉️</span>Enviar informe por email</a>
+            <button onclick="document.getElementById('contactoModal').classList.add('hidden')" class="w-full py-2.5 rounded-xl border border-sky-200 text-slate-600 text-sm font-medium">Cerrar</button>
         </div>
     </div>
 
@@ -1335,15 +1350,10 @@
                                 <button onclick="${pend ? `eliminarTratamiento(${med.id})` : `deleteSingleMed(${med.id})`}" class="ibtn" title="${pend ? 'Eliminar todo el tratamiento' : 'Eliminar del registro'}">🗑️</button>
                             </div>
                         </div>
-                        ${pend
-                            ? `<div class="grid grid-cols-2 gap-2">
+                        ${pend ? `<div class="grid grid-cols-2 gap-2">
                                 <button onclick="updateMedStatus(${med.id}, 'tomado')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm py-2.5 rounded-xl font-bold shadow-sm transition">✅ Tomado</button>
                                 <button onclick="updateMedStatus(${med.id}, 'saltado')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm py-2.5 rounded-xl font-semibold transition">Saltar</button>
-                               </div>`
-                            : `<div class="flex items-center justify-between gap-2">
-                                <span class="inline-block text-xs ${med.status === 'tomado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} px-3 py-1.5 rounded-lg font-semibold">${med.status === 'tomado' ? '✔ Tomado' : '⏭ Saltado'}</span>
-                                <button onclick="destomar(${med.id})" class="text-[11px] text-slate-400 hover:text-rose-500 underline transition" title="Revertir esta toma a pendiente">↩ Deshacer</button>
-                               </div>`}
+                            </div>` : `<span class="inline-block text-xs ${med.status === 'tomado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} px-3 py-1.5 rounded-lg font-semibold">${med.status === 'tomado' ? '✔ Tomado' : 'Saltado'}</span>`}
                     `;
                     container.appendChild(item);
                 });
@@ -1536,19 +1546,8 @@
             speakVita(`Receta verificada con éxito. Fármaco ${medName} agendado.`);
         }
 
-        function destomar(id) {               // revierte "tomado" o "saltado" a "pendiente" y devuelve la unidad al stock
-            playClickSound();
-            let meds = getProfileData(); const med = meds.find(m => m.id === id); if (!med) return;
-            if (med.status === 'tomado') {
-                const map = getStockMap(); const nombre = med.name;
-                map[nombre] = { qty: Math.round(((map[nombre]||{qty:0}).qty + unidadesPorToma(med.dose)) * 100) / 100, unit: (map[nombre]||{unit:'pastillas'}).unit };
-                saveStockMap(map);
-            }
-            meds = meds.map(m => { if (m.id === id) m.status = 'pendiente'; return m; });
-            saveProfileData(meds); speakVita('Toma revertida.'); renderMeds(); renderUI(); if(typeof sincronizarNube==='function') sincronizarNube();
-        }
         function updateMedStatus(id, status) {
-            if (status === 'tomado') { if(typeof destello==='function') destello(); try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} }
+            if (status === 'tomado') { destello(); try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} }
             playClickSound();
             let meds = getProfileData();
             meds = meds.map(m => {
@@ -1559,8 +1558,7 @@
                 return m;
             });
             saveProfileData(meds);
-            const v = status === 'tomado' ? 'Medicamento tomado.' : (status === 'pendiente' ? 'Toma revertida.' : 'Medicamento saltado.');
-            speakVita(v); renderMeds(); renderUI(); sincronizarNube ? sincronizarNube() : null;
+            speakVita(status === 'tomado' ? "Medicamento tomado con éxito." : "Medicamento saltado.");
         }
 
         function deleteSingleMed(id) {
@@ -1645,7 +1643,7 @@
             });
             document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
             document.getElementById(`cardTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "bg-sky-600 text-white p-4 rounded-2xl shadow-sm cursor-pointer transition flex flex-col justify-between space-y-2";
-            setTimeout(() => { const el = document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`); if (el) window.scrollTo({ top: 0, behavior: 'smooth' }); }, 80);
+            setTimeout(() => { const id=`view${tab.charAt(0).toUpperCase()+tab.slice(1)}`; const el=document.getElementById(id); if(el){ const y=el.getBoundingClientRect().top+window.scrollY-82; window.scrollTo({top:Math.max(0,y),behavior:'smooth'}); } }, 80);
         }
 
         function openAddMedModal() { playClickSound(); resetFormMed(); document.getElementById('addMedModal').classList.remove('hidden'); }
@@ -2549,6 +2547,52 @@
         window.addEventListener('load', () => setTimeout(revisarActualizacion, 4000));
         document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') revisarActualizacion(); });
         setInterval(revisarActualizacion, 3600000);
+
+        // ===== CONTACTO RÁPIDO: llamada, WA, email =====
+        function textoInformeBreve() {
+            const meds=getProfileData(), vitals=getProfileVitals(), appts=getProfileAppointments();
+            const prof=JSON.parse(localStorage.getItem(`neovita_profile_info_${currentProfile}`)||'{}');
+            const nombre=(getProfiles().find(x=>x.id===currentProfile)||{}).name||'Paciente';
+            let t=`INFORME NEOVITA - ${nombre}\n`; t+=`Alergias: ${prof.allergies||'Ninguna'}\nSangre: ${prof.bloodType||'N/D'}\n\nTRATAMIENTOS:\n`;
+            const grupos={}; meds.forEach(m=>{(grupos[m.name]=grupos[m.name]||[]).push(m)});
+            Object.keys(grupos).forEach(k=>{const g=grupos[k]; const pend=g.filter(m=>m.status==='pendiente').length; t+=`• ${k}: ${g[0].dose||'1 unidad'}, ${pend} tomas pendientes hoy\n`;});
+            if(appts.length){t+=`\nCITAS:\n`;appts.slice(0,3).forEach(a=>{t+=`• ${a.doctor} ${a.date} ${a.time||''}\n`;});}
+            if(vitals.length){t+=`\nSIGNOS VITALES:\n• PA: ${vitals[0].bp} | Glucosa: ${vitals[0].glucose} mg/dL\n`;}
+            return t;
+        }
+        function abrirContactoRapido() {
+            playClickSound();
+            const tel=(localStorage.getItem('neovita_caregiver_phone')||'').replace(/\D/g,'');
+            const ll=document.getElementById('ctaLlamada'), wa=document.getElementById('ctaWhatsApp'), em=document.getElementById('ctaEmail');
+            if(ll){ ll.href=tel?`tel:+${tel}`:'#'; ll.style.opacity=tel?'1':'0.4'; }
+            if(wa){ const msg=encodeURIComponent(textoInformeBreve()); wa.href=tel?`https://wa.me/${tel}?text=${msg}`:'#'; wa.style.opacity=tel?'1':'0.4'; }
+            if(em){ const p=JSON.parse(localStorage.getItem(`neovita_profile_info_${currentProfile}`)||'{}'); const n=(getProfiles().find(x=>x.id===currentProfile)||{}).name||'Paciente'; em.href=`mailto:?subject=${encodeURIComponent('Informe NeoVita - '+n)}&body=${encodeURIComponent(textoInformeBreve())}`; }
+            document.getElementById('contactoModal').classList.remove('hidden');
+        }
+        // ===== QR DE EMERGENCIA =====
+        function generarQR() {
+            playClickSound();
+            const prof=JSON.parse(localStorage.getItem(`neovita_profile_info_${currentProfile}`)||'{}');
+            const nombre=(getProfiles().find(x=>x.id===currentProfile)||{}).name||'Paciente';
+            const sos=localStorage.getItem('neovita_caregiver_phone')||'No registrado';
+            const data=encodeURIComponent(`EMERGENCIA - ${nombre}\nSangre: ${prof.bloodType||'N/D'}\nAlergias: ${prof.allergies||'No registradas'}\nSOS: ${sos}`);
+            const url=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${data}&bgcolor=050b1c&color=22d3ee`;
+            const box=document.getElementById('qrEmergenciaBox'); if(!box) return;
+            box.innerHTML=`<div class="bg-white/5 border border-cyan-500/40 rounded-2xl p-5 space-y-3 text-center mb-2">
+                <h3 class="font-extrabold text-white text-base">🆘 QR de Emergencia</h3>
+                <p class="text-xs text-slate-400">Muéstraselo al paramédico. Contiene alergias, grupo sanguíneo y contacto SOS.</p>
+                <img src="${url}" alt="QR emergencia" class="mx-auto rounded-xl w-56 h-56">
+                <div class="text-left text-xs text-slate-300 bg-white/5 rounded-xl p-3 space-y-1">
+                    <p><b class="text-cyan-400">Nombre:</b> ${nombre}</p>
+                    <p><b class="text-cyan-400">Sangre:</b> ${prof.bloodType||'N/D'}</p>
+                    <p><b class="text-cyan-400">Alergias:</b> ${prof.allergies||'No registradas'}</p>
+                    <p><b class="text-cyan-400">SOS:</b> ${sos}</p>
+                </div>
+                <p class="text-[11px] text-slate-500">💡 Guarda una captura en tu galería para usarlo sin internet.</p>
+                <button onclick="document.getElementById('qrEmergenciaBox').innerHTML=''" class="text-xs text-slate-500 underline">Cerrar</button>
+            </div>`;
+            box.scrollIntoView({behavior:'smooth',block:'start'});
+        }
 
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
         const LICENSE_VERSION = '2';
