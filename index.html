@@ -362,6 +362,7 @@
         <!-- VIEW 2: SIGNOS VITALES -->
         <div id="viewVitals" class="space-y-4 hidden">
             <div id="qrEmergenciaBox"></div>
+            <div id="graficoVitales" class="bg-white/5 border border-slate-700/40 rounded-2xl p-4 mt-1 mb-2"></div>
             <button onclick="generarQR()" class="w-full bg-gradient-to-r from-cyan-600 to-violet-600 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg mb-2">🆘 Generar QR de Emergencia</button>
             <div class="bg-white border border-sky-100 rounded-2xl p-5 shadow-sm space-y-4">
                 <h3 class="font-bold text-slate-900 flex items-center gap-2">
@@ -431,7 +432,6 @@
         <button id="navVitals" onclick="filterTab('vitals')"><span class="ico">❤️</span>Salud</button>
         <button id="navInforme" onclick="filterTab('informe')"><span class="ico">📋</span>Informe</button>
     </nav>
-    <button onclick="abrirContactoRapido()" aria-label="Contacto rápido" style="position:fixed;right:80px;bottom:96px;z-index:46;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#059669,#06b6d4);color:#fff;font-size:1.3rem;box-shadow:0 10px 24px rgba(5,150,105,.4);display:flex;align-items:center;justify-content:center;border:0">📞</button>
     <button class="fab-vita" onclick="vitaResumenDelDia()" aria-label="Hablar con Vita" title="Hablar con Vita">✨</button>
 
     <!-- BIENVENIDA -->
@@ -710,19 +710,6 @@
             </div>
         </div>
     </div>
-
-    <!-- CONTACTO RÁPIDO -->
-    <div id="contactoModal" class="fixed inset-0 bg-sky-950/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-sm w-full space-y-3 shadow-2xl">
-            <h3 class="text-lg font-bold text-slate-900">📞 Contacto rápido</h3>
-            <p class="text-xs text-slate-500">Llamada, WhatsApp o email al cuidador y al médico.</p>
-            <a id="ctaLlamada" href="#" class="flex items-center gap-3 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl transition"><span class="text-xl">📞</span>Llamar al cuidador</a>
-            <a id="ctaWhatsApp" href="#" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-3 px-4 rounded-xl transition"><span class="text-xl">💬</span>WhatsApp al cuidador</a>
-            <a id="ctaEmail" href="#" class="flex items-center gap-3 w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 px-4 rounded-xl transition"><span class="text-xl">✉️</span>Enviar informe por email</a>
-            <button onclick="document.getElementById('contactoModal').classList.add('hidden')" class="w-full py-2.5 rounded-xl border border-sky-200 text-slate-600 text-sm font-medium">Cerrar</button>
-        </div>
-    </div>
-
     <!-- SETTINGS MODAL -->
     <div id="settingsModal" class="fixed inset-0 bg-sky-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-sky-100 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
@@ -993,7 +980,11 @@
                 let meds = [];
                 try { meds = JSON.parse(localStorage.getItem(`neovita_meds_${prof.id}`) || '[]'); } catch (e) {}
                 for (const med of meds) {
-                    if (med.date !== todayStr || med.status !== 'pendiente') continue;
+                    if (med.status !== 'pendiente') continue;
+                    const hm0=normalizeTimeTo24h(med.time).split(':').map(Number);
+                    const esMad=hm0[0]<5;
+                    const fEsp=esMad&&now.getHours()<5?localDateStr(new Date(now.getFullYear(),now.getMonth(),now.getDate()-1)):todayStr;
+                    if(med.date!==(esMad?fEsp:todayStr)) continue;
                     const t = normalizeTimeTo24h(med.time).split(':');
                     const h = parseInt(t[0], 10), m = parseInt(t[1], 10);
                     if (isNaN(h) || isNaN(m)) continue;
@@ -1356,6 +1347,14 @@
                             </div>` : `<span class="inline-block text-xs ${med.status === 'tomado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} px-3 py-1.5 rounded-lg font-semibold">${med.status === 'tomado' ? '✔ Tomado' : 'Saltado'}</span>`}
                     `;
                     container.appendChild(item);
+                    if(!pend){
+                        const btn=document.createElement('button');
+                        btn.textContent='↩ Deshacer';
+                        btn.title='Revertir a pendiente';
+                        btn.className='text-[11px] text-slate-400 hover:text-rose-500 underline mt-1 block';
+                        btn.onclick=()=>destomar(med.id);
+                        item.appendChild(btn);
+                    }
                 });
             }
 
@@ -1444,6 +1443,7 @@
 
         function saveVitals() {
             playClickSound();
+            setTimeout(renderGraficoVitales,400);
             const bp = document.getElementById('inputBP').value.trim();
             const glucose = document.getElementById('inputGlucose').value.trim();
             if (!bp && !glucose) {
@@ -1546,7 +1546,26 @@
             speakVita(`Receta verificada con éxito. Fármaco ${medName} agendado.`);
         }
 
+        function destomar(id){
+            playClickSound();
+            let meds=getProfileData();
+            const med=meds.find(m=>m.id===id); if(!med)return;
+            if(med.status==='tomado'){
+                const map=getStockMap();
+                map[med.name]={qty:Math.round(((map[med.name]||{qty:0}).qty+unidadesPorToma(med.dose))*100)/100,unit:(map[med.name]||{unit:'pastillas'}).unit};
+                saveStockMap(map);
+            }
+            meds=meds.map(m=>{if(m.id===id)m.status='pendiente';return m;});
+            saveProfileData(meds); speakVita('Toma revertida.'); renderMeds(); renderUI();
+            if(typeof sincronizarNube==='function') sincronizarNube();
+        }
         function updateMedStatus(id, status) {
+            // Verificar licencia vigente antes de marcar desde notificación
+            const exp = Number(localStorage.getItem('neovita_license_expires') || 0);
+            if (exp && Date.now() > exp) { clearLicense(); showLock('Tu licencia venció.'); return; }
+            const demo = Number(localStorage.getItem('neovita_demo_until') || 0);
+            const activa = localStorage.getItem('neovita_license_activated') === 'true';
+            if (!activa && (!demo || Date.now() > demo)) { showLock('Tu acceso ha vencido.'); return; }
             if (status === 'tomado') { destello(); try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} }
             playClickSound();
             let meds = getProfileData();
@@ -2374,7 +2393,7 @@
         }
         window.addEventListener('load', () => {
             if (localStorage.getItem('neovita_facil') === '1') document.documentElement.classList.add('modo-facil');
-            actualizarNav('hoy'); renderUI();
+            actualizarNav('hoy'); renderUI(); setTimeout(renderGraficoVitales,300);
             setInterval(revisarBienvenida, 2000);
         });
 
@@ -2547,28 +2566,6 @@
         window.addEventListener('load', () => setTimeout(revisarActualizacion, 4000));
         document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') revisarActualizacion(); });
         setInterval(revisarActualizacion, 3600000);
-
-        // ===== CONTACTO RÁPIDO: llamada, WA, email =====
-        function textoInformeBreve() {
-            const meds=getProfileData(), vitals=getProfileVitals(), appts=getProfileAppointments();
-            const prof=JSON.parse(localStorage.getItem(`neovita_profile_info_${currentProfile}`)||'{}');
-            const nombre=(getProfiles().find(x=>x.id===currentProfile)||{}).name||'Paciente';
-            let t=`INFORME NEOVITA - ${nombre}\n`; t+=`Alergias: ${prof.allergies||'Ninguna'}\nSangre: ${prof.bloodType||'N/D'}\n\nTRATAMIENTOS:\n`;
-            const grupos={}; meds.forEach(m=>{(grupos[m.name]=grupos[m.name]||[]).push(m)});
-            Object.keys(grupos).forEach(k=>{const g=grupos[k]; const pend=g.filter(m=>m.status==='pendiente').length; t+=`• ${k}: ${g[0].dose||'1 unidad'}, ${pend} tomas pendientes hoy\n`;});
-            if(appts.length){t+=`\nCITAS:\n`;appts.slice(0,3).forEach(a=>{t+=`• ${a.doctor} ${a.date} ${a.time||''}\n`;});}
-            if(vitals.length){t+=`\nSIGNOS VITALES:\n• PA: ${vitals[0].bp} | Glucosa: ${vitals[0].glucose} mg/dL\n`;}
-            return t;
-        }
-        function abrirContactoRapido() {
-            playClickSound();
-            const tel=(localStorage.getItem('neovita_caregiver_phone')||'').replace(/\D/g,'');
-            const ll=document.getElementById('ctaLlamada'), wa=document.getElementById('ctaWhatsApp'), em=document.getElementById('ctaEmail');
-            if(ll){ ll.href=tel?`tel:+${tel}`:'#'; ll.style.opacity=tel?'1':'0.4'; }
-            if(wa){ const msg=encodeURIComponent(textoInformeBreve()); wa.href=tel?`https://wa.me/${tel}?text=${msg}`:'#'; wa.style.opacity=tel?'1':'0.4'; }
-            if(em){ const p=JSON.parse(localStorage.getItem(`neovita_profile_info_${currentProfile}`)||'{}'); const n=(getProfiles().find(x=>x.id===currentProfile)||{}).name||'Paciente'; em.href=`mailto:?subject=${encodeURIComponent('Informe NeoVita - '+n)}&body=${encodeURIComponent(textoInformeBreve())}`; }
-            document.getElementById('contactoModal').classList.remove('hidden');
-        }
         // ===== QR DE EMERGENCIA =====
         function generarQR() {
             playClickSound();
@@ -2594,6 +2591,44 @@
             box.scrollIntoView({behavior:'smooth',block:'start'});
         }
 
+        function renderGraficoVitales(){
+            const box=document.getElementById('graficoVitales'); if(!box)return;
+            const todos=typeof getProfileVitals==='function'?getProfileVitals():[];
+            if(!todos||todos.length<2){box.innerHTML='<p class="text-xs text-slate-400 text-center py-4">Registra al menos 2 días para ver la evolución.</p>';return;}
+            const datos=todos.slice().reverse().slice(-30);
+            const W=Math.min(box.clientWidth||340,480),H=190,pL=40,pR=10,pT=18,pB=32;
+            const gW=W-pL-pR,gH=H-pT-pB;
+            const sis=datos.map(d=>d.bp?parseInt(d.bp.split('/')[0]):null);
+            const glu=datos.map(d=>d.glucose?parseFloat(d.glucose):null);
+            const all=[...sis,...glu].filter(Boolean); if(!all.length)return;
+            const mn=Math.min(...all)-10,mx=Math.max(...all)+10;
+            const xP=i=>pL+(datos.length>1?(i/(datos.length-1))*gW:gW/2);
+            const yP=v=>pT+gH-((v-mn)/(mx-mn))*gH;
+            const lin=(arr,col)=>{
+                const pts=arr.map((v,i)=>v!=null?xP(i)+','+yP(v):null).filter(Boolean).join(' ');
+                const dots=arr.map((v,i)=>v!=null?'<circle cx="'+xP(i)+'" cy="'+yP(v)+'" r="3.5" fill="'+col+'" stroke="#050b1c" stroke-width="1.5"/>':'').join('');
+                return pts?'<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+dots:'';
+            };
+            const eje=[mn,Math.round((mn+mx)/2),mx].map(v=>'<line x1="'+pL+'" y1="'+yP(v)+'" x2="'+(W-pR)+'" y2="'+yP(v)+'" stroke="rgba(148,163,184,.2)" stroke-width="1"/><text x="'+(pL-4)+'" y="'+(yP(v)+4)+'" font-size="9" fill="#64748b" text-anchor="end">'+Math.round(v)+'</text>').join('');
+            const ref=(v,col,lab)=>v>=mn&&v<=mx?'<line x1="'+pL+'" y1="'+yP(v)+'" x2="'+(W-pR)+'" y2="'+yP(v)+'" stroke="'+col+'" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/><text x="'+(W-pR-2)+'" y="'+(yP(v)-3)+'" font-size="8" fill="'+col+'" text-anchor="end">'+lab+'</text>':'';
+            const etiq=datos.map((d,i)=>{if(i%Math.ceil(datos.length/5)!==0&&i!==datos.length-1)return'';return'<text x="'+xP(i)+'" y="'+(H-4)+'" font-size="8" fill="#64748b" text-anchor="middle">'+(d.date||'').slice(5).replace('-','/')+'</text>';}).join('');
+            const prom=arr=>{const v=arr.filter(Boolean);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null;};
+            const pS=prom(sis),pG=prom(glu);
+            const mxS=sis.filter(Boolean).length?Math.max(...sis.filter(Boolean)):null;
+            const mnS=sis.filter(Boolean).length?Math.min(...sis.filter(Boolean)):null;
+            const mxG=glu.filter(Boolean).length?Math.max(...glu.filter(Boolean)):null;
+            const mnG=glu.filter(Boolean).length?Math.min(...glu.filter(Boolean)):null;
+            const res='<div class="flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">'
+                +(pS!=null?'<span style="color:#22d3ee">💙 Sistólica · prom '+pS+' · máx '+mxS+' · mín '+mnS+' mmHg</span>':'')
+                +(pG!=null?'<span style="color:#a78bfa">💜 Glucosa · prom '+pG+' · máx '+mxG+' · mín '+mnG+' mg/dL</span>':'')
+                +'</div>';
+            box.innerHTML='<div class="space-y-2">'+res
+                +'<svg width="'+W+'" height="'+H+'" style="display:block;overflow:visible">'
+                +eje+ref(120,'#f87171','PA 120')+ref(100,'#fb923c','Glu 100')
+                +lin(sis,'#22d3ee')+lin(glu,'#a78bfa')+etiq
+                +'</svg><p class="text-[10px] text-slate-500">Últimos '+datos.length+' registros · líneas rojas = referencia normal</p></div>';
+        }
+
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
         const LICENSE_VERSION = '2';
         const DEMO_DIAS = 7;
@@ -2612,8 +2647,16 @@
         }
         function hideLock() { document.getElementById('licenseLockScreen').classList.add('hidden'); }
         function clearLicense() {
-            ['neovita_license_activated', 'neovita_license_key', 'neovita_license_type', 'neovita_license_expires', 'neovita_license_checked', 'neovita_license_v']
+            ['neovita_license_activated','neovita_license_key','neovita_license_type',
+             'neovita_license_expires','neovita_license_checked','neovita_license_v',
+             'neovita_nube','neovita_fcm_token','neovita_nube_ok']
                 .forEach(k => localStorage.removeItem(k));
+            if (esAppNativa && LN) {
+                LN.getPending().then(p => {
+                    const todas=(p.notifications||[]);
+                    if(todas.length) LN.cancel({notifications:todas.map(n=>({id:n.id}))}).catch(()=>{});
+                }).catch(()=>{});
+            }
         }
         function applyLicenseState() {
             const now = Date.now();
