@@ -424,6 +424,23 @@
 
     </main>
 
+    <!-- PANTALLA DE VENCIMIENTO -->
+    <div id="vencimientoScreen" class="fixed inset-0 z-[55] hidden flex items-center justify-center p-4 backdrop-blur-md" style="background:rgba(5,11,28,.92)">
+        <div class="bg-gradient-to-b from-slate-900 to-slate-800 border border-cyan-500/30 p-7 rounded-3xl max-w-sm w-full shadow-2xl text-center space-y-5">
+            <div id="vencIcono" class="text-5xl">❤️</div>
+            <h2 id="vencTitulo" class="text-xl font-extrabold text-white leading-snug"></h2>
+            <div id="vencMensaje" class="text-sm text-slate-300 leading-relaxed"></div>
+            <div id="vencBotones" class="space-y-3 pt-1"></div>
+            <div id="vencCondiciones" class="text-[11px] text-slate-500 text-left space-y-1 border-t border-slate-700 pt-3 hidden">
+                <p><b class="text-cyan-400">Renovación:</b> escríbenos por WhatsApp antes del vencimiento y te enviamos tu nuevo código.</p>
+                <p><b class="text-cyan-400">Cancelación:</b> en cualquier momento, sin costo ni penalidad.</p>
+                <p><b class="text-cyan-400">Tus datos:</b> se conservan 3 días después del vencimiento. Luego se borran del dispositivo.</p>
+                <button onclick="document.getElementById('vencCondiciones').classList.add('hidden')" class="text-slate-500 underline text-[10px]">Cerrar</button>
+            </div>
+            <button onclick="document.getElementById('vencCondiciones').classList.toggle('hidden')" class="text-[11px] text-slate-500 underline">Ver condiciones de renovación y datos</button>
+        </div>
+    </div>
+
         <!-- BARRA INFERIOR -->
     <nav id="navBar">
         <button id="navHoy" onclick="filterTab('hoy')"><span class="ico">🏠</span>Hoy</button>
@@ -2536,7 +2553,7 @@
             const demo = localStorage.getItem('neovita_license_type') === 'DEM', d = new Date(exp), ahora = Date.now();
             const ti = demo ? '⏳ Tu demo termina pronto' : '⏳ Tu plan vence pronto', accion = demo ? 'activar tu plan' : 'renovar';
             const dias = n => new Date(d.getFullYear(), d.getMonth(), d.getDate() - n, 10, 0);
-            const out = [[dias(demo ? 2 : 3), demo ? 2 : 3], [dias(1), 1]].map(x => ({ at: x[0], ti, b: `Te ${x[1] === 1 ? 'queda 1 día' : 'quedan ' + x[1] + ' días'}. Escríbenos por WhatsApp para ${accion} y no perder tus alarmas.` }));
+            const out = [[dias(1), 1], [dias(1), 1]].map(x => ({ at: x[0], ti, b: `Te ${x[1] === 1 ? 'queda 1 día' : 'quedan ' + x[1] + ' días'}. Escríbenos por WhatsApp para ${accion} y no perder tus alarmas.` }));
             out.push({ at: new Date(exp - 3600000), ti: demo ? '⏳ Tu demo termina en 1 hora' : '⏳ Tu plan vence en 1 hora', b: `Escríbenos por WhatsApp para ${accion} y no perder tus alarmas.` });
             return out.filter(x => x.at.getTime() > ahora).sort((a, b) => a.at - b.at);
         }
@@ -2652,6 +2669,62 @@
             speakVita('Registro actualizado.');
         }
 
+        // ===== VENCIMIENTO, PLANES Y DESPEDIDA =====
+        const PLANES_NV = [
+            { emoji:'📅', nombre:'NEOVITA Mensual', precio:'$10.000 CLP/mes',
+              detalle:'Acceso completo · Vita · Recordatorios · Herramientas familiares',
+              wa:'Hola, quiero activar el plan Mensual de NeoVita ($10.000 CLP\/mes).' },
+            { emoji:'⭐', nombre:'NEOVITA Anual', precio:'$100.000 CLP\/año',
+              detalle:'Todo lo mensual · Equivale a $8.333\/mes · Un solo pago anual',
+              wa:'Hola, quiero activar el plan Anual de NeoVita ($100.000 CLP\/año).' }
+        ];
+        function mostrarVencimiento(esDemo) {
+            clearLicense(); limpiarDatosVencidos();
+            document.getElementById('vencIcono').textContent = '❤️';
+            document.getElementById('vencTitulo').textContent = '¡Hola! Tu período ' + (esDemo ? 'de prueba' : 'mensual') + ' ha terminado.';
+            document.getElementById('vencMensaje').innerHTML =
+                '¡Hola! ❤️ Espero que hayas disfrutado estos días con NEOVITA.<br><br>'
+                + 'Tu período ' + (esDemo ? 'de prueba' : 'de suscripción') + ' está llegando a su fin.<br><br>'
+                + 'Si quieres continuar utilizando tus notificaciones, recordatorios y herramientas de acompañamiento, '
+                + 'puedes elegir el plan que mejor se adapte a ti.<br><br>'
+                + '¡Queremos seguir acompañándote en tu recuperación!';
+            document.getElementById('vencBotones').innerHTML =
+                PLANES_NV.map(p =>
+                    '<a href="https://wa.me/56995713868?text=' + encodeURIComponent(p.wa) + '" target="_blank" rel="noopener" '
+                    + 'class="flex flex-col w-full bg-gradient-to-r from-cyan-600 to-violet-600 text-white font-bold py-3 px-4 rounded-2xl text-left hover:opacity-90 transition">'
+                    + '<span class="text-base">' + p.emoji + ' ' + p.nombre + ' · ' + p.precio + '</span>'
+                    + '<span class="text-[11px] font-normal opacity-80 mt-0.5">' + p.detalle + '</span>'
+                    + '</a>').join('')
+                + '<button onclick="despedidaNV()" class="w-full py-2.5 rounded-xl border border-slate-600 text-slate-400 text-sm font-medium hover:border-slate-400 transition">No quiero por ahora</button>';
+            document.getElementById('vencimientoScreen').classList.remove('hidden');
+            speakVita('Tu período ha terminado. Te presentamos las opciones para continuar con NeoVita.');
+        }
+        function despedidaNV() {
+            document.getElementById('vencIcono').textContent = '🪄';
+            document.getElementById('vencTitulo').textContent = 'Hasta pronto 💙';
+            document.getElementById('vencMensaje').innerHTML =
+                'Gracias por haber confiado en NEOVITA.<br><br>'
+                + 'Tus datos se conservarán durante 3 días. Cuando quieras volver, '
+                + 'estaremos aquí con todo listo para seguir acompañándote.<br><br>'
+                + '¡Cuídate mucho! ❤️';
+            document.getElementById('vencBotones').innerHTML =
+                '<a href="https://wa.me/56995713868?text=' + encodeURIComponent('Hola, quiero volver a usar NeoVita.') + '" target="_blank" rel="noopener" '
+                + 'class="w-full block text-center py-2.5 rounded-xl border border-cyan-500/40 text-cyan-400 text-sm font-semibold hover:bg-cyan-500/10 transition">'
+                + 'Volver cuando quiera 💙</a>';
+            speakVita('Hasta pronto. Cuando quieras volver, aquí estaremos.');
+        }
+        function limpiarDatosVencidos() {
+            const vencioEn = Number(localStorage.getItem('neovita_vencio_en') || 0);
+            if (!vencioEn) { localStorage.setItem('neovita_vencio_en', String(Date.now())); return; }
+            if (Date.now() - vencioEn > 3 * 86400000) {
+                getProfiles().forEach(p => {
+                    ['meds','vitals','appts','trat','stockmap','profile_info'].forEach(k =>
+                        localStorage.removeItem('neovita_' + k + '_' + p.id));
+                });
+                localStorage.removeItem('neovita_vencio_en');
+            }
+        }
+
         // ===== LICENCIAS: dispositivo, vencimiento, demo y revalidación =====
         const LICENSE_VERSION = '2';
         const DEMO_DIAS = 7;
@@ -2688,12 +2761,12 @@
                     clearLicense(); showLock('Por seguridad, ingresa nuevamente tu código de licencia.'); return;
                 }
                 const exp = Number(localStorage.getItem('neovita_license_expires') || 0);
-                if (exp && now > exp) { const esDemo = localStorage.getItem('neovita_license_type') === 'DEM'; clearLicense(); showLock(esDemo ? 'Tu demo de 7 días terminó. Escríbenos por WhatsApp para activar tu plan.' : 'Tu plan de 30 días venció. Escríbenos por WhatsApp para renovar.'); return; }
+                if (exp && now > exp) { const esDemo = localStorage.getItem('neovita_license_type') === 'DEM'; mostrarVencimiento(esDemo); return; }
                 hideLock(); revalidateLicense(); return;
             }
             const demo = Number(localStorage.getItem('neovita_demo_until') || 0);
             if (demo && now < demo) { hideLock(); return; }
-            if (demo) showLock('Tu demo de 7 días terminó. Ingresa un código de licencia para continuar.');
+            if (demo) showLock('Tu demo de 3 días terminó. Ingresa un código de licencia para continuar.');
         }
         async function revalidateLicense() {
             const key = localStorage.getItem('neovita_license_key');
@@ -2714,7 +2787,7 @@
             playClickSound();
             const errorMsg = document.getElementById('licenseErrorMsg');
             if (localStorage.getItem('neovita_demo_until')) {
-                errorMsg.textContent = "Este dispositivo ya usó la demo de 7 días. Ingresa un código de licencia.";
+                errorMsg.textContent = "Este dispositivo ya usó la demo de 3 días. Ingresa un código de licencia.";
                 errorMsg.classList.remove('hidden', 'text-sky-600'); errorMsg.classList.add('text-rose-500');
                 return;
             }
