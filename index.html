@@ -231,7 +231,7 @@
             <button onclick="verifyLicense()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-sky-600/20">
                 Validar Licencia
             </button>
-            <a href="https://wa.me/56954957977?text=Hola%20%F0%9F%91%8B%2C%20quiero%20probar%20%2ANeoVita~VitalSync%2A%20gratis%20por%203%20d%C3%ADas.%0A%0AMis%20datos%3A%0A-%20Nombre%3A%20%5BEscribir%20aqu%C3%AD%5D%0A-%20N%C3%BAmero%20de%20WhatsApp%20del%20celular%20donde%20usar%C3%A9%20la%20app%3A%20%5BEscribir%20aqu%C3%AD%5D%0A-%20Mi%20celular%20es%3A%20Android%20%2F%20iPhone%20%28borra%20el%20que%20no%20corresponda%29%0A%0AQuedo%20atento%28a%29%20a%20mi%20clave%20de%20acceso.%20%C2%A1Gracias%21" target="_blank" rel="noopener noreferrer" class="block w-full bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold py-3 rounded-xl border border-sky-200 transition text-center">🎁 Pedir Demo Gratis (3 días)</a>
+            <a href="https://wa.me/56954957977?text=Hola%20%F0%9F%91%8B%2C%20quiero%20probar%20%2ANeoVita~VitalSync%2A%20gratis%20por%207%20d%C3%ADas.%0A%0AMis%20datos%3A%0A-%20Nombre%3A%20%5BEscribir%20aqu%C3%AD%5D%0A-%20N%C3%BAmero%20de%20WhatsApp%20del%20celular%20donde%20usar%C3%A9%20la%20app%3A%20%5BEscribir%20aqu%C3%AD%5D%0A-%20Mi%20celular%20es%3A%20Android%20%2F%20iPhone%20%28borra%20el%20que%20no%20corresponda%29%0A%0AQuedo%20atento%28a%29%20a%20mi%20clave%20de%20acceso.%20%C2%A1Gracias%21" target="_blank" rel="noopener noreferrer" class="block w-full bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold py-3 rounded-xl border border-sky-200 transition text-center">🎁 Pedir Demo Gratis (7 días)</a>
             <p id="licenseErrorMsg" class="text-xs text-rose-500 hidden font-medium"></p>
             <a href="https://wa.me/56954957977?text=Hola,%20quiero%20mi%20licencia%20de%20NeoVita~VitalSync" target="_blank" rel="noopener noreferrer" class="block text-xs text-sky-600 underline">¿No tienes código? Escríbenos por WhatsApp</a>
         </div>
@@ -1132,17 +1132,22 @@
                 }).catch(() => {});
                 return;
             }
-            if (!("Notification" in window)) {
-                label.textContent = "No soportadas";
+            const esIOS_st = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const pwaIOS = window.navigator.standalone === true;
+            if (esIOS_st && !pwaIOS) {
+                label.textContent = "📱 iPhone: instala en pantalla de inicio";
+                label.className = "text-xs font-bold text-amber-500";
+            } else if (!("Notification" in window)) {
+                label.textContent = esIOS_st ? "⚠️ Actualiza a iOS 16.4+" : "No soportadas";
                 label.className = "text-xs font-bold text-rose-500";
             } else if (Notification.permission === "granted") {
-                label.textContent = "✔ Activas";
+                label.textContent = esIOS_st ? "✔ Activas (solo con app abierta en iPhone)" : "✔ Activas";
                 label.className = "text-xs font-bold text-emerald-600";
             } else if (Notification.permission === "denied") {
-                label.textContent = "❌ Bloqueadas";
+                label.textContent = "❌ Bloqueadas - actívalas en Ajustes";
                 label.className = "text-xs font-bold text-rose-500";
             } else {
-                label.textContent = "⚠️ Pendientes";
+                label.textContent = "⚠️ Pendientes - toca Habilitar";
                 label.className = "text-xs font-bold text-amber-500";
             }
         }
@@ -1156,7 +1161,18 @@
                 }).catch(e => { ultimoErrorAlarmas = String(e); alert("Error: " + e); });
                 return;
             }
-            if (!("Notification" in window)) {
+            const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            if (esIOS) {
+                const instalada = window.navigator.standalone === true;
+                if (!instalada) {
+                    alert("📱 Para recibir notificaciones en iPhone:\n\n1) Toca Compartir ⬆️ en Safari.\n2) Selecciona \"Agregar a pantalla de inicio\".\n3) Abre NeoVita desde ese ícono.\n4) Vuelve a intentar activar las notificaciones.\n\nSin ese paso, las notificaciones no funcionan en iPhone.");
+                    return;
+                }
+                if (!("Notification" in window)) {
+                    alert("⚠️ Tu iOS no soporta notificaciones web.\nActualiza a iOS 16.4+ o usa la app Android para alarmas con pantalla bloqueada.");
+                    return;
+                }
+            } else if (!("Notification" in window)) {
                 alert("Las notificaciones no son compatibles con este navegador.");
                 return;
             }
@@ -2414,6 +2430,11 @@
         window.addEventListener('load', () => {
             if (localStorage.getItem('neovita_facil') === '1') document.documentElement.classList.add('modo-facil');
             actualizarNav('hoy'); renderUI(); setTimeout(renderGraficoVitales,300);
+            // Si la licencia venció y no ha elegido plan, mostrar pantalla de vencimiento
+            if (localStorage.getItem('neovita_vencido') === '1' && !localStorage.getItem('neovita_license_activated')) {
+                const esDemo = (localStorage.getItem('neovita_last_type') || '').indexOf('DEM') > -1;
+                setTimeout(() => mostrarVencimiento(esDemo), 800);
+            }
             setInterval(revisarBienvenida, 2000);
         });
 
@@ -2697,6 +2718,8 @@
                     + '</a>').join('')
                 + '<button onclick="despedidaNV()" class="w-full py-2.5 rounded-xl border border-slate-600 text-slate-400 text-sm font-medium hover:border-slate-400 transition">No quiero por ahora</button>';
             document.getElementById('vencimientoScreen').classList.remove('hidden');
+            // Limpiar estado al interactuar con los botones de plan
+            document.querySelectorAll('#vencBotones a').forEach(a => a.addEventListener('click', () => { localStorage.removeItem('neovita_vencido'); localStorage.removeItem('neovita_last_type'); }));
             speakVita('Tu período ha terminado. Te presentamos las opciones para continuar con NeoVita.');
         }
         function despedidaNV() {
@@ -2747,11 +2770,22 @@
              'neovita_license_expires','neovita_license_checked','neovita_license_v',
              'neovita_nube','neovita_fcm_token','neovita_nube_ok']
                 .forEach(k => localStorage.removeItem(k));
+            localStorage.setItem('neovita_vencido', '1');   // para volver a mostrar la pantalla
             if (esAppNativa && LN) {
+                // Cancelar alarmas pendientes
                 LN.getPending().then(p => {
-                    const todas=(p.notifications||[]);
-                    if(todas.length) LN.cancel({notifications:todas.map(n=>({id:n.id}))}).catch(()=>{});
-                }).catch(()=>{});
+                    const todas = (p.notifications || []);
+                    if (todas.length) LN.cancel({ notifications: todas.map(n => ({ id: n.id })) }).catch(() => {});
+                }).catch(() => {});
+                // Eliminar notificaciones ya entregadas (las que suenan en la barra)
+                if (LN.removeAllDeliveredNotifications) {
+                    LN.removeAllDeliveredNotifications().catch(() => {});
+                } else if (LN.getDeliveredNotifications) {
+                    LN.getDeliveredNotifications().then(d => {
+                        const ids = (d.notifications || []).map(n => ({ id: n.id }));
+                        if (ids.length) LN.removeDeliveredNotifications({ notifications: ids }).catch(() => {});
+                    }).catch(() => {});
+                }
             }
         }
         function applyLicenseState() {
@@ -2761,7 +2795,8 @@
                     clearLicense(); showLock('Por seguridad, ingresa nuevamente tu código de licencia.'); return;
                 }
                 const exp = Number(localStorage.getItem('neovita_license_expires') || 0);
-                if (exp && now > exp) { const esDemo = localStorage.getItem('neovita_license_type') === 'DEM'; mostrarVencimiento(esDemo); return; }
+                if (exp && now > exp) { const esDemo = localStorage.getItem('neovita_license_type') === 'DEM'; localStorage.setItem('neovita_last_type', esDemo ? 'DEM' : (esPro ? 'PRO' : 'TMP'));
+                mostrarVencimiento(esDemo); return; }
                 hideLock(); revalidateLicense(); return;
             }
             const demo = Number(localStorage.getItem('neovita_demo_until') || 0);
